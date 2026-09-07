@@ -104,7 +104,8 @@ function requestWithJar(urlStr, options = {}, postData = null, jar = new CookieJ
             port: targetUrl.port || (targetUrl.protocol === "https:" ? 443 : 80),
             path: targetUrl.pathname + targetUrl.search,
             method: options.method || "GET",
-            headers: headers
+            headers: headers,
+            rejectUnauthorized: false
         };
 
         const req = https.request(reqOpts, async (res) => {

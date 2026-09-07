@@ -76,7 +76,8 @@ function requestWithJar(targetUrl, options = {}, postData = null, jar = null) {
             port: parsed.port || 443,
             path: parsed.pathname + parsed.search,
             method: options.method || "GET",
-            headers
+            headers,
+            rejectUnauthorized: false
         }, (res) => {
             if (jar) {
                 jar.updateFromHeaders(res.headers);
