@@ -1,0 +1,6 @@
+name = "ktu-edge-relay"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# 1-Click Free Cloudflare Worker Deployment
+# Run: npx wrangler deploy

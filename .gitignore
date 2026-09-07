@@ -1,0 +1,21 @@
+﻿# Logs & Process
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Cloudflare Wrangler build cache
+.wrangler/
+.dev.vars
+
+# Dependencies (if any added in future)
+node_modules/
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local Environment Overrides
+.env
+.env.local

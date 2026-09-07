@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>KTU CGPA Calculator & Degree Forecaster</title>
+    
+    <!-- Security & Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https: http://localhost:* http://127.0.0.1:*; img-src 'self' data: blob:;">
+
+    <!-- PWA & Mobile Web App Meta -->
+    <meta name="theme-color" content="#064E3B">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="KTU CGPA">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/32.png">
+    <link rel="apple-touch-icon" href="icons/128.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="app-header">
+        <div class="brand-wrapper">
+            <img src="icons/48.png" alt="KTU CGPA Logo" class="brand-icon">
+            <div>
+                <div class="brand-title">KTU CGPA <span class="version-badge pwa-version-text" id="headerVersionBadge">v1.0.0</span></div>
+                <div class="brand-badge">⚡ 1-Click Fast Sync <span class="pwa-version-code" id="headerBuildBadge" style="opacity: 0.8; font-size: 9.5px; margin-left: 3px;">(Build 1)</span></div>
+            </div>
+        </div>
+        <div class="header-actions">
+            <!-- PDF & CSV Menu Actions (Text buttons on PC, sleek icons on Mobile/Tablet) -->
+            <button id="headerPdfBtn" class="header-menu-btn primary" title="Download Official Vector PDF Transcript" style="display: none;">
+                <span class="btn-icon">📑</span>
+                <span class="btn-text">PDF Transcript</span>
+            </button>
+            <button id="headerCsvBtn" class="header-menu-btn secondary" title="Export Academic CSV Data" style="display: none;">
+                <span class="btn-icon">📥</span>
+                <span class="btn-text">Export CSV</span>
+            </button>
+            <div id="headerMenuDivider" class="header-menu-divider" style="display: none;"></div>
+
+            <button id="headerRefreshBtn" class="icon-btn" title="Zero-Login Refresh (Cached Session • 0 Lockout Risk)">🔄</button>
+            <button id="openForecastModalBtn" class="icon-btn" title="Degree Forecaster">🔮</button>
+            <button id="openProfileModalBtn" class="icon-btn" title="Student Profiles">👤</button>
+            <button id="openImportModalBtn" class="icon-btn" title="Import Data">📂</button>
+        </div>
+    </header>
+
+    <!-- Top Dashboard Grid (Responsive: Stack on Mobile, Side-by-Side on Desktop/4K) -->
+    <div class="top-dashboard-grid">
+        <!-- Thumb-Friendly Hero Fast Sync Box -->
+        <div class="hero-sync-box">
+            <div class="hero-top-row">
+                <div class="hero-active-profile" id="heroActiveProfileLabel">
+                    <span>👤</span> <span id="heroProfileName">No Profile Configured</span>
+                </div>
+                <div class="hero-freshness" id="heroFreshnessBadge">Offline Ready</div>
+            </div>
+            <div class="hero-btn-row">
+                <button id="heroFastSyncBtn" class="btn-fast-sync-main" title="Full KTU portal synchronization">
+                    <span>⚡ 1-Click Fast Sync</span>
+                </button>
+                <button id="heroRefreshBtn" class="btn-fast-sync-refresh" title="Fetch latest data using cached session (0 logins sent to KTU)">
+                    <span>🔄 Zero-Login Refresh</span>
+                </button>
+            </div>
+            <div class="hero-subtext">Cached session refresh bypasses login • 0 lockout risk • Pulls latest portal data</div>
+            <div id="syncStatusPill" class="status-pill"></div>
+        </div>
+
+        <!-- Student Academic Profile Card -->
+        <div id="profileCard" class="profile-card" style="display: none;">
+            <div class="profile-card-top">
+                <div class="profile-name">
+                    <span>🎓</span>
+                    <span id="profileName">Student Name</span>
+                </div>
+                <span id="profileRegNo" class="profile-regno">N/A</span>
+            </div>
+            <div id="profileInstitution" class="profile-institution">
+                <span>🏛️</span>
+                <span id="institutionText">APJ Abdul Kalam Technological University</span>
+            </div>
+            <div class="profile-badges">
+                <span id="badgeDept" class="pill-badge">💻 Engineering</span>
+                <span id="badgeBatch" class="pill-badge">📅 Batch</span>
+                <span id="badgeScheme" class="pill-badge active-scheme">📜 Scheme</span>
+                <span id="badgeLevel" class="pill-badge">🎓 Level</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State (Shown when no data exists) -->
+    <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-icon">📋</div>
+        <div class="empty-title">No Academic Records Loaded</div>
+        <div class="empty-desc">
+            Save your KTU portal credentials to sync your grades automatically, or import an exported JSON backup.
+        </div>
+        <div style="display: flex; gap: 8px; justify-content: center;">
+            <button id="emptyConfigureBtn" class="btn-action primary" style="min-height: 42px;">
+                👤 Configure Profile
+            </button>
+            <button id="emptyImportBtn" class="btn-action secondary" style="min-height: 42px;">
+                📂 Import JSON
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Stats Grid -->
+    <div id="statsContainer"></div>
+
+    <!-- Degree Forecast Banner (Active State) -->
+    <div id="activeForecastBanner" class="forecast-banner" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div>
+                <div style="font-size: 13.5px; font-weight: 700; color: #1E40AF;">
+                    🔮 Degree Forecast Active: <span id="forecastPresetLabel"></span>
+                </div>
+                <div style="font-size: 11.5px; color: #3B82F6; margin-top: 2px;" id="forecastSubLabel"></div>
+            </div>
+            <button id="changeForecastInlineBtn" class="btn-action secondary" style="padding: 6px 12px; min-height: 32px; font-size: 12px;">
+                ⚙️ Change
+            </button>
+        </div>
+    </div>
+
+    <!-- Semester Course Breakdown List -->
+    <div id="semesterContainer"></div>
+
+    <!-- Bottom Action Bar (Mobile & Tablet Two Compact Icon Buttons) -->
+    <div id="bottomActionBar" class="bottom-actions" style="display: none;">
+        <button id="downloadPdfBtn" class="btn-action primary icon-action-btn" title="Download Official Vector PDF Transcript">
+            <span class="btn-icon">📑</span>
+            <span class="action-btn-text">PDF Transcript</span>
+        </button>
+        <button id="downloadCsvBtn" class="btn-action secondary icon-action-btn" title="Export Academic CSV Data">
+            <span class="btn-icon">📥</span>
+            <span class="action-btn-text">Export CSV</span>
+        </button>
+    </div>
+
+    <!-- App Footer & Dynamic Manifest Version Information -->
+    <footer class="app-footer">
+        <div class="footer-content">
+            <span>KTU CGPA Standalone PWA</span>
+            <span class="footer-dot">•</span>
+            <span class="pwa-full-version">v1.0.0 (Build 1)</span>
+            <span class="footer-dot">•</span>
+            <span>100% Offline & Private</span>
+        </div>
+    </footer>
+
+    <!-- ========================================================== -->
+    <!-- MODAL 1: Profile Manager & Local Credentials Vault         -->
+    <!-- ========================================================== -->
+    <div id="profileModal" class="modal-overlay">
+        <div class="modal-sheet">
+            <div class="sheet-header">
+                <div class="sheet-title"><span>👤</span> Manage Student Profiles</div>
+                <button class="sheet-close-btn" data-close="profileModal">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label>Select Active Profile:</label>
+                <select id="profileSelectDropdown" class="form-control">
+                    <option value="">-- No Profiles Saved --</option>
+                </select>
+            </div>
+
+            <div style="border-top: 1px solid var(--border-light); padding-top: 14px; margin-top: 14px;">
+                <div style="font-size: 13px; font-weight: 700; margin-bottom: 10px;" id="formModeTitle">Add / Edit Profile</div>
+                <div class="form-group">
+                    <label>Profile Label (e.g. "My Account", "Friend"):</label>
+                    <input type="text" id="inputProfileLabel" class="form-control" placeholder="Primary Student">
+                </div>
+                <div class="form-group">
+                    <label>KTU Username (Register No / Email):</label>
+                    <input type="text" id="inputProfileUsername" class="form-control" placeholder="e.g. TVE24CS042">
+                </div>
+                <div class="form-group">
+                    <label>KTU Portal Password:</label>
+                    <input type="password" id="inputProfilePassword" class="form-control" placeholder="Your password">
+                </div>
+                <div class="form-group">
+                    <label>Security PIN (Optional — 4 to 6 Digits):</label>
+                    <input type="password" id="inputProfilePin" class="form-control" placeholder="Leave blank for automatic device key" maxlength="6" inputmode="numeric">
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.3;">
+                        🔐 Stored via AES-GCM-256 encryption. If you set a PIN, you must unlock it before full sync.
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button id="saveProfileBtn" class="btn-action primary" style="flex: 2;">💾 Save Profile</button>
+                    <button id="deleteProfileBtn" class="btn-action secondary" style="flex: 1; display: none; color: #DC2626;">🗑️ Delete</button>
+                </div>
+            </div>
+
+            <div style="margin-top: 16px; font-size: 11.5px; color: var(--text-muted); line-height: 1.4; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-light); padding-top: 10px; flex-wrap: wrap; gap: 8px;">
+                <span>🔒 <strong>100% On-Device Sandbox:</strong> Offline & Private</span>
+                <span style="font-family: var(--font-mono); font-size: 11px; opacity: 0.85;" class="pwa-full-version">v1.0.0 (Build 1)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- MODAL 2: Degree Graduation Forecaster                      -->
+    <!-- ========================================================== -->
+    <div id="forecastModal" class="modal-overlay">
+        <div class="modal-sheet">
+            <div class="sheet-header">
+                <div class="sheet-title"><span>🔮</span> Degree Graduation Forecaster</div>
+                <button class="sheet-close-btn" data-close="forecastModal">&times;</button>
+            </div>
+            
+            <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.4;">
+                Simulate your final graduation CGPA at degree completion by supplementing remaining future semester credits from official KTU schemes.
+            </p>
+
+            <div id="forecastLevelNotice" class="forecast-level-notice" style="display: none;">
+                🎓 <strong>Full Degree Completed:</strong> All 8 semesters are recorded in your academic profile. Degree Forecaster is designed to project outcomes for students with future semesters remaining.
+            </div>
+
+            <div class="form-group">
+                <label>Curriculum Scheme / Preset:</label>
+                <select id="schemeSelect" class="form-control">
+                    <option value="none">-- Select Curriculum Preset --</option>
+                    <optgroup label="KTU 2019 Scheme (Current Upper Batches)">
+                        <option value="2019_BTECH_CSE">KTU 2019 B.Tech CSE (160 Credits - Detailed)</option>
+                        <option value="2019_BTECH">KTU 2019 B.Tech Standard (160 Credits)</option>
+                        <option value="2019_LATERAL">KTU 2019 Lateral Entry (122 Credits, S3–S8)</option>
+                    </optgroup>
+                    <optgroup label="KTU 2024 Scheme (New Regulations)">
+                        <option value="2024_BTECH_CSE">KTU 2024 B.Tech CSE (167 Credits)</option>
+                        <option value="2024_LATERAL">KTU 2024 Lateral Entry (126 Credits, S3–S8)</option>
+                    </optgroup>
+                    <optgroup label="Legacy Schemes">
+                        <option value="2015_BTECH">KTU 2015 B.Tech Scheme (180 Credits)</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-top: 14px;">
+                <button id="applyForecastBtn" class="btn-action primary" style="flex: 2;">⚡ Apply Forecast</button>
+                <button id="clearForecastBtn" class="btn-action secondary" style="flex: 1;">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- MODAL 3: Offline Backup / JSON Import                      -->
+    <!-- ========================================================== -->
+    <div id="importModal" class="modal-overlay">
+        <div class="modal-sheet">
+            <div class="sheet-header">
+                <div class="sheet-title"><span>📂</span> Offline Import & Settings</div>
+                <button class="sheet-close-btn" data-close="importModal">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label>Import JSON Backup (From Extension / Flash Grabber):</label>
+                <input type="file" id="jsonFileInput" accept=".json" class="form-control">
+            </div>
+
+            <div class="form-group" style="margin-top: 14px;">
+                <label>Stateless Edge Relay URL (Optional Custom Proxy):</label>
+                <input type="text" id="customRelayInput" class="form-control" placeholder="/api/sync (default)">
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                    Leave blank to use the built-in relay, or paste your personal Cloudflare Worker URL.
+                </div>
+            </div>
+
+            <button id="saveRelayBtn" class="btn-action secondary" style="width: 100%; margin-top: 8px;">
+                💾 Save Relay Settings
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- MODAL 4: PIN Authentication Modal                          -->
+    <!-- ========================================================== -->
+    <div id="pinUnlockModal" class="modal-overlay">
+        <div class="modal-sheet" style="max-width: 380px;">
+            <div class="sheet-header">
+                <div class="sheet-title"><span>🔐</span> Security PIN Required</div>
+                <button class="sheet-close-btn" data-close="pinUnlockModal">&times;</button>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.4;">
+                This profile's credentials are encrypted with a Security PIN. Enter your PIN to unlock and sync.
+            </p>
+            <div class="form-group">
+                <label id="pinUnlockPromptLabel">Enter 4–6 Digit Security PIN:</label>
+                <input type="password" id="inputUnlockPin" class="form-control" placeholder="••••" maxlength="6" inputmode="numeric" style="text-align: center; font-size: 22px; letter-spacing: 6px;">
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 14px;">
+                <button id="confirmUnlockPinBtn" class="btn-action primary" style="flex: 2;">🔓 Unlock & Sync</button>
+                <button class="btn-action secondary" data-close="pinUnlockModal" style="flex: 1;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="constants.js"></script>
+    <script src="libs/jspdf.umd.min.js"></script>
+    <script src="pdf_vector.js"></script>
+    <script src="crypto-vault.js"></script>
+    <script src="sync-engine.js"></script>
+    <script src="app.js"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => {
+                    console.log('[PWA SW] Registration failed:', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
