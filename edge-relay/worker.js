@@ -57,7 +57,7 @@ export default {
         }
 
         // 1-Click Fast Sync Route: POST /api/sync
-        if (url.pathname === "/api/sync" && request.method === "POST") {
+        if ((url.pathname === "/api/sync" || url.pathname === "/" || url.pathname === "") && request.method === "POST") {
             try {
                 const startTime = Date.now();
                 const body = await request.json().catch(() => ({}));

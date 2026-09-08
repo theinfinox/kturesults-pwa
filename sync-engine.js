@@ -4,7 +4,7 @@
  */
 
 (function () {
-    const DEFAULT_RELAY_ENDPOINT = "/api/sync";
+    const DEFAULT_RELAY_ENDPOINT = "https://ktu-fast-sync.theinfinox.workers.dev/api/sync";
 
     const GRADE_REGEX = /^(O|S|A\+|A|B\+|B|C\+|C|D|P|LP|F|FE|I|AB|ABSENT|PASS|FAIL|COMPLETED|AUDIT|SATISFACTORY)$/i;
 
@@ -161,7 +161,10 @@
 
     // --- Fast Sync via Stateless Relay ---
     async function executeFastSync(username, password, customRelayUrl = null) {
-        const relayUrl = customRelayUrl || localStorage.getItem("ktu_custom_relay") || DEFAULT_RELAY_ENDPOINT;
+        let relayUrl = customRelayUrl || localStorage.getItem("ktu_custom_relay") || DEFAULT_RELAY_ENDPOINT;
+        if (relayUrl.startsWith("http") && !relayUrl.endsWith("/api/sync") && !relayUrl.includes("?")) {
+            relayUrl = relayUrl.replace(/\/+$/, "") + "/api/sync";
+        }
 
         const isLocal = relayUrl.startsWith("http://localhost") || relayUrl.startsWith("http://127.0.0.1") || relayUrl.startsWith("/api/sync");
         const isHttps = relayUrl.startsWith("https://");

@@ -1079,7 +1079,10 @@
         // Save Custom Relay
         if (saveRelayBtn) {
             saveRelayBtn.addEventListener("click", () => {
-                const relay = (customRelayInput?.value || "").trim();
+                let relay = (customRelayInput?.value || "").trim();
+                if (relay && !relay.endsWith("/api/sync") && relay.startsWith("http")) {
+                    relay = relay.replace(/\/+$/, "") + "/api/sync";
+                }
                 if (relay) {
                     const isLocal = relay.startsWith("http://localhost") || relay.startsWith("http://127.0.0.1") || relay.startsWith("/api/sync");
                     const isHttps = relay.startsWith("https://");
