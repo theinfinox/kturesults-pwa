@@ -1403,3 +1403,29 @@ body {
 }
 
 
+
+/* Quick Switcher Dropdown in Header */
+.header-profile-select {
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    outline: none;
+    max-width: 170px;
+    transition: all var(--transition-fast);
+}
+.header-profile-select:hover {
+    border-color: var(--primary);
+    background: #FFFFFF;
+}
+@media (max-width: 640px) {
+    .header-profile-select {
+        max-width: 120px;
+        font-size: 11px;
+        padding: 4px 6px;
+    }
+}

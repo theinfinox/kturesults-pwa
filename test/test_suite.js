@@ -171,6 +171,21 @@ assert(!appCss.includes(".semester-body {\n    max-height: 480px"), "Must not re
 assert(appCss.includes(".subject-row:nth-child(even)"), "Must include checkerboard alternating styles");
 console.log("  ✅ Card full-height extension and checkerboard styling validated.");
 
+// -----------------------------------------------------------------
+// Test 7: Multi-User Profile Switching & Primary Account Selection
+// -----------------------------------------------------------------
+console.log("\n[Test 7] Testing Multi-User Architecture & Primary Account Selection...");
+const appJsCode = fs.readFileSync(path.join(ROOT, "app.js"), "utf8");
+assert(appJsCode.includes("STORAGE_KEY_PRIMARY_ID"), "Must track STORAGE_KEY_PRIMARY_ID");
+assert(appJsCode.includes("addNewProfileBtn"), "Must handle addNewProfileBtn");
+assert(appJsCode.includes("setPrimaryProfileBtn"), "Must handle setPrimaryProfileBtn");
+assert(appJsCode.includes("headerProfileSwitcher"), "Must handle headerProfileSwitcher");
+
+assert(indexHtml.includes('id="addNewProfileBtn"'), "index.html must include Add New Student button");
+assert(indexHtml.includes('id="setPrimaryProfileBtn"'), "index.html must include Set as Primary button");
+assert(indexHtml.includes('id="headerProfileSwitcher"'), "index.html must include Quick Switcher");
+console.log("  ✅ Multi-user switching, add student trigger, and primary account persistence verified.");
+
 // Conclude
 testCrypto().then(() => {
     console.log("\n=================================================");

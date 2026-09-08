@@ -7,6 +7,7 @@
     // --- Local Storage Keys ---
     const STORAGE_KEY_PROFILES = "ktu_pwa_saved_profiles";
     const STORAGE_KEY_ACTIVE_ID = "ktu_pwa_active_profile_id";
+    const STORAGE_KEY_PRIMARY_ID = "ktu_pwa_primary_profile_id";
     const STORAGE_KEY_DATA_PREFIX = "ktu_pwa_data_";
     const STORAGE_KEY_CURRICULUM_PREFIX = "ktu_pwa_curriculum_";
     const STORAGE_KEY_CUSTOM_RELAY = "ktu_custom_relay";
@@ -56,6 +57,10 @@
 
     // Modal Form Elements
     const profileSelectDropdown = document.getElementById("profileSelectDropdown");
+    const headerProfileSwitcher = document.getElementById("headerProfileSwitcher");
+    const addNewProfileBtn = document.getElementById("addNewProfileBtn");
+    const setPrimaryProfileBtn = document.getElementById("setPrimaryProfileBtn");
+    const primaryStatusText = document.getElementById("primaryStatusText");
     const inputProfileLabel = document.getElementById("inputProfileLabel");
     const inputProfileUsername = document.getElementById("inputProfileUsername");
     const inputProfilePassword = document.getElementById("inputProfilePassword");
@@ -141,7 +146,11 @@
     function loadProfilesFromStorage() {
         try {
             savedProfiles = JSON.parse(localStorage.getItem(STORAGE_KEY_PROFILES) || "{}");
-            activeProfileId = localStorage.getItem(STORAGE_KEY_ACTIVE_ID) || null;
+            const primaryId = localStorage.getItem(STORAGE_KEY_PRIMARY_ID);
+            activeProfileId = (primaryId && savedProfiles[primaryId])
+                ? primaryId
+                : (localStorage.getItem(STORAGE_KEY_ACTIVE_ID) || Object.keys(savedProfiles)[0] || null);
+
             if (!activeProfileId && Object.keys(savedProfiles).length > 0) {
                 activeProfileId = Object.keys(savedProfiles)[0];
                 localStorage.setItem(STORAGE_KEY_ACTIVE_ID, activeProfileId);
@@ -254,30 +263,73 @@
     function updateProfileDropdown() {
         if (!profileSelectDropdown) return;
         profileSelectDropdown.innerHTML = "";
+        if (headerProfileSwitcher) headerProfileSwitcher.innerHTML = "";
+
         const keys = Object.keys(savedProfiles);
+        const primaryId = localStorage.getItem(STORAGE_KEY_PRIMARY_ID) || (keys.length > 0 ? keys[0] : null);
 
         if (keys.length === 0) {
             profileSelectDropdown.innerHTML = `<option value="">-- No Profiles Saved --</option>`;
+            if (headerProfileSwitcher) headerProfileSwitcher.style.display = "none";
             if (heroProfileName) heroProfileName.textContent = "No Profile Configured";
             if (heroFreshnessBadge) heroFreshnessBadge.textContent = "Setup Required";
+            if (primaryStatusText) primaryStatusText.innerHTML = "⭐ <strong>Default Account:</strong> None";
+            if (setPrimaryProfileBtn) setPrimaryProfileBtn.style.display = "none";
             populateProfileForm(null);
             return;
         }
 
         keys.forEach(k => {
             const p = savedProfiles[k];
+            const isPrimary = (k === primaryId);
+            const optText = isPrimary ? `⭐ ${p.label} (${p.username}) [Primary]` : `👤 ${p.label} (${p.username})`;
+
+            // Modal Dropdown
             const opt = document.createElement("option");
             opt.value = k;
-            opt.textContent = `${p.label} (${p.username})`;
+            opt.textContent = optText;
             if (k === activeProfileId) opt.selected = true;
             profileSelectDropdown.appendChild(opt);
+
+            // Header Quick Switcher Dropdown
+            if (headerProfileSwitcher) {
+                const hOpt = document.createElement("option");
+                hOpt.value = k;
+                hOpt.textContent = isPrimary ? `⭐ ${p.label}` : `👤 ${p.label}`;
+                if (k === activeProfileId) hOpt.selected = true;
+                headerProfileSwitcher.appendChild(hOpt);
+            }
         });
+
+        // Show header switcher if 2 or more profiles exist
+        if (headerProfileSwitcher) {
+            headerProfileSwitcher.style.display = (keys.length >= 2) ? "inline-block" : "none";
+        }
 
         const activeProf = savedProfiles[activeProfileId];
         if (activeProf) {
             if (heroProfileName) heroProfileName.textContent = `${activeProf.label} (${activeProf.username})`;
             if (heroFreshnessBadge) heroFreshnessBadge.textContent = formatRelativeTime(currentLastScraped || activeProf.lastGrabbed);
             populateProfileForm(activeProf);
+
+            // Update Primary Status Controls
+            const isCurrPrimary = (activeProfileId === primaryId);
+            if (primaryStatusText) {
+                const primProf = savedProfiles[primaryId];
+                primaryStatusText.innerHTML = `⭐ <strong>Default Account:</strong> ${primProf ? primProf.label : 'None'}`;
+            }
+            if (setPrimaryProfileBtn) {
+                setPrimaryProfileBtn.style.display = "block";
+                if (isCurrPrimary) {
+                    setPrimaryProfileBtn.textContent = "Current Primary ⭐";
+                    setPrimaryProfileBtn.disabled = true;
+                    setPrimaryProfileBtn.style.opacity = "0.7";
+                } else {
+                    setPrimaryProfileBtn.textContent = "Set as Primary ⭐";
+                    setPrimaryProfileBtn.disabled = false;
+                    setPrimaryProfileBtn.style.opacity = "1";
+                }
+            }
         }
     }
 
@@ -971,6 +1023,40 @@
             });
         }
 
+        // Add New Student Button (Clears form)
+        if (addNewProfileBtn) {
+            addNewProfileBtn.addEventListener("click", () => {
+                populateProfileForm(null);
+                if (profileSelectDropdown) profileSelectDropdown.value = "";
+                if (formModeTitle) formModeTitle.textContent = "➕ Add New Student Profile";
+                if (inputProfileLabel) inputProfileLabel.focus();
+            });
+        }
+
+        // Set as Primary Account Button
+        if (setPrimaryProfileBtn) {
+            setPrimaryProfileBtn.addEventListener("click", () => {
+                if (!activeProfileId || !savedProfiles[activeProfileId]) return;
+                localStorage.setItem(STORAGE_KEY_PRIMARY_ID, activeProfileId);
+                updateProfileDropdown();
+                alert(`⭐ "${savedProfiles[activeProfileId].label}" is now set as your default primary student!`);
+            });
+        }
+
+        // Header Quick Switcher
+        if (headerProfileSwitcher) {
+            headerProfileSwitcher.addEventListener("change", (e) => {
+                const targetId = e.target.value;
+                if (targetId && savedProfiles[targetId]) {
+                    activeProfileId = targetId;
+                    saveProfilesToStorage();
+                    loadActiveStudentData();
+                    renderApp();
+                    updateProfileDropdown();
+                }
+            });
+        }
+
         // Save Profile
         if (saveProfileBtn) {
             saveProfileBtn.addEventListener("click", async () => {
@@ -1014,6 +1100,11 @@
                     createdAt: existing?.createdAt || new Date().toISOString(),
                     lastGrabbed: existing?.lastGrabbed || null
                 };
+
+                // If this is the first profile ever saved, automatically set as primary
+                if (Object.keys(savedProfiles).length === 1 || !localStorage.getItem(STORAGE_KEY_PRIMARY_ID)) {
+                    localStorage.setItem(STORAGE_KEY_PRIMARY_ID, id);
+                }
 
                 activeProfileId = id;
                 saveProfilesToStorage();

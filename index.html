@@ -51,6 +51,7 @@
 
             <button id="headerRefreshBtn" class="icon-btn" title="Zero-Login Refresh (Cached Session • 0 Lockout Risk)">🔄</button>
             <button id="openForecastModalBtn" class="icon-btn" title="Degree Forecaster">🔮</button>
+            <select id="headerProfileSwitcher" class="header-profile-select" title="Quick Switch Student" style="display: none;"></select>
             <button id="openProfileModalBtn" class="icon-btn" title="Student Profiles">👤</button>
             <button id="openImportModalBtn" class="icon-btn" title="Import Data">📂</button>
         </div>
@@ -172,10 +173,23 @@
             </div>
             
             <div class="form-group">
-                <label>Select Active Profile:</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <label style="margin-bottom: 0;">Select Active Profile:</label>
+                    <button id="addNewProfileBtn" type="button" class="btn-action secondary" style="padding: 4px 10px; font-size: 11.5px; height: auto;">
+                        ➕ Add New Student
+                    </button>
+                </div>
                 <select id="profileSelectDropdown" class="form-control">
                     <option value="">-- No Profiles Saved --</option>
                 </select>
+            </div>
+
+            <!-- Primary Account Status & Toggle Row -->
+            <div id="primaryProfileRow" style="display: flex; justify-content: space-between; align-items: center; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 14px; font-size: 12.5px;">
+                <span id="primaryStatusText">⭐ <strong>Default Account:</strong> None</span>
+                <button id="setPrimaryProfileBtn" type="button" class="btn-action secondary" style="padding: 4px 10px; font-size: 11.5px; height: auto;">
+                    ⭐ Set as Primary
+                </button>
             </div>
 
             <div style="border-top: 1px solid var(--border-light); padding-top: 14px; margin-top: 14px;">
