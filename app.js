@@ -55,6 +55,7 @@
     const disclaimerCloseXBtn = document.getElementById("disclaimerCloseXBtn");
     const openPrivacyPolicyBtn = document.getElementById("openPrivacyPolicyBtn");
     const footerDisclaimerLink = document.getElementById("footerDisclaimerLink");
+    const openDisclaimerBtn = document.getElementById("openDisclaimerBtn");
 
     // Modal Trigger Buttons
     const openProfileModalBtn = document.getElementById("openProfileModalBtn");
@@ -994,6 +995,12 @@
         if (openPrivacyPolicyBtn) {
             openPrivacyPolicyBtn.addEventListener("click", () => {
                 openModal(privacyModal);
+            });
+        }
+
+        if (openDisclaimerBtn) {
+            openDisclaimerBtn.addEventListener("click", () => {
+                openModal(disclaimerModal);
             });
         }
 

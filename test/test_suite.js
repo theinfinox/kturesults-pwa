@@ -198,6 +198,7 @@ assert(indexHtml.includes('id="disclaimerModal"'), "index.html must include disc
 assert(indexHtml.includes('id="privacyModal"'), "index.html must include privacyModal");
 assert(indexHtml.includes('id="disclaimerAcceptBtn"'), "index.html must include I Understand button");
 assert(indexHtml.includes('id="disclaimerIgnoreBtn"'), "index.html must include Ignore button");
+assert(indexHtml.includes('id="openDisclaimerBtn"'), "index.html must include openDisclaimerBtn (ℹ️)");
 assert(indexHtml.includes('id="footerDisclaimerLink"'), "index.html must include footer Disclaimer & Privacy link");
 console.log("  ✅ Disclaimer modal, persistence rules, and privacy disclosures verified.");
 
