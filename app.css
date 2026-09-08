@@ -1446,3 +1446,49 @@ body {
 .footer-attribution a:hover {
     opacity: 1;
 }
+
+/* ========================================================================== */
+/* MOBILE HEADER COMPACT FIX (max-width: 480px)                               */
+/* Additive only — no HTML/JS changes. Reduces clutter on narrow phones.      */
+/* ========================================================================== */
+@media (max-width: 480px) {
+    .app-header {
+        padding: 10px 14px;
+    }
+
+    .brand-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+    }
+
+    .brand-wrapper {
+        gap: 8px;
+    }
+
+    .brand-title {
+        font-size: 15px;
+    }
+
+    /* Hide the v1.0.0 chip — still visible in footer */
+    .version-badge {
+        display: none;
+    }
+
+    .header-actions {
+        gap: 5px;
+    }
+
+    .icon-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 14px;
+        border-radius: 8px;
+    }
+
+    .header-profile-select {
+        max-width: 90px;
+        font-size: 10.5px;
+        padding: 4px 5px;
+    }
+}
