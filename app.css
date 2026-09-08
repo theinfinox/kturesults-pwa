@@ -1454,6 +1454,9 @@ body {
 @media (max-width: 480px) {
     .app-header {
         padding: 10px 14px;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: flex-start;
     }
 
     .brand-icon {
@@ -1464,6 +1467,7 @@ body {
 
     .brand-wrapper {
         gap: 8px;
+        flex: 1 1 100%;
     }
 
     .brand-title {
@@ -1476,7 +1480,9 @@ body {
     }
 
     .header-actions {
-        gap: 5px;
+        gap: 6px;
+        flex: 1 1 100%;
+        justify-content: center;
     }
 
     .icon-btn {
