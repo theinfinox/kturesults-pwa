@@ -1,4 +1,4 @@
-﻿/**
+/**
  * KTU CGPA Calculator - Mobile-First PWA Stylesheet
  * Ergonomic, Responsive, Touch-Optimized Design System
  */
@@ -140,22 +140,6 @@ body {
 
 .footer-dot {
     opacity: 0.4;
-}
-.footer-attribution {
-    margin-top: 6px;
-    font-size: 11px;
-    opacity: 0.55;
-    letter-spacing: 0.01em;
-}
-.footer-attribution a {
-    color: inherit;
-    text-decoration: underline;
-    text-underline-offset: 2px;
-    opacity: 0.8;
-    transition: opacity 0.2s;
-}
-.footer-attribution a:hover {
-    opacity: 1;
 }
 
 .header-actions {
@@ -1178,7 +1162,7 @@ body {
 
 /* 4. ULTRA-WIDE & 4K MONITORS (min-width: 1540px, 27" QHD & 32"+ 4K UHD) */
 @media (min-width: 1540px) {
-    /* 4-Column Semester Grid: Row 1 = S1â€“S4, Row 2 = S5â€“S8 */
+    /* 4-Column Semester Grid: Row 1 = S1–S4, Row 2 = S5–S8 */
     #semesterContainer {
         grid-template-columns: repeat(4, 1fr) !important;
         gap: 20px;
@@ -1446,3 +1430,19 @@ body {
     }
 }
 
+.footer-attribution {
+    margin-top: 6px;
+    font-size: 11px;
+    opacity: 0.55;
+    letter-spacing: 0.01em;
+}
+.footer-attribution a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+.footer-attribution a:hover {
+    opacity: 1;
+}
