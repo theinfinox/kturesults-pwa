@@ -158,7 +158,12 @@
             <span class="footer-dot">•</span>
             <span class="pwa-full-version">v1.0.0 (Build 1)</span>
             <span class="footer-dot">•</span>
-            <span>100% Offline & Private</span>
+            <a href="#" id="footerDisclaimerLink" style="color: inherit; text-decoration: underline; cursor: pointer;">Disclaimer & Privacy</a>
+            <span class="footer-dot">•</span>
+            <a href="https://github.com/theinfinox/kturesults-pwa" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="GitHub Repository">
+                <svg height="13" width="13" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: text-bottom;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+                <span>GitHub</span>
+            </a>
         </div>
     </footer>
 
@@ -318,6 +323,92 @@
             <div style="display: flex; gap: 8px; margin-top: 14px;">
                 <button id="confirmUnlockPinBtn" class="btn-action primary" style="flex: 2;">🔓 Unlock & Sync</button>
                 <button class="btn-action secondary" data-close="pinUnlockModal" style="flex: 1;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- ========================================================== -->
+    <!-- MODAL 5: Important Notice & Disclaimer                     -->
+    <!-- ========================================================== -->
+    <div id="disclaimerModal" class="modal-overlay" style="display: none;">
+        <div class="modal-sheet" style="max-width: 480px;">
+            <div class="sheet-header">
+                <div class="sheet-title" style="color: #D97706;"><span>⚠️</span> Important Notice & Disclaimer</div>
+                <button class="sheet-close-btn" id="disclaimerCloseXBtn" data-close="disclaimerModal">&times;</button>
+            </div>
+            
+            <div style="font-size: 13px; color: var(--text-primary); line-height: 1.55; margin-bottom: 16px;">
+                <div style="background: rgba(245, 158, 11, 0.08); border-left: 3px solid #F59E0B; padding: 10px 14px; border-radius: 4px; margin-bottom: 14px;">
+                    <strong>Unofficial Academic Project:</strong> This application is an independent, open-source student utility. It is <strong>NOT</strong> an official website of, affiliated with, or endorsed by <strong>APJ Abdul Kalam Technological University (KTU)</strong>.
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    🔐 <strong>Zero Cloud Storage for Passwords:</strong> Any KTU credentials or passwords you save are <strong>strictly encrypted on your personal device</strong> using the native <strong>Web Cryptography API (AES-GCM-256)</strong>. Plaintext passwords never touch disk and are never stored on any external database.
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    📱 <strong>100% Client-Side Privacy:</strong> All calculation engines (SGPA, CGPA, 2019 & 2024 schemes, academic comeback projections) and PDF transcripts execute locally in your personal browser sandbox.
+                </div>
+
+                <div style="display: flex; gap: 10px; align-items: center; padding-top: 10px; border-top: 1px solid var(--border-light); font-size: 12px;">
+                    <button id="openPrivacyPolicyBtn" type="button" style="background: none; border: none; color: var(--primary); font-weight: 600; cursor: pointer; padding: 0; text-decoration: underline;">
+                        📄 Read Privacy Policy
+                    </button>
+                    <span style="color: var(--text-muted);">•</span>
+                    <a href="https://github.com/theinfinox/kturesults-pwa" target="_blank" rel="noopener noreferrer" style="color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="View Source on GitHub">
+                        <svg height="14" width="14" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: middle;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+                        <span>GitHub</span>
+                    </a>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+                <button id="disclaimerAcceptBtn" class="btn-action primary" style="flex: 2;">
+                    ✅ I Understand & Proceed
+                </button>
+                <button id="disclaimerIgnoreBtn" class="btn-action secondary" style="flex: 1;">
+                    Ignore for now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- MODAL 6: Privacy Policy & Data Architecture                -->
+    <!-- ========================================================== -->
+    <div id="privacyModal" class="modal-overlay" style="display: none;">
+        <div class="modal-sheet" style="max-width: 540px; max-height: 80vh; overflow-y: auto;">
+            <div class="sheet-header">
+                <div class="sheet-title"><span>🔒</span> Privacy Policy & Security Architecture</div>
+                <button class="sheet-close-btn" data-close="privacyModal">&times;</button>
+            </div>
+
+            <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.6;">
+                <h4 style="color: var(--text-primary); margin: 0 0 6px 0; font-size: 14px;">1. Client-Side Only Storage</h4>
+                <p style="margin-bottom: 12px;">
+                    This Progressive Web App stores student academic profiles, grades, and preferences <strong>exclusively inside your local browser storage (localStorage & IndexedDB)</strong>. There is no central user database or tracking server.
+                </p>
+
+                <h4 style="color: var(--text-primary); margin: 0 0 6px 0; font-size: 14px;">2. AES-GCM-256 Cryptographic Vault</h4>
+                <p style="margin-bottom: 12px;">
+                    Stored credentials are encrypted using the native browser Web Cryptography API (<code>window.crypto.subtle</code>) with 100,000 rounds of PBKDF2 key stretching. Passwords never touch disk unencrypted. If an optional Security PIN is set, the PIN is never saved to disk and must be provided in-memory during sync.
+                </p>
+
+                <h4 style="color: var(--text-primary); margin: 0 0 6px 0; font-size: 14px;">3. Stateless Edge Sync Relay</h4>
+                <p style="margin-bottom: 12px;">
+                    The 1-Click Fast Sync relay operates in 100% pass-through stateless mode solely to bridge browser cross-origin restrictions (CORS). The relay does not persist, log, or track passwords, usernames, or academic grades.
+                </p>
+
+                <h4 style="color: var(--text-primary); margin: 0 0 6px 0; font-size: 14px;">4. Disclaimer of Affiliation</h4>
+                <p style="margin-bottom: 14px;">
+                    This application is developed independently by engineering students for educational and academic tracking purposes. It is not affiliated with, endorsed by, or representing APJ Abdul Kalam Technological University. Official results and regulations can be verified on <code>app.ktu.edu.in</code>.
+                </p>
+
+                <div style="text-align: right; padding-top: 10px; border-top: 1px solid var(--border-light);">
+                    <button class="btn-action primary" data-close="privacyModal" style="padding: 6px 18px;">
+                        Close
+                    </button>
+                </div>
             </div>
         </div>
     </div>

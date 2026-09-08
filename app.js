@@ -8,6 +8,8 @@
     const STORAGE_KEY_PROFILES = "ktu_pwa_saved_profiles";
     const STORAGE_KEY_ACTIVE_ID = "ktu_pwa_active_profile_id";
     const STORAGE_KEY_PRIMARY_ID = "ktu_pwa_primary_profile_id";
+    const STORAGE_KEY_DISCLAIMER_ACCEPTED = "ktu_disclaimer_accepted";
+    const SESSION_KEY_DISCLAIMER_IGNORED = "ktu_disclaimer_ignored_session";
     const STORAGE_KEY_DATA_PREFIX = "ktu_pwa_data_";
     const STORAGE_KEY_CURRICULUM_PREFIX = "ktu_pwa_curriculum_";
     const STORAGE_KEY_CUSTOM_RELAY = "ktu_custom_relay";
@@ -46,6 +48,13 @@
     const profileModal = document.getElementById("profileModal");
     const forecastModal = document.getElementById("forecastModal");
     const importModal = document.getElementById("importModal");
+    const disclaimerModal = document.getElementById("disclaimerModal");
+    const privacyModal = document.getElementById("privacyModal");
+    const disclaimerAcceptBtn = document.getElementById("disclaimerAcceptBtn");
+    const disclaimerIgnoreBtn = document.getElementById("disclaimerIgnoreBtn");
+    const disclaimerCloseXBtn = document.getElementById("disclaimerCloseXBtn");
+    const openPrivacyPolicyBtn = document.getElementById("openPrivacyPolicyBtn");
+    const footerDisclaimerLink = document.getElementById("footerDisclaimerLink");
 
     // Modal Trigger Buttons
     const openProfileModalBtn = document.getElementById("openProfileModalBtn");
@@ -88,6 +97,7 @@
         setupEventListeners();
         renderApp();
         await loadManifestVersion();
+        checkDisclaimerStatus();
     }
 
     // --- Dynamic Manifest Version Sync ---
@@ -953,7 +963,47 @@
     }
 
     // --- 9. Event Listeners ---
+    
+    // --- Disclaimer & Privacy Warning Logic ---
+    function checkDisclaimerStatus() {
+        const accepted = localStorage.getItem(STORAGE_KEY_DISCLAIMER_ACCEPTED) === "true";
+        const ignoredThisSession = sessionStorage.getItem(SESSION_KEY_DISCLAIMER_IGNORED) === "true";
+
+        if (!accepted && !ignoredThisSession && disclaimerModal) {
+            openModal(disclaimerModal);
+        }
+    }
+
     function setupEventListeners() {
+        // Disclaimer & Privacy Warning Handlers
+        if (disclaimerAcceptBtn) {
+            disclaimerAcceptBtn.addEventListener("click", () => {
+                localStorage.setItem(STORAGE_KEY_DISCLAIMER_ACCEPTED, "true");
+                closeModal(disclaimerModal);
+            });
+        }
+
+        const handleDisclaimerIgnore = () => {
+            sessionStorage.setItem(SESSION_KEY_DISCLAIMER_IGNORED, "true");
+            closeModal(disclaimerModal);
+        };
+
+        if (disclaimerIgnoreBtn) disclaimerIgnoreBtn.addEventListener("click", handleDisclaimerIgnore);
+        if (disclaimerCloseXBtn) disclaimerCloseXBtn.addEventListener("click", handleDisclaimerIgnore);
+
+        if (openPrivacyPolicyBtn) {
+            openPrivacyPolicyBtn.addEventListener("click", () => {
+                openModal(privacyModal);
+            });
+        }
+
+        if (footerDisclaimerLink) {
+            footerDisclaimerLink.addEventListener("click", (e) => {
+                e.preventDefault();
+                openModal(disclaimerModal);
+            });
+        }
+
         // Window Resize: Maintain Card Equalization
         window.addEventListener("resize", () => {
             equalizeSemesterCardHeights();

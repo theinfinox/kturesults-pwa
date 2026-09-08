@@ -186,6 +186,21 @@ assert(indexHtml.includes('id="setPrimaryProfileBtn"'), "index.html must include
 assert(indexHtml.includes('id="headerProfileSwitcher"'), "index.html must include Quick Switcher");
 console.log("  ✅ Multi-user switching, add student trigger, and primary account persistence verified.");
 
+// -----------------------------------------------------------------
+// Test 8: One-Time Unofficial Warning & Privacy Disclaimer
+// -----------------------------------------------------------------
+console.log("\n[Test 8] Testing One-Time Disclaimer & Privacy Modal...");
+assert(appJsCode.includes("STORAGE_KEY_DISCLAIMER_ACCEPTED"), "Must track STORAGE_KEY_DISCLAIMER_ACCEPTED");
+assert(appJsCode.includes("SESSION_KEY_DISCLAIMER_IGNORED"), "Must track SESSION_KEY_DISCLAIMER_IGNORED");
+assert(appJsCode.includes("checkDisclaimerStatus"), "Must include checkDisclaimerStatus function");
+
+assert(indexHtml.includes('id="disclaimerModal"'), "index.html must include disclaimerModal");
+assert(indexHtml.includes('id="privacyModal"'), "index.html must include privacyModal");
+assert(indexHtml.includes('id="disclaimerAcceptBtn"'), "index.html must include I Understand button");
+assert(indexHtml.includes('id="disclaimerIgnoreBtn"'), "index.html must include Ignore button");
+assert(indexHtml.includes('id="footerDisclaimerLink"'), "index.html must include footer Disclaimer & Privacy link");
+console.log("  ✅ Disclaimer modal, persistence rules, and privacy disclosures verified.");
+
 // Conclude
 testCrypto().then(() => {
     console.log("\n=================================================");
