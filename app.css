@@ -711,11 +711,12 @@ body {
 .subject-row {
     padding: 10px 18px;
     border-bottom: 1px solid rgba(226, 232, 240, 0.65);
+    border-left: 3px solid transparent;
     display: flex;
     align-items: center;
     justify-content: space-between;
     font-size: 13px;
-    transition: background 0.15s ease;
+    transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .subject-row:nth-child(odd) {
@@ -728,6 +729,28 @@ body {
 
 .subject-row:hover {
     background: #EEF2F6; /* Clear interactive focus */
+}
+
+/* Arrear / Failed Subject Red Checkerboard Highlighting (2-Tone Red Palette) */
+.subject-row.is-failed:nth-child(odd) {
+    background: #FEF2F2;
+    border-left: 3px solid #EF4444;
+    border-bottom: 1px solid rgba(239, 68, 68, 0.18);
+}
+
+.subject-row.is-failed:nth-child(even) {
+    background: #FEE2E2;
+    border-left: 3px solid #EF4444;
+    border-bottom: 1px solid rgba(239, 68, 68, 0.22);
+}
+
+.subject-row.is-failed:hover {
+    background: #FECACA;
+}
+
+.subject-row.is-failed .grade-badge.grade-F {
+    border: 1px solid #FCA5A5;
+    box-shadow: 0 1px 2px rgba(239, 68, 68, 0.12);
 }
 
 .subject-row:last-child {

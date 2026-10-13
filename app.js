@@ -922,6 +922,11 @@
                 const name = parts.length > 1 ? parts.slice(1).join("-").trim() : code;
                 const grade = String(sub.grade || "").trim();
 
+                const isFailed = !sem.isProjected && window.isBacklogGrade && window.isBacklogGrade(grade);
+                if (isFailed) {
+                    row.classList.add("is-failed");
+                }
+
                 const gradeClass = sem.isProjected 
                     ? "grade-planned" 
                     : (window.getGradeClass ? window.getGradeClass(grade) : "");

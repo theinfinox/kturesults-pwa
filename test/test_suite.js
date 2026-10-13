@@ -153,8 +153,8 @@ async function testCrypto() {
 // -----------------------------------------------------------------
 console.log("\n[Test 5] Testing PWA Web Manifest & Dynamic Versioning...");
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.webmanifest"), "utf8"));
-assert(manifest.version === "1.2" || manifest.version === "1.1" || manifest.version === "1.0.0", "Manifest version mismatch");
-assert(manifest.version_code === 3 || manifest.version_code === 2 || manifest.version_code === 1, "Manifest version code mismatch");
+assert(manifest.version === "1.2.1" || manifest.version === "1.2" || manifest.version === "1.1" || manifest.version === "1.0.0", "Manifest version mismatch");
+assert(manifest.version_code === 4 || manifest.version_code === 3 || manifest.version_code === 2 || manifest.version_code === 1, "Manifest version code mismatch");
 assert.strictEqual(manifest.display, "standalone");
 
 const indexHtml = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
@@ -302,6 +302,18 @@ assert.strictEqual(parsedMock[0].slot, "A", "Course 0 slot must be A");
 assert.strictEqual(parsedMock[1].slot, "B", "Course 1 slot must be normalized to B");
 assert.strictEqual(parsedMock[2].slot, "", "Course 2 (lab with '-') slot must be empty");
 console.log("  ✅ Slot extraction with dynamic headers and lab fallback verified.");
+
+// -----------------------------------------------------------------
+// Test 10: Arrear / Failed Subject Red Checkerboard Highlighting
+// -----------------------------------------------------------------
+console.log("\n[Test 10] Testing Arrear / Failed Subject Red Checkerboard Styles...");
+assert(appCss.includes(".subject-row.is-failed:nth-child(odd)"), "Must include failed odd checkerboard style");
+assert(appCss.includes(".subject-row.is-failed:nth-child(even)"), "Must include failed even checkerboard style");
+assert(appCss.includes("#FEF2F2"), "Must include Tone 1 (#FEF2F2)");
+assert(appCss.includes("#FEE2E2"), "Must include Tone 2 (#FEE2E2)");
+assert(appCss.includes("border-left: 3px solid #EF4444"), "Must include 3px crimson left accent border");
+assert(appJsCode.includes('row.classList.add("is-failed")'), "app.js must tag failed rows with is-failed");
+console.log("  ✅ Arrear red checkerboard alternating styles and left accent validated.");
 
 // Conclude
 testCrypto().then(() => {
