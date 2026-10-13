@@ -21,6 +21,7 @@ When initializing a new session or addressing user requests without context:
    - **Academic Calculations, KTU Schemes, Formulas, Projections**: Consult **[`docs/BUSINESS_LOGIC.md`](file:///c:/Users/1sree/Documents/standalone-pwa/docs/BUSINESS_LOGIC.md)**.
    - **Portal Scraping, Heuristics, & DOM Parsing (`sync-engine.js`)**: Consult **[`docs/SYNC_ENGINE.md`](file:///c:/Users/1sree/Documents/standalone-pwa/docs/SYNC_ENGINE.md)**.
    - **Security, Encryption, PBKDF2, AES-GCM (`crypto-vault.js`)**: Consult **[`docs/SECURITY_AND_VAULT.md`](file:///c:/Users/1sree/Documents/standalone-pwa/docs/SECURITY_AND_VAULT.md)**.
+   - **PWA Releases, Version Bumping & Cache Invalidation**: Consult **[`docs/VERSIONING_AND_RELEASES.md`](file:///c:/Users/1sree/Documents/standalone-pwa/docs/VERSIONING_AND_RELEASES.md)**.
 
 ---
 
@@ -46,3 +47,6 @@ All future contributions and code modifications MUST preserve the following inva
 5. **100% Offline PWA Ready**:
    - When modifying web assets, ensure the Service Worker precache list in `sw.js` remains up-to-date.
    - All academic calculation, forecasting, and vector PDF generation must function offline without an active internet connection.
+6. **Mandatory Atomic Version Upgrade on Any Code Change**:
+   - Whenever ANY change, fix, or feature is applied, you **MUST** execute the atomic 5-point release protocol documented in **[`docs/VERSIONING_AND_RELEASES.md`](file:///c:/Users/1sree/Documents/standalone-pwa/docs/VERSIONING_AND_RELEASES.md)** (`sw.js` cache name, `manifest.webmanifest`, `package.json`, `index.html`, `test_suite.js`).
+   - Never leave cached code behind; failure to bump cache name and manifest prevents users with installed PWAs from receiving updates.

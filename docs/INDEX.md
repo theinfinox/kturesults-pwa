@@ -16,6 +16,7 @@ This knowledge base is specifically crafted to serve as an authoritative technic
 | **[BUSINESS_LOGIC.md](file:///c:/Users/1sree/Documents/standalone-pwa/docs/BUSINESS_LOGIC.md)** | Academic Engine & Regulations | KTU grade point mappings, 2015/2019/2024 schemes, credit tables, 3-Level Academic Architecture, 9 Academic Comeback Projections, Degree Forecasting, fuzzy scheme/branch resolver, and major/minor branch auto-healing. |
 | **[SYNC_ENGINE.md](file:///c:/Users/1sree/Documents/standalone-pwa/docs/SYNC_ENGINE.md)** | Portal Scraping & Parsing | Headless client parser (`sync-engine.js`), DOM traversal, regex pattern extractors for KTU accordion tables (`#collapseFiveS*`), register number decoding, and session cookie lifecycle (`AWSALB`, `JSESSIONID`). |
 | **[SECURITY_AND_VAULT.md](file:///c:/Users/1sree/Documents/standalone-pwa/docs/SECURITY_AND_VAULT.md)** | Cryptography & Privacy | Web Cryptography API (`crypto-vault.js`), AES-GCM-256 + PBKDF2 (100,000 iterations), device seed vs zero-knowledge user PIN mode, memory hygiene, CSP, and strict HTTPS relay enforcement. |
+| **[VERSIONING_AND_RELEASES.md](file:///c:/Users/1sree/Documents/standalone-pwa/docs/VERSIONING_AND_RELEASES.md)** | Release & PWA Updates | Mandatory 5-point atomic version upgrade protocol (`sw.js` cache bust, manifest bump, `package.json`, `index.html`, and `test_suite.js`). |
 
 ---
 
