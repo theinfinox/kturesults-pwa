@@ -738,11 +738,34 @@ body {
     max-width: 76%;
 }
 
+.subject-code-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+}
+
 .subject-code {
     font-family: "JetBrains Mono", monospace;
     font-size: 11px;
     color: var(--text-muted);
     font-weight: 600;
+}
+
+.subject-slot-badge {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: #4338CA;
+    background: #EEF2FF;
+    border: 1px solid #C7D2FE;
+    padding: 1px 6px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1.25;
+    letter-spacing: 0.02em;
+    vertical-align: middle;
 }
 
 .subject-name {

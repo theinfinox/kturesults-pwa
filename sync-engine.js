@@ -103,11 +103,15 @@
             const table = panel.querySelector("table");
             if (!table) return;
 
-            // Header inspection for Grade column
+            // Header inspection for Slot and Grade columns
             let gradeColIdx = -1;
+            let slotColIdx = -1;
             const ths = table.querySelectorAll("thead th, tr th, tr:first-child td");
             ths.forEach((th, idx) => {
                 const txt = th.textContent.trim().toLowerCase();
+                if (txt === "slot" || txt.includes("slot")) {
+                    slotColIdx = idx;
+                }
                 if (txt === "grade" || txt.includes("grade")) {
                     gradeColIdx = idx;
                 }
@@ -118,6 +122,24 @@
             rows.forEach(tr => {
                 const cols = tr.querySelectorAll("td");
                 if (cols.length < 7) return;
+
+                // Robust Slot Extraction: check slotColIdx first, then fallback to cols[0]
+                let rawSlot = "";
+                if (slotColIdx >= 0 && cols[slotColIdx]) {
+                    rawSlot = cols[slotColIdx].textContent.trim();
+                } else if (cols[0]) {
+                    const cand = cols[0].textContent.trim();
+                    if (/^(?:slot\s*[:\-]?\s*)?[A-Za-z][A-Za-z0-9+]{0,3}$/i.test(cand)) {
+                        rawSlot = cand;
+                    }
+                }
+
+                // Clean & normalize slot token
+                let slot = "";
+                if (rawSlot && !/^[-–—\s]+$/.test(rawSlot) && !/^null$/i.test(rawSlot)) {
+                    const matchSlot = rawSlot.match(/^(?:slot\s*[:\-]?\s*)?([A-Za-z0-9+]+)/i);
+                    slot = matchSlot ? matchSlot[1].toUpperCase() : rawSlot.toUpperCase();
+                }
 
                 const subject = cols[1] ? cols[1].textContent.trim() : "";
                 const creditRaw = cols[2] ? cols[2].textContent.trim() : "0";
@@ -148,6 +170,7 @@
                 if (subject) {
                     semesterData.push({
                         semester: semId,
+                        slot: slot || "",
                         subject,
                         credit,
                         grade

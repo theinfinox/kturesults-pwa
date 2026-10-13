@@ -926,9 +926,17 @@
                     ? "grade-planned" 
                     : (window.getGradeClass ? window.getGradeClass(grade) : "");
 
+                const slot = sub.slot ? String(sub.slot).trim() : "";
+                const slotBadge = slot 
+                    ? `<span class="subject-slot-badge" title="Exam Slot: ${slot}">Slot ${slot}</span>` 
+                    : "";
+
                 row.innerHTML = `
                     <div class="subject-info">
-                        <div class="subject-code">${code}</div>
+                        <div class="subject-code-row">
+                            <span class="subject-code">${code}</span>
+                            ${slotBadge}
+                        </div>
                         <div class="subject-name">${name}</div>
                     </div>
                     <div class="subject-right">
@@ -1343,9 +1351,9 @@
         csv += `# Export Date: ${new Date().toLocaleDateString("en-GB")}\n`;
         csv += "# ========================================================\n\n";
 
-        csv += "Semester,Subject,Grade,Credit\n";
+        csv += "Semester,Subject,Grade,Credit,Slot\n";
         currentSemesterData.forEach(r => {
-            csv += `"${r.semester}","${r.subject}","${r.grade}",${r.credit}\n`;
+            csv += `"${r.semester}","${r.subject}","${r.grade}",${r.credit},"${r.slot || ""}"\n`;
         });
 
         const blob = new Blob([csv], { type: "text/csv" });
