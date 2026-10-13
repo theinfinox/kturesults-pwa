@@ -153,8 +153,8 @@ async function testCrypto() {
 // -----------------------------------------------------------------
 console.log("\n[Test 5] Testing PWA Web Manifest & Dynamic Versioning...");
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.webmanifest"), "utf8"));
-assert(manifest.version === "1.1" || manifest.version === "1.0.0", "Manifest version mismatch");
-assert(manifest.version_code === 2 || manifest.version_code === 1, "Manifest version code mismatch");
+assert(manifest.version === "1.2" || manifest.version === "1.1" || manifest.version === "1.0.0", "Manifest version mismatch");
+assert(manifest.version_code === 3 || manifest.version_code === 2 || manifest.version_code === 1, "Manifest version code mismatch");
 assert.strictEqual(manifest.display, "standalone");
 
 const indexHtml = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
