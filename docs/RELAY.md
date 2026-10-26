@@ -180,7 +180,7 @@ If an authentication failure occurs:
 ## 6. Client Relay Configuration & Transport Enforcement
 
 Users can configure a custom relay URL in the application settings modal:
-- Default endpoint: `https://kturesults.netlify.app/api/sync` (or relative `/api/sync` on Netlify)
+- Default endpoint: `https://kturesults.govindsr.me/api/sync` (or relative `/api/sync` on Netlify)
 - Stored in `localStorage` under `ktu_custom_relay`.
 
 ### Enforced HTTPS Transport

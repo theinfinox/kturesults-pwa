@@ -7,11 +7,11 @@
     function getDefaultRelay() {
         if (typeof window !== "undefined" && window.location) {
             const host = window.location.hostname;
-            if (host.endsWith(".netlify.app") || host === "localhost" || host === "127.0.0.1") {
+            if (host === "kturesults.govindsr.me" || host.endsWith(".netlify.app") || host === "localhost" || host === "127.0.0.1") {
                 return "/api/sync";
             }
         }
-        return "https://kturesults.netlify.app/api/sync";
+        return "https://kturesults.govindsr.me/api/sync";
     }
 
     const DEFAULT_RELAY_ENDPOINT = getDefaultRelay();
@@ -206,13 +206,14 @@
         } else if (savedRelay) {
             candidateUrls.push(savedRelay);
         } else {
-            // Prioritize native relative endpoint if on Netlify or localhost
+            // Prioritize native relative endpoint if on custom domain, Netlify or localhost
             if (typeof window !== "undefined" && window.location) {
                 const host = window.location.hostname;
-                if (host.endsWith(".netlify.app") || host === "localhost" || host === "127.0.0.1") {
+                if (host === "kturesults.govindsr.me" || host.endsWith(".netlify.app") || host === "localhost" || host === "127.0.0.1") {
                     candidateUrls.push("/api/sync");
                 }
             }
+            candidateUrls.push("https://kturesults.govindsr.me/api/sync");
             candidateUrls.push("https://kturesults.netlify.app/api/sync");
         }
 
