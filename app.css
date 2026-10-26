@@ -1940,3 +1940,168 @@ iframe[src*="netlify"],
     opacity: 0 !important;
     pointer-events: none !important;
 }
+
+/* ========================================================== */
+/* Hamburger Navigation & Tools Menu & Master Controls        */
+/* ========================================================== */
+.hamburger-btn {
+    font-size: 19px;
+    font-weight: 700;
+}
+
+.menu-section {
+    margin-top: 16px;
+}
+
+.menu-section-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    padding-left: 2px;
+}
+
+.menu-profile-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+}
+
+.menu-profile-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #E2E8F0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.menu-btn-sm {
+    padding: 6px 12px;
+    font-size: 11.5px;
+    border-radius: 8px;
+}
+
+.menu-tools-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.menu-tool-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.menu-tool-card:hover, .menu-tool-card:active {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.menu-tool-card.primary-tint {
+    background: #EFF6FF;
+    border-color: #BFDBFE;
+}
+
+.menu-tool-card.primary-tint:hover {
+    background: #DBEAFE;
+}
+
+.menu-tool-icon {
+    font-size: 20px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.menu-tool-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.menu-tool-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.menu-list-items {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.menu-list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-main);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    width: 100%;
+    text-align: left;
+}
+
+.menu-list-item:hover, .menu-list-item:active {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--border-light);
+}
+
+.menu-list-icon {
+    font-size: 16px;
+    width: 24px;
+    text-align: center;
+}
+
+/* Master Semester Expand/Collapse Toggle Button */
+.btn-toggle-all-sem {
+    background: #F1F5F9;
+    border: 1px solid var(--border-light);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+}
+
+.btn-toggle-all-sem:hover, .btn-toggle-all-sem:active {
+    background: #E2E8F0;
+    color: var(--text-main);
+    border-color: var(--border-hover);
+}

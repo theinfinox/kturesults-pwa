@@ -153,13 +153,15 @@ async function testCrypto() {
 // -----------------------------------------------------------------
 console.log("\n[Test 5] Testing PWA Web Manifest & Dynamic Versioning...");
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.webmanifest"), "utf8"));
-assert(manifest.version === "1.2.12" || manifest.version === "1.2.11" || manifest.version === "1.2.10" || manifest.version === "1.2.9" || manifest.version === "1.2.8" || manifest.version === "1.2.7" || manifest.version === "1.2.6" || manifest.version === "1.2.5" || manifest.version === "1.2.4" || manifest.version === "1.2.3" || manifest.version === "1.2.2" || manifest.version === "1.2.1" || manifest.version === "1.2" || manifest.version === "1.1" || manifest.version === "1.0.0", "Manifest version mismatch");
-assert(manifest.version_code === 15 || manifest.version_code === 14 || manifest.version_code === 13 || manifest.version_code === 12 || manifest.version_code === 11 || manifest.version_code === 10 || manifest.version_code === 9 || manifest.version_code === 8 || manifest.version_code === 7 || manifest.version_code === 6 || manifest.version_code === 5 || manifest.version_code === 4 || manifest.version_code === 3 || manifest.version_code === 2 || manifest.version_code === 1, "Manifest version code mismatch");
+assert(manifest.version === "1.2.13" || manifest.version === "1.2.12" || manifest.version === "1.2.11" || manifest.version === "1.2.10" || manifest.version === "1.2.9" || manifest.version === "1.2.8" || manifest.version === "1.2.7" || manifest.version === "1.2.6" || manifest.version === "1.2.5" || manifest.version === "1.2.4" || manifest.version === "1.2.3" || manifest.version === "1.2.2" || manifest.version === "1.2.1" || manifest.version === "1.2" || manifest.version === "1.1" || manifest.version === "1.0.0", "Manifest version mismatch");
+assert(manifest.version_code === 16 || manifest.version_code === 15 || manifest.version_code === 14 || manifest.version_code === 13 || manifest.version_code === 12 || manifest.version_code === 11 || manifest.version_code === 10 || manifest.version_code === 9 || manifest.version_code === 8 || manifest.version_code === 7 || manifest.version_code === 6 || manifest.version_code === 5 || manifest.version_code === 4 || manifest.version_code === 3 || manifest.version_code === 2 || manifest.version_code === 1, "Manifest version code mismatch");
 assert.strictEqual(manifest.display, "standalone");
 
 const indexHtml = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
 assert(indexHtml.includes("pwa-version-text"), "index.html missing version placeholders");
 assert(indexHtml.includes("pwa-version-code"), "index.html missing version code placeholders");
+assert(indexHtml.includes('id="hamburgerMenuBtn"'), "index.html must include hamburgerMenuBtn");
+assert(indexHtml.includes('id="menuModal"'), "index.html must include menuModal");
 console.log("  ✅ PWA manifest configuration and DOM placeholders verified.");
 
 // -----------------------------------------------------------------
@@ -169,7 +171,8 @@ console.log("\n[Test 6] Testing UI Card Full-Height & Checkerboard Styling...");
 const appCss = fs.readFileSync(path.join(ROOT, "app.css"), "utf8");
 assert(!appCss.includes(".semester-body {\n    max-height: 480px"), "Must not restrict semester card height");
 assert(appCss.includes(".subject-row:nth-child(even)"), "Must include checkerboard alternating styles");
-console.log("  ✅ Card full-height extension and checkerboard styling validated.");
+assert(appCss.includes(".btn-toggle-all-sem"), "Must include .btn-toggle-all-sem style");
+console.log("  ✅ Card full-height extension, checkerboard styling, and expand toggle validated.");
 
 // -----------------------------------------------------------------
 // Test 7: Multi-User Profile Switching & Primary Account Selection

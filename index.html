@@ -33,30 +33,13 @@
         <div class="brand-wrapper">
             <img src="icons/48.png" alt="KTU CGPA Logo" class="brand-icon">
             <div>
-                <div class="brand-title">KTU CGPA <span class="version-badge pwa-version-text" id="headerVersionBadge">v1.2.12</span></div>
-                <div class="brand-badge">⚡ 1-Click Fast Sync <span class="pwa-version-code" id="headerBuildBadge" style="opacity: 0.8; font-size: 9.5px; margin-left: 3px;">(Build 15)</span></div>
+                <div class="brand-title">KTU CGPA <span class="version-badge pwa-version-text" id="headerVersionBadge">v1.2.13</span></div>
+                <div class="brand-badge">⚡ 1-Click Fast Sync <span class="pwa-version-code" id="headerBuildBadge" style="opacity: 0.8; font-size: 9.5px; margin-left: 3px;">(Build 16)</span></div>
             </div>
         </div>
         <div class="header-actions">
-            <!-- PDF & CSV Menu Actions (Text buttons on PC, sleek icons on Mobile/Tablet) -->
-            <button id="headerPdfBtn" class="header-menu-btn primary" title="Download Official Vector PDF Transcript" style="display: none;">
-                <span class="btn-icon">📑</span>
-                <span class="btn-text">PDF Transcript</span>
-            </button>
-            <button id="headerCsvBtn" class="header-menu-btn secondary" title="Export Academic CSV Data" style="display: none;">
-                <span class="btn-icon">📥</span>
-                <span class="btn-text">Export CSV</span>
-            </button>
-            <div id="headerMenuDivider" class="header-menu-divider" style="display: none;"></div>
-
             <button id="headerRefreshBtn" class="icon-btn" title="Zero-Login Refresh (Cached Session • 0 Lockout Risk)">🔄</button>
-            <button id="openForecastModalBtn" class="icon-btn" title="Degree Forecaster">🔮</button>
-            <button id="openHonorsModalBtn" class="icon-btn" title="KTU Honors & Minors Eligibility Validator">🎓</button>
-            <button id="openActivityModalBtn" class="icon-btn" title="Mandatory 100 Activity Points Tracker">🎯</button>
-            <select id="headerProfileSwitcher" class="header-profile-select" title="Quick Switch Student" style="display: none;"></select>
-            <button id="openProfileModalBtn" class="icon-btn" title="Student Profiles">👤</button>
-            <button id="openImportModalBtn" class="icon-btn" title="Import Data">📂</button>
-            <button id="openDisclaimerBtn" class="icon-btn" title="About & Disclaimer">ℹ️</button>
+            <button id="hamburgerMenuBtn" class="icon-btn" title="Menu & Academic Tools" aria-label="Open Navigation Menu">☰</button>
         </div>
     </header>
 
@@ -159,7 +142,7 @@
         <div class="footer-content">
             <span>KTU CGPA Standalone PWA</span>
             <span class="footer-dot">•</span>
-            <span class="pwa-full-version">v1.2.12 (Build 15)</span>
+            <span class="pwa-full-version">v1.2.13 (Build 16)</span>
             <span class="footer-dot">•</span>
             <a href="#" id="footerDisclaimerLink" style="color: inherit; text-decoration: underline; cursor: pointer;">Disclaimer & Privacy</a>
             <span class="footer-dot">•</span>
@@ -491,6 +474,115 @@
             </p>
             <div id="activityCategoryMeters" class="activity-categories-grid">
                 <!-- 5 category reference cards rendered dynamically by app.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- MODAL 9: Hamburger Navigation & Tools Menu                 -->
+    <!-- ========================================================== -->
+    <div id="menuModal" class="modal-overlay" style="display: none;">
+        <div class="modal-sheet menu-sheet" style="max-width: 480px; max-height: 88vh; overflow-y: auto;">
+            <div class="sheet-header">
+                <div class="sheet-title" style="display: flex; align-items: center; gap: 8px;">
+                    <span>⚡</span>
+                    <span>Menu & Tools</span>
+                </div>
+                <button class="sheet-close-btn" data-close="menuModal">&times;</button>
+            </div>
+
+            <!-- 1. Active Student Profile Section -->
+            <div class="menu-section">
+                <div class="menu-section-label">Active Student</div>
+                <div class="menu-profile-card">
+                    <div class="menu-profile-avatar">👤</div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div id="menuProfileName" class="menu-profile-name" style="font-size: 13.5px; font-weight: 700; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">No Profile Configured</div>
+                        <div id="menuProfileReg" class="menu-profile-reg" style="font-size: 11px; color: var(--text-muted); font-family: monospace;">--</div>
+                    </div>
+                    <div class="menu-profile-actions" style="display: flex; gap: 6px; align-items: center;">
+                        <select id="headerProfileSwitcher" class="header-profile-select" title="Switch Student" style="display: none;"></select>
+                        <button id="openProfileModalBtn" class="btn-action secondary menu-btn-sm" type="button" title="Student Profiles">
+                            <span>👥 Profiles</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Academic & Forecasting Tools -->
+            <div class="menu-section">
+                <div class="menu-section-label">Academic & Forecasting Tools</div>
+                <div class="menu-tools-grid">
+                    <button id="openForecastModalBtn" class="menu-tool-card" type="button" title="Degree Forecaster & Comeback Simulator">
+                        <span class="menu-tool-icon">🔮</span>
+                        <div class="menu-tool-info">
+                            <div class="menu-tool-title">Degree Forecaster</div>
+                            <div class="menu-tool-desc">Comeback simulation & targets</div>
+                        </div>
+                    </button>
+                    <button id="openHonorsModalBtn" class="menu-tool-card" type="button" title="KTU Honors & Minors Eligibility Validator">
+                        <span class="menu-tool-icon">🎓</span>
+                        <div class="menu-tool-info">
+                            <div class="menu-tool-title">Honors & Minors</div>
+                            <div class="menu-tool-desc">Eligibility & regulations check</div>
+                        </div>
+                    </button>
+                    <button id="openActivityModalBtn" class="menu-tool-card" type="button" title="Mandatory 100 Activity Points Tracker">
+                        <span class="menu-tool-icon">🎯</span>
+                        <div class="menu-tool-info">
+                            <div class="menu-tool-title">Activity Points</div>
+                            <div class="menu-tool-desc">100 / 75 Pts degree requirement</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. Transcripts & Data Export -->
+            <div class="menu-section">
+                <div class="menu-section-label">Transcripts & Data</div>
+                <div class="menu-tools-grid">
+                    <button id="headerPdfBtn" class="menu-tool-card primary-tint" type="button" title="Download Official Vector PDF Transcript" style="display: none;">
+                        <span class="menu-tool-icon">📑</span>
+                        <div class="menu-tool-info">
+                            <div class="menu-tool-title">PDF Transcript</div>
+                            <div class="menu-tool-desc">Official vector transcript</div>
+                        </div>
+                    </button>
+                    <button id="headerCsvBtn" class="menu-tool-card" type="button" title="Export Academic CSV Data" style="display: none;">
+                        <span class="menu-tool-icon">📥</span>
+                        <div class="menu-tool-info">
+                            <div class="menu-tool-title">Export CSV</div>
+                            <div class="menu-tool-desc">Spreadsheet backup format</div>
+                        </div>
+                    </button>
+                    <button id="openImportModalBtn" class="menu-tool-card" type="button" title="Import Backup JSON Data">
+                        <span class="menu-tool-icon">📂</span>
+                        <div class="menu-tool-info">
+                            <div class="menu-tool-title">Import Data</div>
+                            <div class="menu-tool-desc">Restore offline backup JSON</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 4. System & Security Information -->
+            <div class="menu-section">
+                <div class="menu-section-label">System & Security</div>
+                <div class="menu-list-items">
+                    <button id="openDisclaimerBtn" class="menu-list-item" type="button" title="Disclaimer & Privacy Information">
+                        <span class="menu-list-icon">ℹ️</span>
+                        <span class="menu-list-text">About, Disclaimer & Privacy</span>
+                    </button>
+                    <a href="https://github.com/theinfinox/kturesults-pwa" target="_blank" rel="noopener noreferrer" class="menu-list-item" style="text-decoration: none;" title="GitHub Source Repository">
+                        <span class="menu-list-icon">🐙</span>
+                        <span class="menu-list-text">GitHub Repository</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="menu-footer" style="margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted);">
+                <span>KTU Standalone PWA</span>
+                <span class="pwa-version-text">v1.2.13 (Build 16)</span>
             </div>
         </div>
     </div>

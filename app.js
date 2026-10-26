@@ -50,6 +50,10 @@
     const headerCsvBtn = document.getElementById("headerCsvBtn");
     const headerRefreshBtn = document.getElementById("headerRefreshBtn");
     const headerMenuDivider = document.getElementById("headerMenuDivider");
+    const hamburgerMenuBtn = document.getElementById("hamburgerMenuBtn");
+    const menuModal = document.getElementById("menuModal");
+    const menuProfileName = document.getElementById("menuProfileName");
+    const menuProfileReg = document.getElementById("menuProfileReg");
 
     // Modals
     const profileModal = document.getElementById("profileModal");
@@ -442,6 +446,8 @@
             if (heroFreshnessBadge) heroFreshnessBadge.textContent = "Setup Required";
             if (primaryStatusText) primaryStatusText.innerHTML = "⭐ <strong>Default Account:</strong> None";
             if (setPrimaryProfileBtn) setPrimaryProfileBtn.style.display = "none";
+            if (menuProfileName) menuProfileName.textContent = "No Profile Configured";
+            if (menuProfileReg) menuProfileReg.textContent = "--";
             populateProfileForm(null);
             return;
         }
@@ -477,6 +483,8 @@
         if (activeProf) {
             if (heroProfileName) heroProfileName.textContent = `${activeProf.label} (${activeProf.username})`;
             if (heroFreshnessBadge) heroFreshnessBadge.textContent = formatRelativeTime(currentLastScraped || activeProf.lastGrabbed);
+            if (menuProfileName) menuProfileName.textContent = currentStudentInfo ? (currentStudentInfo.name || activeProf.label) : activeProf.label;
+            if (menuProfileReg) menuProfileReg.textContent = activeProf.username;
             populateProfileForm(activeProf);
 
             // Update Primary Status Controls
@@ -754,8 +762,8 @@
         if (emptyState) emptyState.style.display = "none";
         if (profileCard) profileCard.style.display = "flex";
         if (bottomActionBar) bottomActionBar.style.display = "flex";
-        if (headerPdfBtn) headerPdfBtn.style.display = "inline-flex";
-        if (headerCsvBtn) headerCsvBtn.style.display = "inline-flex";
+        if (headerPdfBtn) headerPdfBtn.style.display = "flex";
+        if (headerCsvBtn) headerCsvBtn.style.display = "flex";
         if (headerMenuDivider) headerMenuDivider.style.display = "block";
 
         // Auto-Detect Curriculum Scheme
@@ -1094,6 +1102,7 @@
 
     // --- 7b. KTU Honors & Minors Modal Renderer ---
     function openHonorsModal(tab = "honors") {
+        if (menuModal) closeModal(menuModal);
         currentHonorsTab = tab;
         renderHonorsModal();
         openModal(honorsModal);
@@ -1206,6 +1215,7 @@
 
     // --- 7c. KTU Mandatory Activity Points Modal Renderer ---
     function openActivityModal() {
+        if (menuModal) closeModal(menuModal);
         renderActivityModal();
         openModal(activityModal);
     }
@@ -1324,14 +1334,46 @@
         if (!semesterContainer) return;
         semesterContainer.innerHTML = "";
 
+        const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
         const header = document.createElement("div");
         header.className = "section-header";
-        header.innerHTML = `<div class="section-title">📚 Semester Breakdown ${hasProjected ? '(Completed & Forecast)' : ''}</div>`;
+        header.style.display = "flex";
+        header.style.justifyContent = "space-between";
+        header.style.alignItems = "center";
+        header.innerHTML = `
+            <div class="section-title">📚 Semester Breakdown ${hasProjected ? '(Completed & Forecast)' : ''}</div>
+            <button id="toggleAllSemestersBtn" class="btn-toggle-all-sem" type="button" title="Expand or collapse all semester records">
+                <span id="toggleAllSemestersText">${isMobile ? 'Expand All' : 'Collapse All'}</span>
+                <span id="toggleAllSemestersIcon">${isMobile ? '▼' : '▲'}</span>
+            </button>
+        `;
         semesterContainer.appendChild(header);
+
+        let allCollapsed = isMobile;
+        const toggleBtn = header.querySelector("#toggleAllSemestersBtn");
+        if (toggleBtn) {
+            toggleBtn.addEventListener("click", () => {
+                allCollapsed = !allCollapsed;
+                const cards = semesterContainer.querySelectorAll(".semester-card");
+                cards.forEach(c => {
+                    if (allCollapsed) {
+                        c.classList.add("collapsed");
+                    } else {
+                        c.classList.remove("collapsed");
+                    }
+                });
+                const txt = toggleBtn.querySelector("#toggleAllSemestersText");
+                const ico = toggleBtn.querySelector("#toggleAllSemestersIcon");
+                if (txt) txt.textContent = allCollapsed ? "Expand All" : "Collapse All";
+                if (ico) ico.textContent = allCollapsed ? "▼" : "▲";
+                equalizeSemesterCardHeights();
+            });
+        }
 
         semesters.forEach(sem => {
             const card = document.createElement("div");
-            card.className = `semester-card ${sem.isProjected ? 'projected' : ''}`;
+            card.className = `semester-card ${isMobile ? 'collapsed' : ''} ${sem.isProjected ? 'projected' : ''}`;
 
             const badgeHtml = sem.isProjected
                 ? `<span style="font-size: 11px; font-weight: 700; color: #1D4ED8; background: #DBEAFE; padding: 2px 8px; border-radius: 999px;">🔮 FORECAST</span>`
@@ -1463,6 +1505,7 @@
 
         if (openDisclaimerBtn) {
             openDisclaimerBtn.addEventListener("click", () => {
+                if (menuModal) closeModal(menuModal);
                 openModal(disclaimerModal);
             });
         }
@@ -1486,6 +1529,7 @@
 
         // Modal Open/Close Handlers
         const openForecastModal = () => {
+            if (menuModal) closeModal(menuModal);
             const forecastLevelNotice = document.getElementById("forecastLevelNotice");
             if (forecastLevelNotice) {
                 if (currentMetrics && currentMetrics.level === 1) {
@@ -1512,13 +1556,29 @@
             openModal(forecastModal);
         };
 
-        if (openProfileModalBtn) openProfileModalBtn.addEventListener("click", () => openModal(profileModal));
+        if (hamburgerMenuBtn) {
+            hamburgerMenuBtn.addEventListener("click", () => {
+                openModal(menuModal);
+            });
+        }
+
+        if (openProfileModalBtn) {
+            openProfileModalBtn.addEventListener("click", () => {
+                if (menuModal) closeModal(menuModal);
+                openModal(profileModal);
+            });
+        }
         if (emptyConfigureBtn) emptyConfigureBtn.addEventListener("click", () => openModal(profileModal));
         if (openForecastModalBtn) openForecastModalBtn.addEventListener("click", openForecastModal);
         if (openHonorsModalBtn) openHonorsModalBtn.addEventListener("click", () => openHonorsModal("honors"));
         if (openActivityModalBtn) openActivityModalBtn.addEventListener("click", () => openActivityModal());
         if (changeForecastInlineBtn) changeForecastInlineBtn.addEventListener("click", openForecastModal);
-        if (openImportModalBtn) openImportModalBtn.addEventListener("click", () => openModal(importModal));
+        if (openImportModalBtn) {
+            openImportModalBtn.addEventListener("click", () => {
+                if (menuModal) closeModal(menuModal);
+                openModal(importModal);
+            });
+        }
         if (emptyImportBtn) emptyImportBtn.addEventListener("click", () => openModal(importModal));
 
         // Honors & Minors Tab Switching
