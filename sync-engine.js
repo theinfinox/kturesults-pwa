@@ -7,11 +7,11 @@
     function getDefaultRelay() {
         if (typeof window !== "undefined" && window.location) {
             const host = window.location.hostname;
-            if (host === "ktu.govindsr.me" || host.endsWith(".netlify.app") || host === "localhost" || host === "127.0.0.1") {
+            if (host.endsWith(".netlify.app") || host === "localhost" || host === "127.0.0.1") {
                 return "/api/sync";
             }
         }
-        return "https://ktu.govindsr.me/api/sync";
+        return "https://kturesults.netlify.app/api/sync";
     }
 
     const DEFAULT_RELAY_ENDPOINT = getDefaultRelay();
@@ -195,7 +195,7 @@
     // --- Fail-Safe Relay Transport with Automatic Edge Failover ---
     async function dispatchRelayWithFailover(payload, customRelayUrl = null) {
         let savedRelay = localStorage.getItem("ktu_custom_relay");
-        if (savedRelay && (savedRelay.includes("theinfinox.workers.dev") || savedRelay.includes("kturesults.govindsr.me"))) {
+        if (savedRelay && (savedRelay.includes("theinfinox.workers.dev") || savedRelay.includes("govindsr.me"))) {
             savedRelay = null;
             localStorage.removeItem("ktu_custom_relay");
         }
@@ -206,14 +206,13 @@
         } else if (savedRelay) {
             candidateUrls.push(savedRelay);
         } else {
-            // Prioritize native relative endpoint if on custom domain or Netlify
+            // Prioritize native relative endpoint if on Netlify or localhost
             if (typeof window !== "undefined" && window.location) {
                 const host = window.location.hostname;
-                if (host === "ktu.govindsr.me" || host.endsWith(".netlify.app") || host === "localhost" || host === "127.0.0.1") {
+                if (host.endsWith(".netlify.app") || host === "localhost" || host === "127.0.0.1") {
                     candidateUrls.push("/api/sync");
                 }
             }
-            candidateUrls.push("https://ktu.govindsr.me/api/sync");
             candidateUrls.push("https://kturesults.netlify.app/api/sync");
         }
 
