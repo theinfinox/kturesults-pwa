@@ -1,4 +1,4 @@
-﻿# Logs & Process
+# Logs & Process
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -19,3 +19,9 @@ Thumbs.db
 # Local Environment Overrides
 .env
 .env.local
+
+# Local Netlify folder
+.netlify
+
+# Temporary backups
+legacy/

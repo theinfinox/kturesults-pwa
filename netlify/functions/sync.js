@@ -156,7 +156,7 @@ exports.handler = async (event, context) => {
     try {
         const payload = JSON.parse(event.body || "{}");
         const { username, password, sessionCookies, sessionOnly } = payload;
-        const normUser = (username || "").trim();
+        const normUser = (username || "").trim().toUpperCase();
 
         // --- 1. ZERO-LOGIN SESSION REFRESH PATH ---
         if (sessionOnly) {
@@ -177,7 +177,7 @@ exports.handler = async (event, context) => {
 
             const currRes = await requestWithJar(`https://${KTU_HOST}/eu/stu/studentDetailsView.htm`, {
                 method: "GET",
-                headers: { "Referer": `https://${KTU_HOST}/eu/pub/dashboard.htm` }
+                headers: { "Referer": `https://${KTU_HOST}/eu/alt/dashboard.htm` }
             }, null, jar);
 
             const elapsedMs = Date.now() - startTime;
@@ -222,7 +222,7 @@ exports.handler = async (event, context) => {
             jar.loadFromCookieHeader(sessionCookies);
             const probeRes = await requestWithJar(`https://${KTU_HOST}/eu/stu/studentDetailsView.htm`, {
                 method: "GET",
-                headers: { "Referer": `https://${KTU_HOST}/eu/pub/dashboard.htm` }
+                headers: { "Referer": `https://${KTU_HOST}/eu/alt/dashboard.htm` }
             }, null, jar);
 
             if (probeRes.body.includes("collapseFiveS")) {
@@ -293,7 +293,7 @@ exports.handler = async (event, context) => {
         const currRes = await requestWithJar(`https://${KTU_HOST}/eu/stu/studentDetailsView.htm`, {
             method: "GET",
             headers: {
-                "Referer": authRes.url || `https://${KTU_HOST}/eu/pub/dashboard.htm`
+                "Referer": authRes.url || `https://${KTU_HOST}/eu/alt/dashboard.htm`
             }
         }, null, jar);
 

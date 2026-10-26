@@ -216,7 +216,7 @@ const server = http.createServer(async (req, res) => {
                     console.log(`[KTU Relay] 📡 Probing KTU curriculum page with cached session (${jar.cookies.size} cookies)...`);
                     const probeRes = await requestWithJar(`https://${KTU_HOST}/eu/stu/studentDetailsView.htm`, {
                         method: "GET",
-                        headers: { "Referer": `https://${KTU_HOST}/eu/pub/dashboard.htm` }
+                        headers: { "Referer": `https://${KTU_HOST}/eu/alt/dashboard.htm` }
                     }, null, jar);
 
                     if (probeRes.body.includes("collapseFiveS")) {
@@ -274,7 +274,7 @@ const server = http.createServer(async (req, res) => {
                     console.log(`[KTU Relay] 🔄 Reusing cached session cookie (Zero-Login Fast Path)...`);
                     const probeRes = await requestWithJar(`https://${KTU_HOST}/eu/stu/studentDetailsView.htm`, {
                         method: "GET",
-                        headers: { "Referer": `https://${KTU_HOST}/eu/pub/dashboard.htm` }
+                        headers: { "Referer": `https://${KTU_HOST}/eu/alt/dashboard.htm` }
                     }, null, jar);
 
                     if (probeRes.body.includes("collapseFiveS")) {
@@ -363,7 +363,7 @@ const server = http.createServer(async (req, res) => {
                 const currRes = await requestWithJar(`https://${KTU_HOST}/eu/stu/studentDetailsView.htm`, {
                     method: "GET",
                     headers: {
-                        "Referer": authRes.url || `https://${KTU_HOST}/eu/pub/dashboard.htm`
+                        "Referer": authRes.url || `https://${KTU_HOST}/eu/alt/dashboard.htm`
                     }
                 }, null, jar);
 

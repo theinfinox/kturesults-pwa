@@ -180,7 +180,7 @@ If an authentication failure occurs:
 ## 6. Client Relay Configuration & Transport Enforcement
 
 Users can configure a custom relay URL in the application settings modal:
-- Default endpoint: `https://ktu-fast-sync.theinfinox.workers.dev/api/sync`
+- Default endpoint: `https://ktu.govindsr.me/api/sync` (or relative `/api/sync` on Netlify)
 - Stored in `localStorage` under `ktu_custom_relay`.
 
 ### Enforced HTTPS Transport

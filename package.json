@@ -1,13 +1,14 @@
 {
     "scripts":  {
-                    "deploy:worker":  "cd edge-relay; npx wrangler deploy",
+                    "deploy:netlify": "npx netlify deploy --prod",
+                    "deploy:worker":  "npx wrangler deploy --config edge-relay/wrangler.toml",
                     "test":  "node test/test_suite.js",
                     "dev":  "node server.js",
                     "start":  "node server.js"
                 },
     "description":  "Progressive Web Application \u0026 1-Click Fast Sync Engine for KTU CGPA/SGPA calculation, comeback projections, and offline grade forecasting.",
-    "version_code":  4,
-    "version":  "1.2.1",
+    "version_code":  6,
+    "version":  "1.2.3",
     "author":  "GSR (theinfinox)",
     "name":  "ktu-cgpa-standalone-pwa",
     "main":  "server.js",

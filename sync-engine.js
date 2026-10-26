@@ -4,7 +4,17 @@
  */
 
 (function () {
-    const DEFAULT_RELAY_ENDPOINT = "https://ktu-fast-sync.theinfinox.workers.dev/api/sync";
+    function getDefaultRelay() {
+        if (typeof window !== "undefined" && window.location) {
+            const host = window.location.hostname;
+            if (host === "ktu.govindsr.me" || host.endsWith(".netlify.app") || host === "localhost" || host === "127.0.0.1") {
+                return "/api/sync";
+            }
+        }
+        return "https://ktu.govindsr.me/api/sync";
+    }
+
+    const DEFAULT_RELAY_ENDPOINT = getDefaultRelay();
 
     const GRADE_REGEX = /^(O|S|A\+|A|B\+|B|C\+|C|D|P|LP|F|FE|I|AB|ABSENT|PASS|FAIL|COMPLETED|AUDIT|SATISFACTORY)$/i;
 
@@ -184,7 +194,12 @@
 
     // --- Fast Sync via Stateless Relay ---
     async function executeFastSync(username, password, customRelayUrl = null) {
-        let relayUrl = customRelayUrl || localStorage.getItem("ktu_custom_relay") || DEFAULT_RELAY_ENDPOINT;
+        let savedRelay = localStorage.getItem("ktu_custom_relay");
+        if (savedRelay && savedRelay.includes("theinfinox.workers.dev")) {
+            savedRelay = null;
+            localStorage.removeItem("ktu_custom_relay");
+        }
+        let relayUrl = customRelayUrl || savedRelay || DEFAULT_RELAY_ENDPOINT;
         if (relayUrl.startsWith("http") && !relayUrl.endsWith("/api/sync") && !relayUrl.includes("?")) {
             relayUrl = relayUrl.replace(/\/+$/, "") + "/api/sync";
         }
@@ -238,7 +253,12 @@
     // --- Zero-Login Session Refresh via Cached Session ---
     // Strictly uses session cookies without login.htm invocation (0 lockout risk)
     async function executeSessionRefresh(username, sessionCookies = null, customRelayUrl = null) {
-        const relayUrl = customRelayUrl || localStorage.getItem("ktu_custom_relay") || DEFAULT_RELAY_ENDPOINT;
+        let savedRelay = localStorage.getItem("ktu_custom_relay");
+        if (savedRelay && savedRelay.includes("theinfinox.workers.dev")) {
+            savedRelay = null;
+            localStorage.removeItem("ktu_custom_relay");
+        }
+        const relayUrl = customRelayUrl || savedRelay || DEFAULT_RELAY_ENDPOINT;
 
         const isLocal = relayUrl.startsWith("http://localhost") || relayUrl.startsWith("http://127.0.0.1") || relayUrl.startsWith("/api/sync");
         const isHttps = relayUrl.startsWith("https://");

@@ -72,12 +72,24 @@ export default {
 
                 const cookieMap = new Map();
                 const updateCookies = (res) => {
-                    const raw = res.headers.get("set-cookie") || "";
-                    raw.split(/,(?=\s*[A-Za-z0-9_-]+=)/).forEach(str => {
+                    if (!res || !res.headers) return;
+                    let cookieList = [];
+                    if (typeof res.headers.getSetCookie === "function") {
+                        cookieList = res.headers.getSetCookie();
+                    } else {
+                        const raw = res.headers.get("set-cookie") || "";
+                        cookieList = raw.split(/,(?=\s*[A-Za-z0-9_-]+=)/);
+                    }
+                    const IGNORED_DIRECTIVES = new Set(["path", "domain", "expires", "max-age", "samesite", "httponly", "secure"]);
+                    cookieList.forEach(str => {
                         const part = str.split(";")[0].trim();
                         const eq = part.indexOf("=");
                         if (eq > 0) {
-                            cookieMap.set(part.slice(0, eq).trim(), part.slice(eq + 1).trim());
+                            const name = part.slice(0, eq).trim();
+                            const value = part.slice(eq + 1).trim();
+                            if (name && value && !IGNORED_DIRECTIVES.has(name.toLowerCase())) {
+                                cookieMap.set(name, value);
+                            }
                         }
                     });
                 };
@@ -120,8 +132,7 @@ export default {
                     const currRes = await fetch(CURRICULUM_URL, {
                         headers: {
                             "Cookie": getCookieStr(),
-                            "Origin": KTU_ORIGIN,
-                            "Referer": `${KTU_ORIGIN}/eu/pub/dashboard.htm`,
+                            "Referer": `${KTU_ORIGIN}/eu/alt/dashboard.htm`,
                             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
                         }
@@ -130,7 +141,21 @@ export default {
                     const currHtml = await currRes.text();
                     const elapsedMs = Date.now() - startTime;
 
-                    if (currHtml.includes("collapseFiveS")) {
+                    if (currRes.status === 526) {
+                        return new Response(JSON.stringify({
+                            success: false,
+                            sessionExpired: false,
+                            error: "KTU Portal SSL Handshake Error (526): Cloudflare Workers rejected KTU's eMudhra SSL certificate because KTU's server omitted the intermediate CA bundle. Please use the Node.js/Netlify relay or local server."
+                        }), {
+                            status: 502,
+                            headers: { ...corsHeaders, "Content-Type": "application/json" }
+                        });
+                    }
+
+                    const hasCurriculum = currHtml.includes("collapseFiveS");
+                    const hasStudentProfile = currHtml.includes("profile-title") || currHtml.includes("studentDetailsView") || (currHtml.includes("list-group-item") && currHtml.includes("Register"));
+
+                    if (hasCurriculum || hasStudentProfile) {
                         return new Response(JSON.stringify({
                             success: true,
                             html: currHtml,
@@ -141,10 +166,17 @@ export default {
                             headers: { ...corsHeaders, "Content-Type": "application/json" }
                         });
                     } else {
+                        const titleMatch = currHtml.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+                        const pageTitle = titleMatch ? titleMatch[1].trim() : "";
                         return new Response(JSON.stringify({
                             success: false,
                             sessionExpired: true,
-                            error: "Cached KTU session has expired. Zero login attempts were made to protect your account. Please use Fast Sync to re-authenticate."
+                            error: `Cached KTU session has expired (Status: ${currRes.status}, Title: "${pageTitle}", Len: ${currHtml.length}).`,
+                            diagnostics: {
+                                status: currRes.status,
+                                title: pageTitle,
+                                preview: currHtml.slice(0, 300)
+                            }
                         }), {
                             status: 200,
                             headers: { ...corsHeaders, "Content-Type": "application/json" }
@@ -173,7 +205,7 @@ export default {
                 postParams.append("password", password);
                 if (csrfToken) postParams.append("CSRF_TOKEN", csrfToken);
 
-                const authRes = await fetch(LOGIN_URL, {
+                let authRes = await fetch(LOGIN_URL, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded",
@@ -189,24 +221,44 @@ export default {
 
                 updateCookies(authRes);
 
-                // If KTU returned a redirect (302/303), follow it to landing page
-                let finalAuthUrl = LOGIN_URL;
-                if ([301, 302, 303, 307, 308].includes(authRes.status) && authRes.headers.get("location")) {
-                    finalAuthUrl = new URL(authRes.headers.get("location"), KTU_ORIGIN).toString();
-                    const redirectRes = await fetch(finalAuthUrl, {
+                // Follow redirects hop-by-hop (preserving and updating cookies at every stage)
+                let currentUrl = LOGIN_URL;
+                let redirectCount = 0;
+                const MAX_REDIRECTS = 5;
+
+                while ([301, 302, 303, 307, 308].includes(authRes.status) && authRes.headers.get("location") && redirectCount < MAX_REDIRECTS) {
+                    redirectCount++;
+                    const prevUrl = currentUrl;
+                    currentUrl = new URL(authRes.headers.get("location"), prevUrl).toString();
+                    authRes = await fetch(currentUrl, {
+                        method: "GET",
                         headers: {
                             "Cookie": getCookieStr(),
+                            "Referer": prevUrl,
                             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-                        }
+                        },
+                        redirect: "manual"
                     });
-                    updateCookies(redirectRes);
+                    updateCookies(authRes);
                 }
 
-                const authText = await authRes.text();
+                // Inspect the final landing page body for auth errors or login forms
+                const landingHtml = await authRes.text();
+
+                // Detect Cloudflare SSL 526 Handshake failure to prevent false 401 lockout
+                if (loginPageRes.status === 526 || authRes.status === 526) {
+                    return new Response(JSON.stringify({ 
+                        success: false, 
+                        error: "KTU SSL Handshake Error (526): Cloudflare rejected KTU's eMudhra SSL certificate due to a missing intermediate CA bundle on KTU's server. Please use the Node/Netlify relay or local server (server.js)." 
+                    }), {
+                        status: 502,
+                        headers: { ...corsHeaders, "Content-Type": "application/json" }
+                    });
+                }
 
                 // Extract human error from .alert-danger
-                const dangerAlerts = [...authText.matchAll(/<div[^>]*class="[^"]*alert-danger[^"]*"[^>]*>([\s\S]*?)<\/div>/gi)];
+                const dangerAlerts = [...landingHtml.matchAll(/<div[^>]*class="[^"]*alert-danger[^"]*"[^>]*>([\s\S]*?)<\/div>/gi)];
                 let portalError = "";
                 for (const m of dangerAlerts) {
                     const txt = m[1].replace(/<[^>]+>/g, "").trim();
@@ -216,9 +268,9 @@ export default {
                     }
                 }
 
-                const isLoginForm = authText.includes("name=\"loginform\"") || authText.includes("id=\"login-username\"");
-                if (portalError || (authRes.status === 200 && isLoginForm)) {
-                    const errorMsg = portalError || "Invalid KTU username or password";
+                const isLoginForm = landingHtml.includes("name=\"loginform\"") || landingHtml.includes("id=\"login-username\"");
+                if (portalError || isLoginForm || authRes.status === 401 || currentUrl.includes("/login.htm")) {
+                    const errorMsg = portalError || "Invalid KTU username or password. Please verify your portal credentials.";
                     return new Response(JSON.stringify({ success: false, error: errorMsg }), {
                         status: 401,
                         headers: { ...corsHeaders, "Content-Type": "application/json" }
@@ -227,20 +279,47 @@ export default {
 
                 // Step 3: Fetch Student Curriculum Page
                 const currRes = await fetch(CURRICULUM_URL, {
+                    method: "GET",
                     headers: {
                         "Cookie": getCookieStr(),
-                        "Origin": KTU_ORIGIN,
-                        "Referer": LOGIN_URL,
+                        "Referer": currentUrl || `${KTU_ORIGIN}/eu/alt/dashboard.htm`,
                         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
                     }
                 });
 
+                updateCookies(currRes);
                 const currHtml = await currRes.text();
                 const elapsedMs = Date.now() - startTime;
 
-                if (!currHtml.includes("collapseFiveS")) {
-                    return new Response(JSON.stringify({ success: false, error: "Authenticated successfully, but curriculum records could not be loaded." }), {
+                const hasCurriculum = currHtml.includes("collapseFiveS");
+                const hasStudentProfile = currHtml.includes("profile-title") || currHtml.includes("studentDetailsView") || (currHtml.includes("list-group-item") && currHtml.includes("Register"));
+
+                if (!hasCurriculum && !hasStudentProfile) {
+                    // Diagnostic extraction: pinpoint why KTU did not return the student page
+                    const titleMatch = currHtml.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+                    const pageTitle = titleMatch ? titleMatch[1].trim() : "";
+                    
+                    let errorMsg = "Curriculum records could not be loaded from KTU portal.";
+                    if (currRes.status === 403 || currHtml.includes("Access Denied")) {
+                        errorMsg = "KTU portal returned 403 Access Denied. The university firewall may be restricting datacenter IP traffic.";
+                    } else if (currHtml.includes("loginform") || currHtml.includes("login-username")) {
+                        errorMsg = "KTU portal session expired immediately after login. Please verify your portal credentials or try again.";
+                    } else if (currHtml.includes("feedback") || currHtml.includes("survey")) {
+                        errorMsg = "KTU portal requires completion of a mandatory student survey or feedback form before academic records can be viewed.";
+                    } else if (pageTitle) {
+                        errorMsg = `Curriculum records could not be loaded (KTU page title: "${pageTitle}", HTTP status: ${currRes.status}).`;
+                    }
+
+                    return new Response(JSON.stringify({ 
+                        success: false, 
+                        error: errorMsg,
+                        diagnostics: {
+                            statusCode: currRes.status,
+                            pageTitle: pageTitle || null,
+                            landingUrl: currentUrl
+                        }
+                    }), {
                         status: 500,
                         headers: { ...corsHeaders, "Content-Type": "application/json" }
                     });
