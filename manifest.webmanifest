@@ -1,8 +1,8 @@
 {
   "name": "KTU CGPA Calculator & Forecaster",
   "short_name": "KTU CGPA",
-  "version": "1.2.5",
-  "version_code": 8,
+  "version": "1.2.6",
+  "version_code": 9,
   "description": "Calculate KTU SGPA & CGPA, forecast degree outcomes, track backlogs, and sync grades with 1-click speed.",
   "start_url": "./index.html",
   "display": "standalone",
