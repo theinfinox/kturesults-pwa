@@ -443,7 +443,7 @@
             profileSelectDropdown.innerHTML = `<option value="">-- No Profiles Saved --</option>`;
             if (headerProfileSwitcher) headerProfileSwitcher.style.display = "none";
             if (heroProfileName) heroProfileName.textContent = "No Profile Configured";
-            if (heroFreshnessBadge) heroFreshnessBadge.textContent = "Setup Required";
+            if (heroFreshnessBadge) heroFreshnessBadge.innerHTML = `<span class="freshness-dot" style="background:#F59E0B; box-shadow:0 0 6px #F59E0B;"></span> Setup Required`;
             if (primaryStatusText) primaryStatusText.innerHTML = "⭐ <strong>Default Account:</strong> None";
             if (setPrimaryProfileBtn) setPrimaryProfileBtn.style.display = "none";
             if (menuProfileName) menuProfileName.textContent = "No Profile Configured";
@@ -482,7 +482,7 @@
         const activeProf = savedProfiles[activeProfileId];
         if (activeProf) {
             if (heroProfileName) heroProfileName.textContent = `${activeProf.label} (${activeProf.username})`;
-            if (heroFreshnessBadge) heroFreshnessBadge.textContent = formatRelativeTime(currentLastScraped || activeProf.lastGrabbed);
+            if (heroFreshnessBadge) heroFreshnessBadge.innerHTML = `<span class="freshness-dot"></span> ${formatRelativeTime(currentLastScraped || activeProf.lastGrabbed)}`;
             if (menuProfileName) menuProfileName.textContent = currentStudentInfo ? (currentStudentInfo.name || activeProf.label) : activeProf.label;
             if (menuProfileReg) menuProfileReg.textContent = activeProf.username;
             populateProfileForm(activeProf);
@@ -742,13 +742,33 @@
             heroProfileName.textContent = activeProf ? `${activeProf.label} (${activeProf.username})` : "No Profile Configured";
         }
         if (heroFreshnessBadge) {
-            heroFreshnessBadge.textContent = formatRelativeTime(currentLastScraped);
+            heroFreshnessBadge.innerHTML = `<span class="freshness-dot"></span> ${formatRelativeTime(currentLastScraped || (activeProf ? activeProf.lastGrabbed : null))}`;
         }
 
         // Empty State Handler
         if (!semesterData || !semesterData.length) {
             if (emptyState) emptyState.style.display = "block";
-            if (profileCard) profileCard.style.display = "none";
+            if (profileCard) {
+                if (activeProf) {
+                    profileCard.style.display = "flex";
+                    const pName = document.getElementById("profileName");
+                    const pReg = document.getElementById("profileRegNo");
+                    const instEl = document.getElementById("institutionText");
+                    const bDept = document.getElementById("badgeDept");
+                    const bBatch = document.getElementById("badgeBatch");
+                    const bScheme = document.getElementById("badgeScheme");
+                    const bLevel = document.getElementById("badgeLevel");
+                    if (pName) pName.textContent = activeProf.label;
+                    if (pReg) pReg.textContent = activeProf.username;
+                    if (instEl) instEl.textContent = "APJ Abdul Kalam Technological University";
+                    if (bDept) bDept.textContent = "💻 Engineering";
+                    if (bBatch) bBatch.textContent = "📅 Profile Saved";
+                    if (bScheme) bScheme.textContent = "📜 KTU Portal";
+                    if (bLevel) bLevel.textContent = "⚡ Ready to Sync";
+                } else {
+                    profileCard.style.display = "none";
+                }
+            }
             if (statsContainer) statsContainer.innerHTML = "";
             if (activeForecastBanner) activeForecastBanner.style.display = "none";
             if (semesterContainer) semesterContainer.innerHTML = "";
@@ -761,7 +781,7 @@
 
         if (emptyState) emptyState.style.display = "none";
         if (profileCard) profileCard.style.display = "flex";
-        if (bottomActionBar) bottomActionBar.style.display = "flex";
+        if (bottomActionBar) bottomActionBar.style.display = "none";
         if (headerPdfBtn) headerPdfBtn.style.display = "flex";
         if (headerCsvBtn) headerCsvBtn.style.display = "flex";
         if (headerMenuDivider) headerMenuDivider.style.display = "block";
@@ -880,76 +900,70 @@
         const progressPct = Math.min(100, Math.max(0, Math.round((metrics.earnedCredits / (totalTarget || 160)) * 100)));
 
         let html = `
-            <div class="stats-grid">
-                <div class="stat-card featured" id="cgpaCard" title="Tap to copy CGPA">
+            <div class="bento-stats-grid">
+                <!-- Bento Hero: CGPA Card -->
+                <div class="stat-card bento-hero featured" id="cgpaCard" title="Tap to copy CGPA">
                     <div class="copy-toast" id="copyToast">✓ Copied!</div>
+                    <div class="bento-badge">Degree Standing</div>
                     <div class="value">${metrics.currentCGPA}</div>
                     <div class="label">Cumulative CGPA (${eqPct}%)</div>
                 </div>
 
+                <!-- Bento Metric: Active Backlogs -->
                 <div class="stat-card ${metrics.hasBacklogs ? 'accent-danger' : 'accent-success'}">
                     <div class="value">${metrics.totalBacklogs}</div>
                     <div class="label">${metrics.hasBacklogs ? '💀 Active Backlogs' : '✨ Backlogs (All Clear)'}</div>
                 </div>
 
+                <!-- Bento Metric: Earned Credits -->
                 <div class="stat-card accent-success">
-                    <div class="value">${metrics.earnedCredits} cr</div>
+                    <div class="value">${metrics.earnedCredits} <span class="unit">cr</span></div>
                     <div class="label">Earned Credits</div>
                 </div>
 
+                <!-- Bento Metric: Degree Progress -->
                 <div class="stat-card">
                     <div class="value">${metrics.earnedCredits} / ${totalTarget}</div>
-                    <div class="label">${gf ? `Degree Progress (${progressPct}% • ${gf.totalFutureCredits}cr rem.)` : `Degree Progress (${progressPct}%)`}</div>
-                    <div class="stat-progress-bar" title="${progressPct}% completed"><div class="stat-progress-fill" style="width: ${progressPct}%;"></div></div>
+                    <div class="label">${gf ? `Progress (${progressPct}% • ${gf.totalFutureCredits}cr rem.)` : `Degree Progress (${progressPct}%)`}</div>
+                    <div class="stat-progress-bar" title="${progressPct}% completed">
+                        <div class="stat-progress-fill" style="width: ${progressPct}%;"></div>
+                    </div>
+                </div>
+
+                <!-- Bento Metric: Activity Points (Symmetrically balanced with Degree Progress!) -->
+                <div class="stat-card ${actCompleted ? 'accent-success' : ''}" id="activityCardBtn" style="cursor: pointer;" title="View and track KTU Activity Points">
+                    <div class="value">${actSum ? actSum.effectivePoints : 0} / ${actSum ? actSum.targetPoints : 100}</div>
+                    <div class="label">🎯 Activity Pts (${actSum ? actSum.progressPercent : 0}% • ${actCompleted ? 'Completed' : (actSum ? actSum.remainingPoints + ' rem.' : '')})</div>
+                    <div class="stat-progress-bar" title="${actSum ? actSum.progressPercent : 0}% completed">
+                        <div class="stat-progress-fill" style="width: ${actSum ? actSum.progressPercent : 0}%; background: ${actCompleted ? '#10B981' : '#3B82F6'};"></div>
+                    </div>
                 </div>
             </div>
         `;
 
-        // Honors & Minors and Activity Points Cards
+        // Honors & Minors VIP Achievement Banner (Shown when student is eligible)
         const evalHM = window.validateHonorsMinorsEligibility ? window.validateHonorsMinorsEligibility(metrics, currentStudentInfo) : null;
-        const isLateral = getIsLateralEntry();
-        const actSum = window.calculateActivityPointsSummary ? window.calculateActivityPointsSummary(currentActivityPoints, isLateral) : null;
-
         const hmHonorsEligible = evalHM && evalHM.honors && evalHM.honors.eligible;
         const hmMinorsEligible = evalHM && evalHM.minors && evalHM.minors.eligible;
-        const actCompleted = actSum && actSum.isCompleted;
 
-        // Show Honors card only if student is actually eligible; otherwise hide it from main dashboard
-        const showHonors = Boolean(hmHonorsEligible);
-
-        html += `
-            <div class="stats-grid" style="grid-template-columns: ${showHonors ? 'repeat(2, 1fr)' : '1fr'}; margin-top: 10px; margin-bottom: 12px;">
-                ${showHonors ? `
-                <div class="stat-card accent-success" id="honorsCardBtn" style="cursor: pointer; text-align: left; padding: 14px;" title="View detailed Honors & Minors eligibility breakdown">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary);">🎓 Honors Degree</span>
-                        <span class="pill-badge" style="font-size: 10px; background:#DCFCE7; color:#166534;">
-                            Honors Eligible
+        if (hmHonorsEligible) {
+            html += `
+                <div class="honors-banner-card" id="honorsCardBtn" style="cursor: pointer;" title="View detailed Honors & Minors eligibility breakdown">
+                    <div class="honors-banner-content">
+                        <div class="honors-banner-left">
+                            <span class="honors-badge-icon">🎓</span>
+                            <div>
+                                <div class="honors-title">Honors Degree Qualified (CGPA ≥ 8.50)</div>
+                                <div class="honors-subtitle">Zero backlogs • First-attempt excellence • Minors: ${hmMinorsEligible ? 'Eligible' : 'Ineligible'}</div>
+                            </div>
+                        </div>
+                        <span class="pill-badge" style="background:#DCFCE7; color:#166534; font-weight:700; font-size:11px;">
+                            Tap for Details ➔
                         </span>
                     </div>
-                    <div class="value" style="font-size: 16px; font-weight: 700; margin-bottom: 2px;">
-                        ✅ Eligible (≥ 8.50)
-                    </div>
-                    <div class="label" style="font-size: 11px;">
-                        Minors: ${hmMinorsEligible ? 'Eligible (≥ 7.0)' : 'Ineligible'} • Tap for breakdown
-                    </div>
                 </div>
-                ` : ''}
-
-                <div class="stat-card ${actCompleted ? 'accent-success' : ''}" id="activityCardBtn" style="cursor: pointer; text-align: left; padding: 14px;" title="View and track KTU Activity Points">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary);">🎯 Activity Points</span>
-                        <span class="pill-badge" style="font-size: 10px; ${actCompleted ? 'background:#DCFCE7; color:#166534;' : 'background:#EFF6FF; color:#1D4ED8;'}">
-                            ${actCompleted ? 'Completed' : (actSum ? actSum.remainingPoints + ' pts needed' : '0 Pts')}
-                        </span>
-                    </div>
-                    <div class="value" style="font-size: 16px; font-weight: 700; margin-bottom: 2px;">
-                        ${actSum ? actSum.effectivePoints : 0} / ${actSum ? actSum.targetPoints : 100} <span style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">(${actSum ? actSum.progressPercent : 0}%)</span>
-                    </div>
-                    <div class="stat-progress-bar" style="margin-top: 6px;"><div class="stat-progress-fill" style="width: ${actSum ? actSum.progressPercent : 0}%;"></div></div>
-                </div>
-            </div>
-        `;
+            `;
+        }
 
         // Level 2 Forecast Projections
         if (metrics.level === 2 && gf) {
