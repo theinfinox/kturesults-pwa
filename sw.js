@@ -1,4 +1,4 @@
-const CACHE_NAME = "ktu-cgpa-pwa-v12";
+const CACHE_NAME = "ktu-cgpa-pwa-v13";
 const ASSETS_TO_CACHE = [
     "./",
     "./index.html",
@@ -43,9 +43,9 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
-    // Pass API / sync requests straight through
-    if (e.request.url.includes("/api/") || e.request.url.includes("app.ktu.edu.in")) {
-        e.respondWith(fetch(e.request).catch(() => new Response(JSON.stringify({ error: "Offline" }), { status: 503 })));
+    // 100% Fail-safe: NEVER intercept non-GET requests or backend API sync endpoints.
+    // Allow the native browser network stack to handle them with full CORS & streaming support.
+    if (e.request.method !== "GET" || e.request.url.includes("/api/") || e.request.url.includes("app.ktu.edu.in")) {
         return;
     }
 

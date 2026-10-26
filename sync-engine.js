@@ -192,41 +192,94 @@
         return semesterData;
     }
 
-    // --- Fast Sync via Stateless Relay ---
-    async function executeFastSync(username, password, customRelayUrl = null) {
+    // --- Fail-Safe Relay Transport with Automatic Edge Failover ---
+    async function dispatchRelayWithFailover(payload, customRelayUrl = null) {
         let savedRelay = localStorage.getItem("ktu_custom_relay");
-        if (savedRelay && savedRelay.includes("theinfinox.workers.dev")) {
+        if (savedRelay && (savedRelay.includes("theinfinox.workers.dev") || savedRelay.includes("kturesults.govindsr.me"))) {
             savedRelay = null;
             localStorage.removeItem("ktu_custom_relay");
         }
-        let relayUrl = customRelayUrl || savedRelay || DEFAULT_RELAY_ENDPOINT;
-        if (relayUrl.startsWith("http") && !relayUrl.endsWith("/api/sync") && !relayUrl.includes("?")) {
-            relayUrl = relayUrl.replace(/\/+$/, "") + "/api/sync";
+
+        const candidateUrls = [];
+        if (customRelayUrl) {
+            candidateUrls.push(customRelayUrl);
+        } else if (savedRelay) {
+            candidateUrls.push(savedRelay);
+        } else {
+            // Prioritize native relative endpoint if on custom domain or Netlify
+            if (typeof window !== "undefined" && window.location) {
+                const host = window.location.hostname;
+                if (host === "ktu.govindsr.me" || host.endsWith(".netlify.app") || host === "localhost" || host === "127.0.0.1") {
+                    candidateUrls.push("/api/sync");
+                }
+            }
+            candidateUrls.push("https://ktu.govindsr.me/api/sync");
+            candidateUrls.push("https://kturesults.netlify.app/api/sync");
         }
 
-        const isLocal = relayUrl.startsWith("http://localhost") || relayUrl.startsWith("http://127.0.0.1") || relayUrl.startsWith("/api/sync");
-        const isHttps = relayUrl.startsWith("https://");
-        if (!isLocal && !isHttps) {
-            throw new Error("Security Error: Relay endpoint must use encrypted HTTPS to protect credentials.");
+        // Deduplicate candidates
+        const uniqueUrls = [...new Set(candidateUrls)];
+        let lastError = null;
+
+        for (const rawUrl of uniqueUrls) {
+            let url = rawUrl;
+            if (url.startsWith("http") && !url.endsWith("/api/sync") && !url.includes("?")) {
+                url = url.replace(/\/+$/, "") + "/api/sync";
+            }
+
+            const isLocal = url.startsWith("http://localhost") || url.startsWith("http://127.0.0.1") || url.startsWith("/api/sync");
+            const isHttps = url.startsWith("https://");
+            if (!isLocal && !isHttps) continue;
+
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.status === 401) {
+                    const errData = await response.json().catch(() => ({ error: null }));
+                    const msg = (errData && errData.error && errData.error.trim()) || "Invalid KTU username or password. Please verify your portal credentials.";
+                    throw new Error(msg); // 401 is auth rejection. NEVER retry, report to student immediately.
+                }
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({ error: null }));
+                    const msg = (errData && errData.error && errData.error.trim()) || `Relay server error (${response.status})`;
+                    throw new Error(msg);
+                }
+
+                const data = await response.json().catch(() => null);
+                if (!data || (!data.success && !data.sessionExpired)) {
+                    throw new Error((data && data.error) || "Relay returned empty response.");
+                }
+
+                return data; // Success!
+            } catch (err) {
+                // If it's authentication error or cooldown shield, immediately bubble up to protect KTU account
+                const isAuthError = err.message && (
+                    err.message.includes("Invalid") || 
+                    err.message.includes("Shield") || 
+                    err.message.includes("disabled") || 
+                    err.message.includes("password")
+                );
+                if (isAuthError) throw err;
+
+                lastError = err;
+                console.warn(`[KTUSyncEngine] Relay candidate failed (${url}):`, err.message, "Trying failover candidate...");
+            }
         }
 
-        const response = await fetch(relayUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ username, password })
-        });
-
-        if (!response.ok) {
-            const errData = await response.json().catch(() => ({ error: null }));
-            const defaultMsg = response.status === 401 
-                ? "Invalid KTU username or password. Please verify your portal credentials." 
-                : `Sync failed (${response.status})`;
-            throw new Error((errData && errData.error && errData.error.trim()) ? errData.error.trim() : defaultMsg);
+        if (lastError && (lastError.name === "TypeError" || lastError.message.includes("Failed to fetch"))) {
+            throw new Error("Unable to connect to KTU relay servers. Please check your internet connection.");
         }
+        throw (lastError || new Error("Relay connection failure."));
+    }
 
-        const data = await response.json();
+    // --- Fast Sync via Stateless Relay ---
+    async function executeFastSync(username, password, customRelayUrl = null) {
+        const data = await dispatchRelayWithFailover({ username, password }, customRelayUrl);
         if (!data.success || !data.html) {
             throw new Error(data.error || "Portal returned empty response.");
         }
@@ -253,35 +306,15 @@
     // --- Zero-Login Session Refresh via Cached Session ---
     // Strictly uses session cookies without login.htm invocation (0 lockout risk)
     async function executeSessionRefresh(username, sessionCookies = null, customRelayUrl = null) {
-        let savedRelay = localStorage.getItem("ktu_custom_relay");
-        if (savedRelay && savedRelay.includes("theinfinox.workers.dev")) {
-            savedRelay = null;
-            localStorage.removeItem("ktu_custom_relay");
-        }
-        const relayUrl = customRelayUrl || savedRelay || DEFAULT_RELAY_ENDPOINT;
+        const data = await dispatchRelayWithFailover({
+            username,
+            sessionOnly: true,
+            sessionCookies
+        }, customRelayUrl);
 
-        const isLocal = relayUrl.startsWith("http://localhost") || relayUrl.startsWith("http://127.0.0.1") || relayUrl.startsWith("/api/sync");
-        const isHttps = relayUrl.startsWith("https://");
-        if (!isLocal && !isHttps) {
-            throw new Error("Security Error: Relay endpoint must use encrypted HTTPS to protect session tokens.");
-        }
-
-        const response = await fetch(relayUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                username,
-                sessionOnly: true,
-                sessionCookies
-            })
-        });
-
-        const data = await response.json().catch(() => ({ success: false, error: `Relay responded with status ${response.status}` }));
-        if (!response.ok || !data.success || !data.html) {
-            const err = new Error((data && data.error && data.error.trim()) ? data.error.trim() : "Session refresh failed.");
-            err.sessionExpired = Boolean(data && data.sessionExpired);
+        if (!data.success || !data.html) {
+            const err = new Error(data.error || "Session refresh failed.");
+            err.sessionExpired = Boolean(data.sessionExpired);
             throw err;
         }
 
