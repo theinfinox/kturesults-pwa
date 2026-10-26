@@ -1063,3 +1063,277 @@ window.generateSmartAcademicFilename = function(prefix, extension, metrics, stud
     const ext = extension ? String(extension).replace(/^\./, "") : "pdf";
     return `${parts.join("_")}.${ext}`;
 };
+
+
+// =============================================================
+// KTU Activity Points Engine & 5 Official University Categories
+// =============================================================
+window.KTU_ACTIVITY_CATEGORIES = {
+    national_initiatives: {
+        id: "national_initiatives",
+        name: "National Initiatives (NSS / NCC / UBA)",
+        shortName: "NSS & NCC",
+        icon: "🇮🇳",
+        maxCap: 60,
+        description: "NSS, NCC, Unnat Bharat Abhiyan, Blood donation drives, Disaster relief"
+    },
+    sports_cultural: {
+        id: "sports_cultural",
+        name: "Sports, Games & Cultural Activities",
+        shortName: "Sports & Culturals",
+        icon: "🎭",
+        maxCap: 40,
+        description: "Inter-college, zonal, university, national sports or arts fest competitions"
+    },
+    professional_leadership: {
+        id: "professional_leadership",
+        name: "Professional Bodies & Leadership",
+        shortName: "Leadership & Chapters",
+        icon: "👔",
+        maxCap: 40,
+        description: "IEEE, CSI, ISTE, ACM chapters, student senate, class representative, club chair"
+    },
+    innovation_hackathons: {
+        id: "innovation_hackathons",
+        name: "Innovation, Hackathons & Startups",
+        shortName: "Hackathons & IEDC",
+        icon: "💡",
+        maxCap: 50,
+        description: "IEDC activities, hackathon wins/participation, product patents, paper publications"
+    },
+    internships_moocs: {
+        id: "internships_moocs",
+        name: "Internships & Certified MOOCs",
+        shortName: "Internships & MOOCs",
+        icon: "💼",
+        maxCap: 50,
+        description: "Industrial training (≥ 20 days), NPTEL / Swayam / Coursera certs, technical workshops"
+    }
+};
+
+window.calculateActivityPointsSummary = function(entries, isLateralEntry) {
+    const targetPoints = isLateralEntry ? 75 : 100;
+    const categories = window.KTU_ACTIVITY_CATEGORIES || {};
+    const breakdown = {};
+
+    Object.keys(categories).forEach(catKey => {
+        breakdown[catKey] = {
+            id: catKey,
+            name: categories[catKey].name,
+            shortName: categories[catKey].shortName,
+            icon: categories[catKey].icon,
+            maxCap: categories[catKey].maxCap,
+            description: categories[catKey].description,
+            rawPoints: 0,
+            claimablePoints: 0,
+            excessPoints: 0,
+            entriesCount: 0
+        };
+    });
+
+    if (Array.isArray(entries)) {
+        entries.forEach(entry => {
+            if (!entry) return;
+            const catKey = entry.category;
+            const pts = parseFloat(entry.points) || 0;
+            if (catKey && breakdown[catKey] && pts > 0) {
+                breakdown[catKey].rawPoints += pts;
+                breakdown[catKey].entriesCount += 1;
+            }
+        });
+    }
+
+    let totalRawPoints = 0;
+    let totalClaimablePoints = 0;
+
+    Object.keys(breakdown).forEach(catKey => {
+        const item = breakdown[catKey];
+        item.claimablePoints = Math.min(item.rawPoints, item.maxCap);
+        item.excessPoints = Math.max(0, item.rawPoints - item.maxCap);
+        totalRawPoints += item.rawPoints;
+        totalClaimablePoints += item.claimablePoints;
+    });
+
+    const effectivePoints = Math.min(totalClaimablePoints, targetPoints);
+    const remainingPoints = Math.max(0, targetPoints - effectivePoints);
+    const progressPercent = targetPoints > 0 ? Math.min(100, Math.round((effectivePoints / targetPoints) * 100)) : 100;
+
+    return {
+        targetPoints,
+        isLateralEntry: !!isLateralEntry,
+        totalRawPoints,
+        totalClaimablePoints,
+        effectivePoints,
+        remainingPoints,
+        progressPercent,
+        isCompleted: effectivePoints >= targetPoints,
+        breakdown
+    };
+};
+
+// =============================================================
+// KTU Honors & Minors Eligibility Validator
+// =============================================================
+window.validateHonorsMinorsEligibility = function(metrics, studentInfo) {
+    if (!metrics) {
+        return {
+            honors: {
+                eligible: false,
+                status: "ineligible",
+                currentCGPA: 0,
+                minCGPA: 8.50,
+                cgpaMet: false,
+                backlogsMet: false,
+                extraCredits: 20,
+                summary: "No academic data available.",
+                checklist: []
+            },
+            minors: {
+                eligible: false,
+                status: "ineligible",
+                currentCGPA: 0,
+                minCGPA: 7.00,
+                cgpaMet: false,
+                backlogsMet: false,
+                extraCredits: 20,
+                enrolledBranch: null,
+                summary: "No academic data available.",
+                checklist: []
+            }
+        };
+    }
+
+    const cgpaVal = parseFloat(metrics.currentCGPA) || 0;
+    const totalBacklogs = parseInt(metrics.totalBacklogs, 10) || 0;
+    const hasBacklogs = metrics.hasBacklogs || totalBacklogs > 0;
+
+    // Check if there was any historical backlog across all completed courses
+    let hadPastBacklogs = hasBacklogs;
+    if (Array.isArray(metrics.semesters)) {
+        for (const sem of metrics.semesters) {
+            if (sem.backlogs > 0) {
+                hadPastBacklogs = true;
+                break;
+            }
+        }
+    }
+
+    // Honors Assessment:
+    // Prerequisite: CGPA >= 8.50 AND zero backlog history (all courses in first attempt)
+    const honorsCgpaMet = cgpaVal >= 8.50;
+    const honorsBacklogsMet = !hadPastBacklogs;
+    const honorsEligible = honorsCgpaMet && honorsBacklogsMet;
+
+    let honorsStatus = "ineligible";
+    let honorsSummary = "";
+
+    if (honorsEligible) {
+        honorsStatus = "eligible";
+        honorsSummary = "Eligible for B.Tech (Honors). Current CGPA (" + cgpaVal.toFixed(2) + ") meets the ≥ 8.50 threshold with zero backlogs. Student must complete 20 additional stream credits to graduate with Honors.";
+    } else if (honorsBacklogsMet && cgpaVal >= 8.00) {
+        honorsStatus = "at_risk";
+        honorsSummary = "At Risk: Zero backlogs, but current CGPA (" + cgpaVal.toFixed(2) + ") is slightly below the 8.50 threshold. An increase of " + (8.50 - cgpaVal).toFixed(2) + " CGPA points is required to attain Honors eligibility.";
+    } else if (!honorsBacklogsMet && honorsCgpaMet) {
+        honorsStatus = "ineligible";
+        honorsSummary = "Ineligible: CGPA (" + cgpaVal.toFixed(2) + ") meets ≥ 8.50, but KTU Honors regulation strictly requires passing all courses in the first attempt with zero backlog history.";
+    } else {
+        honorsStatus = "ineligible";
+        honorsSummary = "Ineligible: Current CGPA (" + cgpaVal.toFixed(2) + ") is below the required 8.50 threshold" + (hadPastBacklogs ? " and backlogs exist" : "") + ".";
+    }
+
+    const honorsChecklist = [
+        {
+            label: "Cumulative CGPA ≥ 8.50",
+            met: honorsCgpaMet,
+            current: cgpaVal.toFixed(2),
+            target: "≥ 8.50",
+            details: honorsCgpaMet ? "CGPA threshold satisfied" : "Deficit: " + (8.50 - cgpaVal).toFixed(2) + " pts"
+        },
+        {
+            label: "Zero Backlog Invariant (First Attempt Pass)",
+            met: honorsBacklogsMet,
+            current: hadPastBacklogs ? totalBacklogs + " Backlog(s)" : "0 Backlogs (Clean)",
+            target: "0 Backlogs",
+            details: honorsBacklogsMet ? "First attempt pass rule satisfied" : "Strict KTU regulation: 0 backlogs permitted"
+        },
+        {
+            label: "20 Additional Stream Credits",
+            met: null,
+            current: "Curriculum Requirement",
+            target: "+20 Credits (S5–S8)",
+            details: "Earned via 4 discipline honors theory courses + 1 mini-project"
+        }
+    ];
+
+    // Minors Assessment:
+    // Prerequisite: CGPA >= 7.00 AND no active backlogs
+    const minorsCgpaMet = cgpaVal >= 7.00;
+    const minorsBacklogsMet = !hasBacklogs;
+    const minorsEligible = minorsCgpaMet && minorsBacklogsMet;
+
+    const minorBranch = (studentInfo && (studentInfo.minorBranch || studentInfo.minorDept)) || null;
+
+    let minorsStatus = "ineligible";
+    let minorsSummary = "";
+
+    if (minorsEligible) {
+        minorsStatus = "eligible";
+        minorsSummary = "Eligible for B.Tech (Minor in Engineering). Current CGPA (" + cgpaVal.toFixed(2) + ") meets the ≥ 7.00 threshold with no active backlogs. Student must complete 20 additional inter-discipline credits.";
+    } else if (minorsCgpaMet && !minorsBacklogsMet) {
+        minorsStatus = "ineligible";
+        minorsSummary = "Ineligible: CGPA meets ≥ 7.00, but active backlogs (" + totalBacklogs + ") must be cleared before registering for or graduating with a Minor.";
+    } else {
+        minorsStatus = "ineligible";
+        minorsSummary = "Ineligible: Current CGPA (" + cgpaVal.toFixed(2) + ") is below the required 7.00 registration threshold.";
+    }
+
+    const minorsChecklist = [
+        {
+            label: "Cumulative CGPA ≥ 7.00",
+            met: minorsCgpaMet,
+            current: cgpaVal.toFixed(2),
+            target: "≥ 7.00",
+            details: minorsCgpaMet ? "CGPA threshold satisfied" : "Deficit: " + (7.00 - cgpaVal).toFixed(2) + " pts"
+        },
+        {
+            label: "No Active Backlogs",
+            met: minorsBacklogsMet,
+            current: hasBacklogs ? totalBacklogs + " Active Backlog(s)" : "All Cleared",
+            target: "0 Active Backlogs",
+            details: minorsBacklogsMet ? "All active courses cleared" : "Clear active backlogs to restore eligibility"
+        },
+        {
+            label: "20 Additional Inter-Discipline Credits",
+            met: null,
+            current: minorBranch ? "Enrolled: " + minorBranch : "Optional Enrollment",
+            target: "+20 Credits (S3–S8)",
+            details: "Earned from an approved secondary engineering discipline"
+        }
+    ];
+
+    return {
+        honors: {
+            eligible: honorsEligible,
+            status: honorsStatus,
+            currentCGPA: cgpaVal,
+            minCGPA: 8.50,
+            cgpaMet: honorsCgpaMet,
+            backlogsMet: honorsBacklogsMet,
+            extraCredits: 20,
+            summary: honorsSummary,
+            checklist: honorsChecklist
+        },
+        minors: {
+            eligible: minorsEligible,
+            status: minorsStatus,
+            currentCGPA: cgpaVal,
+            minCGPA: 7.00,
+            cgpaMet: minorsCgpaMet,
+            backlogsMet: minorsBacklogsMet,
+            extraCredits: 20,
+            enrolledBranch: minorBranch,
+            summary: minorsSummary,
+            checklist: minorsChecklist
+        }
+    };
+};

@@ -12,6 +12,8 @@
     const SESSION_KEY_DISCLAIMER_IGNORED = "ktu_disclaimer_ignored_session";
     const STORAGE_KEY_DATA_PREFIX = "ktu_pwa_data_";
     const STORAGE_KEY_CURRICULUM_PREFIX = "ktu_pwa_curriculum_";
+    const STORAGE_KEY_ACTIVITY_PREFIX = "ktu_pwa_activity_";
+    const STORAGE_KEY_ACTIVITY_TARGET_PREFIX = "ktu_pwa_activity_target_";
     const STORAGE_KEY_CUSTOM_RELAY = "ktu_custom_relay";
 
     // --- In-Memory App State ---
@@ -22,6 +24,9 @@
     let currentLastScraped = null;
     let currentFutureCurriculum = null;
     let currentMetrics = null;
+    let currentActivities = [];
+    let currentActivityTargetOverride = null;
+    let currentHonorsTab = "honors";
 
     // --- DOM Elements ---
     const heroFastSyncBtn = document.getElementById("heroFastSyncBtn");
@@ -60,10 +65,32 @@
     // Modal Trigger Buttons
     const openProfileModalBtn = document.getElementById("openProfileModalBtn");
     const openForecastModalBtn = document.getElementById("openForecastModalBtn");
-    const openImportModalBtn = document.getElementById("openImportModalBtn");
+    const openHonorsModalBtn = document.getElementById("openHonorsModalBtn");
+    const openActivityModalBtn = document.getElementById("openActivityModalBtn");
     const emptyConfigureBtn = document.getElementById("emptyConfigureBtn");
     const emptyImportBtn = document.getElementById("emptyImportBtn");
     const changeForecastInlineBtn = document.getElementById("changeForecastInlineBtn");
+
+    // Honors & Minors Modal Elements
+    const honorsModal = document.getElementById("honorsModal");
+    const tabHonorsBtn = document.getElementById("tabHonorsBtn");
+    const tabMinorsBtn = document.getElementById("tabMinorsBtn");
+    const honorsContentContainer = document.getElementById("honorsContentContainer");
+
+    // Activity Tracker Modal Elements
+    const activityModal = document.getElementById("activityModal");
+    const targetRegularBtn = document.getElementById("targetRegularBtn");
+    const targetLateralBtn = document.getElementById("targetLateralBtn");
+    const activitySummaryCard = document.getElementById("activitySummaryCard");
+    const activityCategoryMeters = document.getElementById("activityCategoryMeters");
+    const addActivityForm = document.getElementById("addActivityForm");
+    const activityTitleInput = document.getElementById("activityTitleInput");
+    const activityCategorySelect = document.getElementById("activityCategorySelect");
+    const activityPointsInput = document.getElementById("activityPointsInput");
+    const activitySemesterSelect = document.getElementById("activitySemesterSelect");
+    const activityLogList = document.getElementById("activityLogList");
+    const activityLogCount = document.getElementById("activityLogCount");
+    const clearAllActivitiesBtn = document.getElementById("clearAllActivitiesBtn");
 
     // Modal Form Elements
     const profileSelectDropdown = document.getElementById("profileSelectDropdown");
@@ -192,12 +219,54 @@
         updateProfileDropdown();
     }
 
+    function loadActiveStudentActivities() {
+        if (!activeProfileId) {
+            currentActivities = [];
+            currentActivityTargetOverride = null;
+            return;
+        }
+        try {
+            const rawAct = localStorage.getItem(STORAGE_KEY_ACTIVITY_PREFIX + activeProfileId);
+            currentActivities = rawAct ? JSON.parse(rawAct) : [];
+            const targetOverride = localStorage.getItem(STORAGE_KEY_ACTIVITY_TARGET_PREFIX + activeProfileId);
+            currentActivityTargetOverride = targetOverride ? parseInt(targetOverride, 10) : null;
+        } catch (e) {
+            currentActivities = [];
+            currentActivityTargetOverride = null;
+        }
+    }
+
+    function saveActiveStudentActivities() {
+        if (!activeProfileId) return;
+        localStorage.setItem(STORAGE_KEY_ACTIVITY_PREFIX + activeProfileId, JSON.stringify(currentActivities));
+        if (currentActivityTargetOverride) {
+            localStorage.setItem(STORAGE_KEY_ACTIVITY_TARGET_PREFIX + activeProfileId, String(currentActivityTargetOverride));
+        } else {
+            localStorage.removeItem(STORAGE_KEY_ACTIVITY_TARGET_PREFIX + activeProfileId);
+        }
+    }
+
+    function getIsLateralEntry() {
+        if (currentActivityTargetOverride === 75) return true;
+        if (currentActivityTargetOverride === 100) return false;
+        if (currentStudentInfo && currentStudentInfo.registerNo) {
+            const reg = String(currentStudentInfo.registerNo).trim().toUpperCase();
+            if (reg.startsWith("L")) return true;
+        }
+        if (currentFutureCurriculum && String(currentFutureCurriculum.preset || "").toUpperCase().includes("LATERAL")) {
+            return true;
+        }
+        return false;
+    }
+
     function loadActiveStudentData() {
         if (!activeProfileId) {
             currentSemesterData = null;
             currentStudentInfo = null;
             currentLastScraped = null;
             currentFutureCurriculum = null;
+            currentActivities = [];
+            currentActivityTargetOverride = null;
             return;
         }
 
@@ -216,11 +285,14 @@
 
             const rawCurr = localStorage.getItem(STORAGE_KEY_CURRICULUM_PREFIX + activeProfileId);
             currentFutureCurriculum = rawCurr ? JSON.parse(rawCurr) : null;
+            loadActiveStudentActivities();
         } catch (e) {
             currentSemesterData = null;
             currentStudentInfo = null;
             currentLastScraped = null;
             currentFutureCurriculum = null;
+            currentActivities = [];
+            currentActivityTargetOverride = null;
         }
     }
 
@@ -750,6 +822,48 @@
             </div>
         `;
 
+        // Honors & Minors and Activity Points Cards
+        const evalHM = window.validateHonorsMinorsEligibility ? window.validateHonorsMinorsEligibility(metrics, currentStudentInfo) : null;
+        const isLateral = getIsLateralEntry();
+        const actSum = window.calculateActivityPointsSummary ? window.calculateActivityPointsSummary(currentActivities, isLateral) : null;
+
+        const hmHonorsEligible = evalHM && evalHM.honors && evalHM.honors.eligible;
+        const hmHonorsAtRisk = evalHM && evalHM.honors && evalHM.honors.status === "at_risk";
+        const hmMinorsEligible = evalHM && evalHM.minors && evalHM.minors.eligible;
+        const actCompleted = actSum && actSum.isCompleted;
+
+        html += `
+            <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); margin-top: 10px; margin-bottom: 12px;">
+                <div class="stat-card ${hmHonorsEligible ? 'accent-success' : (hmHonorsAtRisk ? 'accent-warning' : '')}" id="honorsCardBtn" style="cursor: pointer; text-align: left; padding: 14px;" title="View detailed Honors & Minors eligibility breakdown">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary);">🎖️ Honors & Minors</span>
+                        <span class="pill-badge" style="font-size: 10px; ${hmHonorsEligible ? 'background:#DCFCE7; color:#166534;' : (hmHonorsAtRisk ? 'background:#FEF3C7; color:#92400E;' : 'background:#FEE2E2; color:#991B1B;')}">
+                            ${hmHonorsEligible ? 'Honors Eligible' : (hmHonorsAtRisk ? 'At Risk' : 'Honors Ineligible')}
+                        </span>
+                    </div>
+                    <div class="value" style="font-size: 16px; font-weight: 700; margin-bottom: 2px;">
+                        ${hmHonorsEligible ? '✅ Eligible (≥ 8.50)' : (hmHonorsAtRisk ? '⚠️ At Risk (' + metrics.currentCGPA + ')' : '❌ Ineligible')}
+                    </div>
+                    <div class="label" style="font-size: 11px;">
+                        Minors: ${hmMinorsEligible ? 'Eligible (≥ 7.0)' : 'Ineligible'} • Tap for breakdown
+                    </div>
+                </div>
+
+                <div class="stat-card ${actCompleted ? 'accent-success' : ''}" id="activityCardBtn" style="cursor: pointer; text-align: left; padding: 14px;" title="View and track KTU Activity Points">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary);">🏅 Activity Points</span>
+                        <span class="pill-badge" style="font-size: 10px; ${actCompleted ? 'background:#DCFCE7; color:#166534;' : 'background:#EFF6FF; color:#1D4ED8;'}">
+                            ${actCompleted ? 'Completed' : (actSum ? actSum.remainingPoints + ' pts needed' : '0 Pts')}
+                        </span>
+                    </div>
+                    <div class="value" style="font-size: 16px; font-weight: 700; margin-bottom: 2px;">
+                        ${actSum ? actSum.effectivePoints : 0} / ${actSum ? actSum.targetPoints : 100} <span style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">(${actSum ? actSum.progressPercent : 0}%)</span>
+                    </div>
+                    <div class="stat-progress-bar" style="margin-top: 6px;"><div class="stat-progress-fill" style="width: ${actSum ? actSum.progressPercent : 0}%;"></div></div>
+                </div>
+            </div>
+        `;
+
         // Level 2 Forecast Projections
         if (metrics.level === 2 && gf) {
             html += `
@@ -875,6 +989,256 @@
                     });
                 }
             });
+        }
+
+        // Bind Honors & Activity Card Modals
+        const honorsCard = document.getElementById("honorsCardBtn");
+        if (honorsCard) {
+            honorsCard.addEventListener("click", () => openHonorsModal("honors"));
+        }
+        const activityCard = document.getElementById("activityCardBtn");
+        if (activityCard) {
+            activityCard.addEventListener("click", () => openActivityModal());
+        }
+    }
+
+    // --- Helper: HTML Sanitizer ---
+    function escapeHtml(str) {
+        if (!str) return "";
+        return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // --- 7b. KTU Honors & Minors Modal Renderer ---
+    function openHonorsModal(tab = "honors") {
+        currentHonorsTab = tab;
+        renderHonorsModal();
+        openModal(honorsModal);
+    }
+
+    function renderHonorsModal() {
+        if (!honorsContentContainer) return;
+        if (tabHonorsBtn) tabHonorsBtn.classList.toggle("active", currentHonorsTab === "honors");
+        if (tabMinorsBtn) tabMinorsBtn.classList.toggle("active", currentHonorsTab === "minors");
+
+        const evaluation = window.validateHonorsMinorsEligibility
+            ? window.validateHonorsMinorsEligibility(currentMetrics, currentStudentInfo)
+            : null;
+
+        if (!evaluation || !currentMetrics) {
+            honorsContentContainer.innerHTML = `
+                <div class="empty-state" style="padding: 24px 12px;">
+                    <div class="empty-icon">🎖️</div>
+                    <div class="empty-title">No Academic Records</div>
+                    <div class="empty-desc">Sync or import your KTU grades to evaluate Honors & Minors eligibility.</div>
+                </div>
+            `;
+            return;
+        }
+
+        if (currentHonorsTab === "honors") {
+            const h = evaluation.honors;
+            const badgeClass = h.eligible ? "badge-success" : (h.status === "at_risk" ? "badge-warning" : "badge-danger");
+            const badgeLabel = h.eligible ? "ELIGIBLE FOR HONORS" : (h.status === "at_risk" ? "AT RISK (NEEDS BOOST)" : "INELIGIBLE FOR HONORS");
+
+            let checklistHtml = "";
+            h.checklist.forEach(item => {
+                const isMet = item.met === true;
+                const isInfo = item.met === null;
+                const icon = isMet ? "✅" : (isInfo ? "ℹ️" : "❌");
+                const pillColor = isMet ? "#059669" : (isInfo ? "#2563EB" : "#DC2626");
+                checklistHtml += `
+                    <div class="honors-checklist-item">
+                        <div class="honors-item-header">
+                            <span class="honors-item-icon">${icon}</span>
+                            <span class="honors-item-title">${item.label}</span>
+                            <span class="honors-item-status" style="color: ${pillColor};">${item.current}</span>
+                        </div>
+                        <div class="honors-item-details">${item.details} (Requirement: ${item.target})</div>
+                    </div>
+                `;
+            });
+
+            honorsContentContainer.innerHTML = `
+                <div class="honors-status-banner ${badgeClass}">
+                    <div class="honors-status-title">
+                        <span>🏆</span> ${badgeLabel}
+                    </div>
+                    <div class="honors-status-desc">${h.summary}</div>
+                </div>
+
+                <div class="honors-checklist-container">
+                    <div class="honors-checklist-title">📋 KTU Regulation Criteria Checklist:</div>
+                    ${checklistHtml}
+                </div>
+
+                <div class="honors-regulation-note">
+                    <strong>📜 Official KTU Regulation Note (B.Tech 2019/2024 Ordinance):</strong>
+                    Students who have earned a minimum CGPA of <strong>8.50</strong> and have cleared all courses in the <strong>first appearance</strong> (zero history of backlogs) are eligible to earn a B.Tech with Honors by completing <strong>20 additional credits</strong> (4 theory courses + 1 mini-project).
+                </div>
+            `;
+        } else {
+            const m = evaluation.minors;
+            const badgeClass = m.eligible ? "badge-success" : "badge-danger";
+            const badgeLabel = m.eligible ? "ELIGIBLE FOR MINOR" : "INELIGIBLE FOR MINOR";
+
+            let checklistHtml = "";
+            m.checklist.forEach(item => {
+                const isMet = item.met === true;
+                const isInfo = item.met === null;
+                const icon = isMet ? "✅" : (isInfo ? "ℹ️" : "❌");
+                const pillColor = isMet ? "#059669" : (isInfo ? "#2563EB" : "#DC2626");
+                checklistHtml += `
+                    <div class="honors-checklist-item">
+                        <div class="honors-item-header">
+                            <span class="honors-item-icon">${icon}</span>
+                            <span class="honors-item-title">${item.label}</span>
+                            <span class="honors-item-status" style="color: ${pillColor};">${item.current}</span>
+                        </div>
+                        <div class="honors-item-details">${item.details} (Requirement: ${item.target})</div>
+                    </div>
+                `;
+            });
+
+            honorsContentContainer.innerHTML = `
+                <div class="honors-status-banner ${badgeClass}">
+                    <div class="honors-status-title">
+                        <span>🎓</span> ${badgeLabel}
+                    </div>
+                    <div class="honors-status-desc">${m.summary}</div>
+                </div>
+
+                <div class="honors-checklist-container">
+                    <div class="honors-checklist-title">📋 KTU Regulation Criteria Checklist:</div>
+                    ${checklistHtml}
+                </div>
+
+                <div class="honors-regulation-note">
+                    <strong>📜 Official KTU Regulation Note (Minor in Engineering):</strong>
+                    Students with a CGPA of <strong>≥ 7.00</strong> and no active backlogs at S2 completion may opt for an inter-discipline Minor. Completion requires <strong>20 additional credits</strong> outside the parent branch.
+                </div>
+            `;
+        }
+    }
+
+    // --- 7c. KTU Mandatory Activity Points Modal Renderer ---
+    function openActivityModal() {
+        renderActivityModal();
+        openModal(activityModal);
+    }
+
+    function renderActivityModal() {
+        const isLateral = getIsLateralEntry();
+        if (targetRegularBtn) targetRegularBtn.classList.toggle("active", !isLateral);
+        if (targetLateralBtn) targetLateralBtn.classList.toggle("active", isLateral);
+
+        const summary = window.calculateActivityPointsSummary
+            ? window.calculateActivityPointsSummary(currentActivities, isLateral)
+            : { targetPoints: 100, effectivePoints: 0, remainingPoints: 100, progressPercent: 0, isCompleted: false, breakdown: {} };
+
+        // 1. Summary Banner
+        if (activitySummaryCard) {
+            const isCompleted = summary.isCompleted;
+            activitySummaryCard.className = `activity-summary-banner ${isCompleted ? 'completed' : ''}`;
+            activitySummaryCard.innerHTML = `
+                <div class="activity-summary-top">
+                    <div>
+                        <div class="activity-points-big">
+                            ${summary.effectivePoints} <span class="activity-points-target">/ ${summary.targetPoints} Pts</span>
+                        </div>
+                        <div class="activity-status-text">
+                            ${isCompleted ? '🎉 KTU Mandatory Activity Requirement Satisfied!' : '⏳ ' + summary.remainingPoints + ' points remaining to meet degree requirement'}
+                        </div>
+                    </div>
+                    <div class="activity-percentage-pill ${isCompleted ? 'success' : ''}">
+                        ${summary.progressPercent}%
+                    </div>
+                </div>
+                <div class="stat-progress-bar" style="margin-top: 10px; height: 8px;">
+                    <div class="stat-progress-fill" style="width: ${summary.progressPercent}%;"></div>
+                </div>
+                ${summary.totalRawPoints > summary.totalClaimablePoints ? `
+                    <div class="activity-cap-notice">
+                        ℹ️ Total logged: <strong>${summary.totalRawPoints} pts</strong> (${summary.totalRawPoints - summary.totalClaimablePoints} pts capped out due to university category limits).
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        // 2. Category Breakdown Meters
+        if (activityCategoryMeters) {
+            const categories = window.KTU_ACTIVITY_CATEGORIES || {};
+            let metersHtml = "";
+            Object.keys(categories).forEach(catKey => {
+                const b = summary.breakdown[catKey] || { rawPoints: 0, claimablePoints: 0, maxCap: categories[catKey].maxCap, name: categories[catKey].name, icon: categories[catKey].icon };
+                const pct = Math.min(100, Math.round((b.claimablePoints / b.maxCap) * 100));
+                const isCapped = b.rawPoints >= b.maxCap;
+                metersHtml += `
+                    <div class="activity-category-item">
+                        <div class="activity-category-header">
+                            <span class="activity-cat-name">${b.icon} ${b.name}</span>
+                            <span class="activity-cat-points ${isCapped ? 'capped' : ''}">${b.claimablePoints} / ${b.maxCap} pts</span>
+                        </div>
+                        <div class="stat-progress-bar" style="height: 6px; margin: 5px 0;">
+                            <div class="stat-progress-fill ${isCapped ? 'fill-capped' : ''}" style="width: ${pct}%;"></div>
+                        </div>
+                        <div class="activity-cat-footer">
+                            <span>${b.entriesCount || 0} logged ${b.excessPoints > 0 ? '(' + b.excessPoints + ' pts over cap)' : ''}</span>
+                            <span>Cap: ${b.maxCap} pts</span>
+                        </div>
+                    </div>
+                `;
+            });
+            activityCategoryMeters.innerHTML = metersHtml;
+        }
+
+        // 3. Activity Entries Log List
+        if (activityLogCount) activityLogCount.textContent = currentActivities.length;
+        if (activityLogList) {
+            if (currentActivities.length === 0) {
+                activityLogList.innerHTML = `
+                    <div class="empty-state" style="padding: 20px 10px;">
+                        <div class="empty-icon" style="font-size: 28px;">🏅</div>
+                        <div class="empty-title" style="font-size: 13.5px;">No Activity Points Logged Yet</div>
+                        <div class="empty-desc" style="font-size: 11.5px;">Add your NSS, sports, tech fests, leadership, MOOC, or internship certificates above.</div>
+                    </div>
+                `;
+            } else {
+                let listHtml = "";
+                currentActivities.forEach(entry => {
+                    const catDef = (window.KTU_ACTIVITY_CATEGORIES && window.KTU_ACTIVITY_CATEGORIES[entry.category]) || { icon: "🏅", shortName: "Activity" };
+                    listHtml += `
+                        <div class="activity-entry-card" data-entry-id="${entry.id}">
+                            <div class="activity-entry-icon">${catDef.icon}</div>
+                            <div class="activity-entry-info">
+                                <div class="activity-entry-title">${escapeHtml(entry.title)}</div>
+                                <div class="activity-entry-meta">
+                                    <span class="pill-badge" style="font-size: 10px; padding: 1px 6px;">${catDef.shortName}</span>
+                                    <span class="pill-badge" style="font-size: 10px; padding: 1px 6px;">${entry.semester || 'All'}</span>
+                                </div>
+                            </div>
+                            <div class="activity-entry-points">+${entry.points} pts</div>
+                            <button class="activity-entry-del-btn" data-delete-activity="${entry.id}" title="Remove entry">&times;</button>
+                        </div>
+                    `;
+                });
+                activityLogList.innerHTML = listHtml;
+
+                // Bind delete buttons
+                activityLogList.querySelectorAll("[data-delete-activity]").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        const id = btn.getAttribute("data-delete-activity");
+                        currentActivities = currentActivities.filter(a => a.id !== id);
+                        saveActiveStudentActivities();
+                        renderActivityModal();
+                        if (currentMetrics) renderStats(currentMetrics);
+                    });
+                });
+            }
         }
     }
 
@@ -1074,9 +1438,97 @@
         if (openProfileModalBtn) openProfileModalBtn.addEventListener("click", () => openModal(profileModal));
         if (emptyConfigureBtn) emptyConfigureBtn.addEventListener("click", () => openModal(profileModal));
         if (openForecastModalBtn) openForecastModalBtn.addEventListener("click", openForecastModal);
+        if (openHonorsModalBtn) openHonorsModalBtn.addEventListener("click", () => openHonorsModal("honors"));
+        if (openActivityModalBtn) openActivityModalBtn.addEventListener("click", () => openActivityModal());
         if (changeForecastInlineBtn) changeForecastInlineBtn.addEventListener("click", openForecastModal);
         if (openImportModalBtn) openImportModalBtn.addEventListener("click", () => openModal(importModal));
         if (emptyImportBtn) emptyImportBtn.addEventListener("click", () => openModal(importModal));
+
+        // Honors & Minors Tab Switching
+        if (tabHonorsBtn) {
+            tabHonorsBtn.addEventListener("click", () => {
+                currentHonorsTab = "honors";
+                renderHonorsModal();
+            });
+        }
+        if (tabMinorsBtn) {
+            tabMinorsBtn.addEventListener("click", () => {
+                currentHonorsTab = "minors";
+                renderHonorsModal();
+            });
+        }
+
+        // Activity Points Targets (Regular 100 vs Lateral 75)
+        if (targetRegularBtn) {
+            targetRegularBtn.addEventListener("click", () => {
+                currentActivityTargetOverride = 100;
+                saveActiveStudentActivities();
+                renderActivityModal();
+                if (currentMetrics) renderStats(currentMetrics);
+            });
+        }
+        if (targetLateralBtn) {
+            targetLateralBtn.addEventListener("click", () => {
+                currentActivityTargetOverride = 75;
+                saveActiveStudentActivities();
+                renderActivityModal();
+                if (currentMetrics) renderStats(currentMetrics);
+            });
+        }
+
+        // Add Activity Form Submit
+        if (addActivityForm) {
+            addActivityForm.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const title = (activityTitleInput?.value || "").trim();
+                const category = activityCategorySelect?.value;
+                const pts = parseFloat(activityPointsInput?.value);
+                const semester = activitySemesterSelect?.value || "All";
+
+                if (!title) {
+                    alert("Please enter an activity title.");
+                    return;
+                }
+                if (!category) {
+                    alert("Please select an activity category.");
+                    return;
+                }
+                if (isNaN(pts) || pts <= 0) {
+                    alert("Please enter valid activity points (1–100).");
+                    return;
+                }
+
+                const newEntry = {
+                    id: "act_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
+                    title,
+                    category,
+                    points: pts,
+                    semester,
+                    createdAt: new Date().toISOString()
+                };
+
+                currentActivities.unshift(newEntry);
+                saveActiveStudentActivities();
+
+                if (activityTitleInput) activityTitleInput.value = "";
+                if (activityPointsInput) activityPointsInput.value = "";
+                renderActivityModal();
+                if (currentMetrics) renderStats(currentMetrics);
+            });
+        }
+
+        // Clear All Activities
+        if (clearAllActivitiesBtn) {
+            clearAllActivitiesBtn.addEventListener("click", () => {
+                if (currentActivities.length === 0) return;
+                const conf = confirm("Clear all logged activity points for this student?");
+                if (!conf) return;
+                currentActivities = [];
+                saveActiveStudentActivities();
+                renderActivityModal();
+                if (currentMetrics) renderStats(currentMetrics);
+            });
+        }
 
         // Close on backdrop or close button
         document.querySelectorAll("[data-close]").forEach(btn => {
@@ -1204,6 +1656,8 @@
                 delete savedProfiles[deletedId];
                 localStorage.removeItem(STORAGE_KEY_DATA_PREFIX + deletedId);
                 localStorage.removeItem(STORAGE_KEY_CURRICULUM_PREFIX + deletedId);
+                localStorage.removeItem(STORAGE_KEY_ACTIVITY_PREFIX + deletedId);
+                localStorage.removeItem(STORAGE_KEY_ACTIVITY_TARGET_PREFIX + deletedId);
 
                 const keys = Object.keys(savedProfiles);
                 activeProfileId = keys.length > 0 ? keys[0] : null;
@@ -1303,6 +1757,11 @@
                         activeProfileId = reg;
                         saveProfilesToStorage();
                         saveActiveStudentData(sData, sInfo, parsed.lastScraped || new Date().toISOString());
+                        if (Array.isArray(parsed.activityPoints) || Array.isArray(parsed.activities)) {
+                            const actList = parsed.activityPoints || parsed.activities;
+                            localStorage.setItem(STORAGE_KEY_ACTIVITY_PREFIX + reg, JSON.stringify(actList));
+                            currentActivities = actList;
+                        }
                         closeModal(importModal);
                         renderApp();
                         alert(`✅ Successfully imported ${sData.length} courses!`);

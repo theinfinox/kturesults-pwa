@@ -153,8 +153,8 @@ async function testCrypto() {
 // -----------------------------------------------------------------
 console.log("\n[Test 5] Testing PWA Web Manifest & Dynamic Versioning...");
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.webmanifest"), "utf8"));
-assert(manifest.version === "1.2.8" || manifest.version === "1.2.7" || manifest.version === "1.2.6" || manifest.version === "1.2.5" || manifest.version === "1.2.4" || manifest.version === "1.2.3" || manifest.version === "1.2.2" || manifest.version === "1.2.1" || manifest.version === "1.2" || manifest.version === "1.1" || manifest.version === "1.0.0", "Manifest version mismatch");
-assert(manifest.version_code === 11 || manifest.version_code === 10 || manifest.version_code === 9 || manifest.version_code === 8 || manifest.version_code === 7 || manifest.version_code === 6 || manifest.version_code === 5 || manifest.version_code === 4 || manifest.version_code === 3 || manifest.version_code === 2 || manifest.version_code === 1, "Manifest version code mismatch");
+assert(manifest.version === "1.2.9" || manifest.version === "1.2.8" || manifest.version === "1.2.7" || manifest.version === "1.2.6" || manifest.version === "1.2.5" || manifest.version === "1.2.4" || manifest.version === "1.2.3" || manifest.version === "1.2.2" || manifest.version === "1.2.1" || manifest.version === "1.2" || manifest.version === "1.1" || manifest.version === "1.0.0", "Manifest version mismatch");
+assert(manifest.version_code === 12 || manifest.version_code === 11 || manifest.version_code === 10 || manifest.version_code === 9 || manifest.version_code === 8 || manifest.version_code === 7 || manifest.version_code === 6 || manifest.version_code === 5 || manifest.version_code === 4 || manifest.version_code === 3 || manifest.version_code === 2 || manifest.version_code === 1, "Manifest version code mismatch");
 assert.strictEqual(manifest.display, "standalone");
 
 const indexHtml = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
@@ -314,6 +314,107 @@ assert(appCss.includes("#FEE2E2"), "Must include Tone 2 (#FEE2E2)");
 assert(appCss.includes("border-left: 3px solid #EF4444"), "Must include 3px crimson left accent border");
 assert(appJsCode.includes('row.classList.add("is-failed")'), "app.js must tag failed rows with is-failed");
 console.log("  ✅ Arrear red checkerboard alternating styles and left accent validated.");
+
+// -----------------------------------------------------------------
+// Test 11: KTU Honors & Minors Eligibility Validator
+// -----------------------------------------------------------------
+console.log("\n[Test 11] Testing KTU Honors & Minors Eligibility Validator...");
+const { validateHonorsMinorsEligibility } = constantsScope;
+assert(typeof validateHonorsMinorsEligibility === "function", "validateHonorsMinorsEligibility must be a function");
+
+// Scenario 1: Clean high performer (CGPA 8.75, 0 backlogs) -> Eligible for Honors & Minors
+const hm1 = validateHonorsMinorsEligibility({
+    currentCGPA: "8.75",
+    totalBacklogs: 0,
+    hasBacklogs: false,
+    semesters: [{ semester: "S1", backlogs: 0 }, { semester: "S2", backlogs: 0 }]
+}, { branch: "Computer Science", registerNo: "TVE21CS042" });
+assert.strictEqual(hm1.honors.eligible, true, "CGPA 8.75 with 0 backlogs must be eligible for Honors");
+assert.strictEqual(hm1.honors.status, "eligible");
+assert.strictEqual(hm1.honors.cgpaMet, true);
+assert.strictEqual(hm1.honors.backlogsMet, true);
+assert.strictEqual(hm1.minors.eligible, true, "CGPA 8.75 with 0 backlogs must be eligible for Minors");
+
+// Scenario 2: High CGPA with backlogs (CGPA 8.80, 1 backlog) -> Disqualified from Honors & Minors
+const hm2 = validateHonorsMinorsEligibility({
+    currentCGPA: "8.80",
+    totalBacklogs: 1,
+    hasBacklogs: true,
+    semesters: [{ semester: "S1", backlogs: 1 }, { semester: "S2", backlogs: 0 }]
+});
+assert.strictEqual(hm2.honors.eligible, false, "Honors strictly requires zero backlogs in first attempt");
+assert.strictEqual(hm2.honors.backlogsMet, false);
+assert.strictEqual(hm2.honors.status, "ineligible");
+assert.strictEqual(hm2.minors.eligible, false, "Active backlogs disqualify from Minors");
+
+// Scenario 3: Clean student with CGPA 8.20 -> At risk for Honors, eligible for Minors
+const hm3 = validateHonorsMinorsEligibility({
+    currentCGPA: "8.20",
+    totalBacklogs: 0,
+    hasBacklogs: false,
+    semesters: [{ semester: "S1", backlogs: 0 }]
+});
+assert.strictEqual(hm3.honors.eligible, false, "CGPA 8.20 is below 8.50 Honors threshold");
+assert.strictEqual(hm3.honors.status, "at_risk", "CGPA between 8.00 and 8.49 with 0 backlogs is marked at_risk");
+assert.strictEqual(hm3.minors.eligible, true, "CGPA 8.20 >= 7.00 qualifies for Minors");
+
+// Scenario 4: Clean student with CGPA 6.80 -> Ineligible for both Honors and Minors
+const hm4 = validateHonorsMinorsEligibility({
+    currentCGPA: "6.80",
+    totalBacklogs: 0,
+    hasBacklogs: false
+});
+assert.strictEqual(hm4.honors.eligible, false);
+assert.strictEqual(hm4.minors.eligible, false, "CGPA 6.80 is below 7.00 Minors threshold");
+
+// Verify UI & DOM wiring
+assert(indexHtml.includes('id="openHonorsModalBtn"'), "index.html must include openHonorsModalBtn (🎖️)");
+assert(indexHtml.includes('id="honorsModal"'), "index.html must include honorsModal");
+assert(appJsCode.includes("openHonorsModal"), "app.js must define openHonorsModal");
+console.log("  ✅ KTU Honors (CGPA >= 8.50, 0 backlogs) & Minors (CGPA >= 7.00) validated.");
+
+// -----------------------------------------------------------------
+// Test 12: Mandatory 100 Activity Points Tracker & University Capping
+// -----------------------------------------------------------------
+console.log("\n[Test 12] Testing KTU Activity Points Tracker & Category Capping...");
+const { calculateActivityPointsSummary, KTU_ACTIVITY_CATEGORIES } = constantsScope;
+assert(typeof calculateActivityPointsSummary === "function", "calculateActivityPointsSummary must be a function");
+assert(KTU_ACTIVITY_CATEGORIES && typeof KTU_ACTIVITY_CATEGORIES === "object", "KTU_ACTIVITY_CATEGORIES must exist");
+assert.strictEqual(Object.keys(KTU_ACTIVITY_CATEGORIES).length, 5, "Must define 5 official KTU categories");
+assert.strictEqual(KTU_ACTIVITY_CATEGORIES.national_initiatives.maxCap, 60, "National initiatives cap must be 60 pts");
+assert.strictEqual(KTU_ACTIVITY_CATEGORIES.sports_cultural.maxCap, 40, "Sports & Culturals cap must be 40 pts");
+
+// Scenario 1: Category capping test (Regular 100 pts)
+// Student logs 80 pts in NSS (capped to 60) + 30 pts in sports (capped to 30) = 90 claimable pts
+const actLog1 = [
+    { category: "national_initiatives", points: 50 },
+    { category: "national_initiatives", points: 30 },
+    { category: "sports_cultural", points: 30 }
+];
+const actRes1 = calculateActivityPointsSummary(actLog1, false);
+assert.strictEqual(actRes1.targetPoints, 100, "Regular B.Tech target must be 100 pts");
+assert.strictEqual(actRes1.totalRawPoints, 110, "Total raw points should be 110");
+assert.strictEqual(actRes1.totalClaimablePoints, 90, "Claimable points must be capped at 60 (NSS) + 30 (Sports) = 90");
+assert.strictEqual(actRes1.effectivePoints, 90);
+assert.strictEqual(actRes1.remainingPoints, 10, "100 - 90 = 10 pts remaining");
+assert.strictEqual(actRes1.progressPercent, 90);
+assert.strictEqual(actRes1.isCompleted, false);
+
+// Scenario 2: Lateral Entry 75 pts target test
+// Same 90 claimable points easily exceeds 75 pts target
+const actRes2 = calculateActivityPointsSummary(actLog1, true);
+assert.strictEqual(actRes2.targetPoints, 75, "Lateral Entry target must be 75 pts");
+assert.strictEqual(actRes2.effectivePoints, 75, "Effective points capped at degree target (75)");
+assert.strictEqual(actRes2.remainingPoints, 0, "Requirement completed, 0 remaining");
+assert.strictEqual(actRes2.progressPercent, 100);
+assert.strictEqual(actRes2.isCompleted, true);
+
+// Verify UI & DOM wiring
+assert(indexHtml.includes('id="openActivityModalBtn"'), "index.html must include openActivityModalBtn (🏅)");
+assert(indexHtml.includes('id="activityModal"'), "index.html must include activityModal");
+assert(appJsCode.includes("openActivityModal"), "app.js must define openActivityModal");
+assert(appJsCode.includes("STORAGE_KEY_ACTIVITY_PREFIX"), "app.js must track activity storage key");
+console.log("  ✅ Activity points capping (60/40/40/50/50) and degree targets (100 / 75 pts) validated.");
 
 // Conclude
 testCrypto().then(() => {

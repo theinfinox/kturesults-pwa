@@ -1546,6 +1546,380 @@ body {
 }
 
 /* ========================================================== */
+/* KTU Honors & Minors Validator and Activity Tracker Styles  */
+/* ========================================================== */
+.honors-tabs-header {
+    display: flex;
+    background: var(--bg-body);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 4px;
+    gap: 4px;
+    margin-bottom: 14px;
+}
+
+.honors-tab-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.honors-tab-btn.active {
+    background: #FFFFFF;
+    color: var(--text-main);
+    box-shadow: var(--shadow-sm);
+}
+
+.honors-status-banner {
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    margin-bottom: 14px;
+}
+
+.honors-status-banner.badge-success {
+    background: #ECFDF5;
+    border: 1px solid #A7F3D0;
+    color: #065F46;
+}
+
+.honors-status-banner.badge-warning {
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    color: #92400E;
+}
+
+.honors-status-banner.badge-danger {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    color: #991B1B;
+}
+
+.honors-status-title {
+    font-size: 14.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.honors-status-desc {
+    font-size: 12.5px;
+    line-height: 1.5;
+    opacity: 0.95;
+}
+
+.honors-checklist-container {
+    background: #FFFFFF;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    margin-bottom: 12px;
+}
+
+.honors-checklist-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.honors-checklist-item {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.honors-checklist-item:last-child {
+    border-bottom: none;
+    padding-bottom: 2px;
+}
+
+.honors-item-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.honors-item-icon {
+    font-size: 14px;
+}
+
+.honors-item-title {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.honors-item-status {
+    margin-left: auto;
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.honors-item-details {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    margin-left: 24px;
+    margin-top: 2px;
+}
+
+.honors-regulation-note {
+    background: rgba(15, 23, 42, 0.03);
+    border-left: 3px solid #3B82F6;
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* Activity Modal Styles */
+.activity-target-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.activity-target-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.activity-target-group {
+    display: flex;
+    gap: 6px;
+}
+
+.activity-target-pill {
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border: 1px solid var(--border-light);
+    border-radius: 999px;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.activity-target-pill.active {
+    background: #0F172A;
+    color: #FFFFFF;
+    border-color: #0F172A;
+}
+
+.activity-summary-banner {
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+    border: 1px solid #BFDBFE;
+    margin-bottom: 12px;
+}
+
+.activity-summary-banner.completed {
+    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+    border-color: #A7F3D0;
+}
+
+.activity-summary-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.activity-points-big {
+    font-size: 26px;
+    font-weight: 800;
+    color: #1E3A8A;
+    line-height: 1.1;
+}
+
+.activity-summary-banner.completed .activity-points-big {
+    color: #065F46;
+}
+
+.activity-points-target {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.activity-status-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.activity-percentage-pill {
+    font-size: 14px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+.activity-percentage-pill.success {
+    background: #DCFCE7;
+    color: #166534;
+}
+
+.activity-cap-notice {
+    font-size: 11px;
+    color: #B45309;
+    margin-top: 8px;
+    line-height: 1.4;
+}
+
+.activity-section-heading {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-top: 14px;
+    margin-bottom: 8px;
+}
+
+.activity-categories-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.activity-category-item {
+    background: #F8FAFC;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+}
+
+.activity-category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.activity-cat-name {
+    color: var(--text-main);
+}
+
+.activity-cat-points {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.activity-cat-points.capped {
+    color: #D97706;
+    font-weight: 700;
+}
+
+.stat-progress-fill.fill-capped {
+    background: #D97706 !important;
+}
+
+.activity-cat-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.activity-form-container {
+    background: #FFFFFF;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 12px;
+}
+
+.activity-log-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.activity-entry-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #FFFFFF;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+}
+
+.activity-entry-icon {
+    font-size: 18px;
+}
+
+.activity-entry-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.activity-entry-title {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.activity-entry-meta {
+    display: flex;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+.activity-entry-points {
+    font-size: 13px;
+    font-weight: 700;
+    color: #059669;
+    white-space: nowrap;
+}
+
+.activity-entry-del-btn {
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    line-height: 1;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0 4px;
+    transition: color 0.15s ease;
+}
+
+.activity-entry-del-btn:hover {
+    color: #DC2626;
+}
+
+.btn-clear-link {
+    border: none;
+    background: transparent;
+    font-size: 11.5px;
+    color: #DC2626;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* ========================================================== */
 /* Suppress Netlify Injected Drawers, Badges & Feedback Tools */
 /* ========================================================== */
 #netlify-drawer,

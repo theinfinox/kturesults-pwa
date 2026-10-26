@@ -170,3 +170,47 @@ The normalizer (`getNormalizedStudentProfile`) protects against this bug:
 1. Tests if `studentInfo.branch` matches `/^minor\s*branch$/i`.
 2. If invalid, decodes the student's true primary major directly from their University Register Number (e.g. `TVE21CS042` &rarr; Computer Science & Engineering).
 3. Preserves any true secondary minor discipline in a separate `minorDept` property, ensuring the primary B.Tech degree major is never overwritten.
+
+---
+
+## 8. KTU Honors & Minors Eligibility Validator (`validateHonorsMinorsEligibility`)
+
+Under KTU B.Tech Regulations (2019 & 2024 Schemes), students may opt for specialized degree enhancements:
+
+### 8.1 B.Tech (Honors)
+- **Cumulative CGPA Requirement**: $\ge 8.50$ maintained across all completed semesters.
+- **Backlog Invariant**: Must have cleared **all courses in the first attempt** (zero history of backlogs). Any previous or active `F`, `FE`, `AB`, or `I` grade permanently disqualifies the student.
+- **Credit Requirement**: Must earn **20 additional stream credits** (typically 4 discipline theory courses + 1 mini-project across S5–S8).
+- **State Evaluation**:
+  - `eligible`: $\text{CGPA} \ge 8.50$ and zero backlogs.
+  - `at_risk`: $8.00 \le \text{CGPA} < 8.50$ with zero backlogs (can achieve Honors with grade boost).
+  - `ineligible`: $\text{CGPA} < 8.00$ or any backlog history.
+
+### 8.2 Minor in Engineering
+- **Cumulative CGPA Requirement**: $\ge 7.00$ at registration (end of S2).
+- **Backlog Invariant**: No active uncleared backlogs.
+- **Credit Requirement**: Must earn **20 additional inter-discipline credits** from an approved secondary engineering department.
+
+---
+
+## 9. Mandatory Activity Points Tracker & University Caps (`calculateActivityPointsSummary`)
+
+KTU B.Tech degree award mandates student activity points in addition to academic course credits:
+- **Regular 4-Year B.Tech**: **100 Points**
+- **Lateral Entry B.Tech**: **75 Points**
+
+### 9.1 University Category Maximum Caps
+Points must be earned across 5 designated university categories, each strictly subject to maximum allowable claim limits:
+1. **National Initiatives (`national_initiatives`)**: NSS, NCC, Unnat Bharat Abhiyan (UBA), Blood donation drives &rarr; **Max 60 Points**.
+2. **Sports & Culturals (`sports_cultural`)**: Inter-college, zonal, state, national sports & arts fest competitions &rarr; **Max 40 Points**.
+3. **Professional Bodies & Leadership (`professional_leadership`)**: IEEE, CSI, ISTE, ACM chapters, student senate, class representative, club chair &rarr; **Max 40 Points**.
+4. **Innovation, Hackathons & Startups (`innovation_hackathons`)**: IEDC, hackathon wins, product patents, paper publications &rarr; **Max 50 Points**.
+5. **Internships & Certified MOOCs (`internships_moocs`)**: Industrial training ($\ge 20$ days), NPTEL / Swayam / Coursera certs, workshops &rarr; **Max 50 Points**.
+
+### 9.2 Engine Capping & Balance Formula
+For each category $c \in \{1..5\}$:
+$$\text{claimablePoints}_c = \min(\text{rawPoints}_c, \text{maxCap}_c)$$
+$$\text{totalClaimablePoints} = \sum_{c=1}^{5} \text{claimablePoints}_c$$
+$$\text{effectivePoints} = \min(\text{totalClaimablePoints}, \text{targetPoints})$$
+$$\text{remainingPoints} = \max(0, \text{targetPoints} - \text{effectivePoints})$$
+$$\text{progressPercent} = \min\left(100, \left\lfloor \frac{\text{effectivePoints}}{\text{targetPoints}} \times 100 \right\rfloor\right)$$
