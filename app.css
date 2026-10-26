@@ -281,7 +281,7 @@ body {
     box-shadow: var(--shadow-sm);
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 3px;
     margin-bottom: 16px;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -293,7 +293,7 @@ body {
 .student-meta-group {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 3px;
     width: 100%;
 }
 
@@ -307,34 +307,31 @@ body {
 
 .student-identity-pair {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     gap: 8px;
     flex-wrap: wrap;
     min-width: 0;
 }
 
 .student-name {
-    font-size: var(--font-title);
+    font-size: 16px;
     font-weight: 700;
     color: var(--text-main);
-    letter-spacing: -0.01em;
-    white-space: nowrap;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
 }
 
 .student-regno {
     font-family: "JetBrains Mono", monospace;
-    font-size: var(--font-caption);
+    font-size: 12px;
     font-weight: 700;
-    color: #065F46;
-    background: #ECFDF5;
-    border: 1px solid #A7F3D0;
-    padding: 2px 8px;
-    border-radius: var(--radius-sm);
+    color: #059669;
     letter-spacing: 0.04em;
+    display: inline-block;
 }
 
 .wallet-freshness {
-    font-size: var(--font-badge);
+    font-size: 11px;
     font-weight: 600;
     background: #F8FAFC;
     border: 1px solid var(--border-light);
@@ -364,33 +361,30 @@ body {
     display: inline-block;
 }
 
-.student-secondary-row {
+.student-academic-row {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    line-height: 1.35;
+    margin-top: 1px;
+}
+
+.student-sub-row {
+    font-size: 12px;
+    font-weight: 400;
+    color: #64748B;
+    line-height: 1.35;
     display: flex;
     align-items: center;
-    gap: 6px;
     flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 1px;
 }
 
-.meta-chip {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 8px;
-    border-radius: var(--radius-sm);
-    background: #F8FAFC;
-    border: 1px solid var(--border-light);
-    font-size: 11.5px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    line-height: 1.4;
-    white-space: nowrap;
-}
-
-.meta-chip.active-scheme,
-.meta-chip.highlight {
-    background: #ECFDF5;
-    border-color: #A7F3D0;
-    color: #065F46;
-    font-weight: 600;
+.sub-dot {
+    color: #94A3B8;
+    font-size: 9px;
+    opacity: 0.8;
 }
 
 /* ========================================================================== */
