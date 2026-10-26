@@ -193,24 +193,27 @@ Under KTU B.Tech Regulations (2019 & 2024 Schemes), students may opt for special
 
 ---
 
-## 9. Mandatory Activity Points Tracker & University Caps (`calculateActivityPointsSummary`)
+## 9. Mandatory Activity Points Tracker & Portal Auto-Sync (`calculateActivityPointsSummary`)
 
 KTU B.Tech degree award mandates student activity points in addition to academic course credits:
 - **Regular 4-Year B.Tech**: **100 Points**
 - **Lateral Entry B.Tech**: **75 Points**
 
-### 9.1 University Category Maximum Caps
-Points must be earned across 5 designated university categories, each strictly subject to maximum allowable claim limits:
+### 9.1 Portal Auto-Extraction & Direct Scoring Architecture
+On `app.ktu.edu.in` (`studentDetailsView.htm`), the college staff advisor uploads verified points, and the portal displays a single aggregated `Activity Points` count at the curriculum/profile summary. The portal does not expose the per-category breakdown to students.
+
+To eliminate student confusion and tedious manual logging, the engine adopts a direct scoring model:
+1. **Auto-Extraction (`KTUSyncEngine.parseStudentInfo`)**: Automatically parses `Activity Points : <num>` directly from portal profile HTML during 1-click sync or session refresh.
+2. **Direct Score Tracker (`calculateActivityPointsSummary`)**: Accepts a numeric score, numeric string, or existing payload:
+   $$\text{effectivePoints} = \min(\text{totalPoints}, \text{targetPoints})$$
+   $$\text{remainingPoints} = \max(0, \text{targetPoints} - \text{effectivePoints})$$
+   $$\text{progressPercent} = \min\left(100, \left\lfloor \frac{\text{effectivePoints}}{\text{targetPoints}} \times 100 \right\rfloor\right)$$
+3. **Manual Override Support**: Enables students to manually save updated scores when advisors haven't yet updated the KTU portal.
+
+### 9.2 University Category Reference Caps (Cheat Sheet)
+While the score tracker evaluates aggregate completion against the 100 pt / 75 pt degree target, the UI provides an informational cheat sheet of the 5 official KTU category caps so students know where to earn future points:
 1. **National Initiatives (`national_initiatives`)**: NSS, NCC, Unnat Bharat Abhiyan (UBA), Blood donation drives &rarr; **Max 60 Points**.
 2. **Sports & Culturals (`sports_cultural`)**: Inter-college, zonal, state, national sports & arts fest competitions &rarr; **Max 40 Points**.
 3. **Professional Bodies & Leadership (`professional_leadership`)**: IEEE, CSI, ISTE, ACM chapters, student senate, class representative, club chair &rarr; **Max 40 Points**.
 4. **Innovation, Hackathons & Startups (`innovation_hackathons`)**: IEDC, hackathon wins, product patents, paper publications &rarr; **Max 50 Points**.
 5. **Internships & Certified MOOCs (`internships_moocs`)**: Industrial training ($\ge 20$ days), NPTEL / Swayam / Coursera certs, workshops &rarr; **Max 50 Points**.
-
-### 9.2 Engine Capping & Balance Formula
-For each category $c \in \{1..5\}$:
-$$\text{claimablePoints}_c = \min(\text{rawPoints}_c, \text{maxCap}_c)$$
-$$\text{totalClaimablePoints} = \sum_{c=1}^{5} \text{claimablePoints}_c$$
-$$\text{effectivePoints} = \min(\text{totalClaimablePoints}, \text{targetPoints})$$
-$$\text{remainingPoints} = \max(0, \text{targetPoints} - \text{effectivePoints})$$
-$$\text{progressPercent} = \min\left(100, \left\lfloor \frac{\text{effectivePoints}}{\text{targetPoints}} \times 100 \right\rfloor\right)$$

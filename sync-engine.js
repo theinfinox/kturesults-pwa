@@ -80,8 +80,26 @@
                 studentInfo.currentSemester = val || text.replace(/Current Semester\s*:/i, "").trim();
             } else if (label.includes("cgpa")) {
                 studentInfo.cgpa = val || text.replace(/CGPA\s*:/i, "").trim();
+            } else if (label.includes("activity point") || label.includes("activity points")) {
+                const actMatch = (val || text).match(/(\d+(?:\.\d+)?)/);
+                if (actMatch) studentInfo.activityPoints = parseFloat(actMatch[1]);
             }
         });
+
+        // Resilient Scrape: Scan document for Activity Points if not found in list-group-items
+        if (studentInfo.activityPoints === undefined || studentInfo.activityPoints === null) {
+            const allElements = doc.querySelectorAll("td, th, span, div, p, li") || [];
+            for (const el of allElements) {
+                const t = el.textContent || "";
+                if (/activity\s*points?/i.test(t)) {
+                    const m = t.match(/activity\s*points?\s*[:\-]?\s*(\d+(?:\.\d+)?)/i);
+                    if (m) {
+                        studentInfo.activityPoints = parseFloat(m[1]);
+                        break;
+                    }
+                }
+            }
+        }
 
         // Resilient Fallback: If primary branch is missing or was parsed as "Minor Branch", decode from registerNo
         if (!studentInfo.branch || /^minor\s*branch$/i.test(studentInfo.branch)) {

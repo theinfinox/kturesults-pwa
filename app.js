@@ -24,7 +24,8 @@
     let currentLastScraped = null;
     let currentFutureCurriculum = null;
     let currentMetrics = null;
-    let currentActivities = [];
+    let currentActivityPoints = 0;
+    let currentActivitySource = "manual";
     let currentActivityTargetOverride = null;
     let currentHonorsTab = "honors";
 
@@ -83,14 +84,9 @@
     const targetLateralBtn = document.getElementById("targetLateralBtn");
     const activitySummaryCard = document.getElementById("activitySummaryCard");
     const activityCategoryMeters = document.getElementById("activityCategoryMeters");
-    const addActivityForm = document.getElementById("addActivityForm");
-    const activityTitleInput = document.getElementById("activityTitleInput");
-    const activityCategorySelect = document.getElementById("activityCategorySelect");
     const activityPointsInput = document.getElementById("activityPointsInput");
-    const activitySemesterSelect = document.getElementById("activitySemesterSelect");
-    const activityLogList = document.getElementById("activityLogList");
-    const activityLogCount = document.getElementById("activityLogCount");
-    const clearAllActivitiesBtn = document.getElementById("clearAllActivitiesBtn");
+    const saveActivityBtn = document.getElementById("saveActivityBtn");
+    const activitySyncSourceBadge = document.getElementById("activitySyncSourceBadge");
 
     // Modal Form Elements
     const profileSelectDropdown = document.getElementById("profileSelectDropdown");
@@ -221,24 +217,45 @@
 
     function loadActiveStudentActivities() {
         if (!activeProfileId) {
-            currentActivities = [];
+            currentActivityPoints = 0;
+            currentActivitySource = "manual";
             currentActivityTargetOverride = null;
             return;
         }
         try {
-            const rawAct = localStorage.getItem(STORAGE_KEY_ACTIVITY_PREFIX + activeProfileId);
-            currentActivities = rawAct ? JSON.parse(rawAct) : [];
             const targetOverride = localStorage.getItem(STORAGE_KEY_ACTIVITY_TARGET_PREFIX + activeProfileId);
             currentActivityTargetOverride = targetOverride ? parseInt(targetOverride, 10) : null;
+
+            const stored = localStorage.getItem(STORAGE_KEY_ACTIVITY_PREFIX + activeProfileId);
+            if (stored !== null) {
+                const parsed = JSON.parse(stored);
+                if (typeof parsed === "number") {
+                    currentActivityPoints = parsed;
+                    currentActivitySource = "manual";
+                } else if (parsed && typeof parsed === "object") {
+                    currentActivityPoints = parseFloat(parsed.points) || 0;
+                    currentActivitySource = parsed.source || "manual";
+                }
+            } else if (currentStudentInfo && currentStudentInfo.activityPoints !== undefined && currentStudentInfo.activityPoints !== null) {
+                currentActivityPoints = parseFloat(currentStudentInfo.activityPoints) || 0;
+                currentActivitySource = "portal";
+            } else {
+                currentActivityPoints = 0;
+                currentActivitySource = "manual";
+            }
         } catch (e) {
-            currentActivities = [];
+            currentActivityPoints = 0;
+            currentActivitySource = "manual";
             currentActivityTargetOverride = null;
         }
     }
 
-    function saveActiveStudentActivities() {
+    function saveActiveStudentActivities(pts, source = "manual") {
         if (!activeProfileId) return;
-        localStorage.setItem(STORAGE_KEY_ACTIVITY_PREFIX + activeProfileId, JSON.stringify(currentActivities));
+        currentActivityPoints = parseFloat(pts) || 0;
+        currentActivitySource = source;
+        const payload = { points: currentActivityPoints, source: currentActivitySource };
+        localStorage.setItem(STORAGE_KEY_ACTIVITY_PREFIX + activeProfileId, JSON.stringify(payload));
         if (currentActivityTargetOverride) {
             localStorage.setItem(STORAGE_KEY_ACTIVITY_TARGET_PREFIX + activeProfileId, String(currentActivityTargetOverride));
         } else {
@@ -265,7 +282,8 @@
             currentStudentInfo = null;
             currentLastScraped = null;
             currentFutureCurriculum = null;
-            currentActivities = [];
+            currentActivityPoints = 0;
+            currentActivitySource = "manual";
             currentActivityTargetOverride = null;
             return;
         }
@@ -291,7 +309,8 @@
             currentStudentInfo = null;
             currentLastScraped = null;
             currentFutureCurriculum = null;
-            currentActivities = [];
+            currentActivityPoints = 0;
+            currentActivitySource = "manual";
             currentActivityTargetOverride = null;
         }
     }
@@ -307,6 +326,16 @@
         currentSemesterData = semesterData;
         currentStudentInfo = studentInfo;
         currentLastScraped = payload.lastScraped;
+
+        // Auto-sync activity points if extracted from portal
+        if (studentInfo && studentInfo.activityPoints !== undefined && studentInfo.activityPoints !== null) {
+            const portalPts = parseFloat(studentInfo.activityPoints);
+            if (!isNaN(portalPts)) {
+                currentActivityPoints = portalPts;
+                currentActivitySource = "portal";
+                localStorage.setItem(STORAGE_KEY_ACTIVITY_PREFIX + activeProfileId, JSON.stringify({ points: portalPts, source: "portal" }));
+            }
+        }
 
         // Also update lastGrabbed timestamp on the profile
         if (savedProfiles[activeProfileId]) {
@@ -825,7 +854,7 @@
         // Honors & Minors and Activity Points Cards
         const evalHM = window.validateHonorsMinorsEligibility ? window.validateHonorsMinorsEligibility(metrics, currentStudentInfo) : null;
         const isLateral = getIsLateralEntry();
-        const actSum = window.calculateActivityPointsSummary ? window.calculateActivityPointsSummary(currentActivities, isLateral) : null;
+        const actSum = window.calculateActivityPointsSummary ? window.calculateActivityPointsSummary(currentActivityPoints, isLateral) : null;
 
         const hmHonorsEligible = evalHM && evalHM.honors && evalHM.honors.eligible;
         const hmHonorsAtRisk = evalHM && evalHM.honors && evalHM.honors.status === "at_risk";
@@ -1137,8 +1166,8 @@
         if (targetLateralBtn) targetLateralBtn.classList.toggle("active", isLateral);
 
         const summary = window.calculateActivityPointsSummary
-            ? window.calculateActivityPointsSummary(currentActivities, isLateral)
-            : { targetPoints: 100, effectivePoints: 0, remainingPoints: 100, progressPercent: 0, isCompleted: false, breakdown: {} };
+            ? window.calculateActivityPointsSummary(currentActivityPoints, isLateral)
+            : { targetPoints: 100, effectivePoints: 0, remainingPoints: 100, progressPercent: 0, isCompleted: false, categories: {} };
 
         // 1. Summary Banner
         if (activitySummaryCard) {
@@ -1161,84 +1190,44 @@
                 <div class="stat-progress-bar" style="margin-top: 10px; height: 8px;">
                     <div class="stat-progress-fill" style="width: ${summary.progressPercent}%;"></div>
                 </div>
-                ${summary.totalRawPoints > summary.totalClaimablePoints ? `
-                    <div class="activity-cap-notice">
-                        ℹ️ Total logged: <strong>${summary.totalRawPoints} pts</strong> (${summary.totalRawPoints - summary.totalClaimablePoints} pts capped out due to university category limits).
-                    </div>
-                ` : ''}
             `;
         }
 
-        // 2. Category Breakdown Meters
+        // 2. Direct Points Input & Sync Source Badge
+        if (activityPointsInput) {
+            activityPointsInput.value = currentActivityPoints || 0;
+        }
+        if (activitySyncSourceBadge) {
+            if (currentActivitySource === "portal") {
+                activitySyncSourceBadge.textContent = "⚡ KTU Portal Verified";
+                activitySyncSourceBadge.style.background = "#DCFCE7";
+                activitySyncSourceBadge.style.color = "#166534";
+            } else {
+                activitySyncSourceBadge.textContent = "✏️ Custom Score";
+                activitySyncSourceBadge.style.background = "#F1F5F9";
+                activitySyncSourceBadge.style.color = "#334155";
+            }
+        }
+
+        // 3. Official Category Reference Cheat-Sheet (5 University Categories & Caps)
         if (activityCategoryMeters) {
             const categories = window.KTU_ACTIVITY_CATEGORIES || {};
             let metersHtml = "";
             Object.keys(categories).forEach(catKey => {
-                const b = summary.breakdown[catKey] || { rawPoints: 0, claimablePoints: 0, maxCap: categories[catKey].maxCap, name: categories[catKey].name, icon: categories[catKey].icon };
-                const pct = Math.min(100, Math.round((b.claimablePoints / b.maxCap) * 100));
-                const isCapped = b.rawPoints >= b.maxCap;
+                const cat = categories[catKey];
                 metersHtml += `
-                    <div class="activity-category-item">
-                        <div class="activity-category-header">
-                            <span class="activity-cat-name">${b.icon} ${b.name}</span>
-                            <span class="activity-cat-points ${isCapped ? 'capped' : ''}">${b.claimablePoints} / ${b.maxCap} pts</span>
+                    <div class="activity-category-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; margin-bottom: 6px;">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 600; color: var(--text-main);">${cat.icon} ${cat.name}</div>
+                            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">${cat.description}</div>
                         </div>
-                        <div class="stat-progress-bar" style="height: 6px; margin: 5px 0;">
-                            <div class="stat-progress-fill ${isCapped ? 'fill-capped' : ''}" style="width: ${pct}%;"></div>
-                        </div>
-                        <div class="activity-cat-footer">
-                            <span>${b.entriesCount || 0} logged ${b.excessPoints > 0 ? '(' + b.excessPoints + ' pts over cap)' : ''}</span>
-                            <span>Cap: ${b.maxCap} pts</span>
+                        <div class="pill-badge" style="font-size: 11px; font-weight: 700; white-space: nowrap; margin-left: 8px; background: #EFF6FF; color: #1D4ED8;">
+                            Max ${cat.maxCap} Pts
                         </div>
                     </div>
                 `;
             });
             activityCategoryMeters.innerHTML = metersHtml;
-        }
-
-        // 3. Activity Entries Log List
-        if (activityLogCount) activityLogCount.textContent = currentActivities.length;
-        if (activityLogList) {
-            if (currentActivities.length === 0) {
-                activityLogList.innerHTML = `
-                    <div class="empty-state" style="padding: 20px 10px;">
-                        <div class="empty-icon" style="font-size: 28px;">🏅</div>
-                        <div class="empty-title" style="font-size: 13.5px;">No Activity Points Logged Yet</div>
-                        <div class="empty-desc" style="font-size: 11.5px;">Add your NSS, sports, tech fests, leadership, MOOC, or internship certificates above.</div>
-                    </div>
-                `;
-            } else {
-                let listHtml = "";
-                currentActivities.forEach(entry => {
-                    const catDef = (window.KTU_ACTIVITY_CATEGORIES && window.KTU_ACTIVITY_CATEGORIES[entry.category]) || { icon: "🏅", shortName: "Activity" };
-                    listHtml += `
-                        <div class="activity-entry-card" data-entry-id="${entry.id}">
-                            <div class="activity-entry-icon">${catDef.icon}</div>
-                            <div class="activity-entry-info">
-                                <div class="activity-entry-title">${escapeHtml(entry.title)}</div>
-                                <div class="activity-entry-meta">
-                                    <span class="pill-badge" style="font-size: 10px; padding: 1px 6px;">${catDef.shortName}</span>
-                                    <span class="pill-badge" style="font-size: 10px; padding: 1px 6px;">${entry.semester || 'All'}</span>
-                                </div>
-                            </div>
-                            <div class="activity-entry-points">+${entry.points} pts</div>
-                            <button class="activity-entry-del-btn" data-delete-activity="${entry.id}" title="Remove entry">&times;</button>
-                        </div>
-                    `;
-                });
-                activityLogList.innerHTML = listHtml;
-
-                // Bind delete buttons
-                activityLogList.querySelectorAll("[data-delete-activity]").forEach(btn => {
-                    btn.addEventListener("click", () => {
-                        const id = btn.getAttribute("data-delete-activity");
-                        currentActivities = currentActivities.filter(a => a.id !== id);
-                        saveActiveStudentActivities();
-                        renderActivityModal();
-                        if (currentMetrics) renderStats(currentMetrics);
-                    });
-                });
-            }
         }
     }
 
@@ -1462,7 +1451,7 @@
         if (targetRegularBtn) {
             targetRegularBtn.addEventListener("click", () => {
                 currentActivityTargetOverride = 100;
-                saveActiveStudentActivities();
+                saveActiveStudentActivities(currentActivityPoints, currentActivitySource);
                 renderActivityModal();
                 if (currentMetrics) renderStats(currentMetrics);
             });
@@ -1470,63 +1459,24 @@
         if (targetLateralBtn) {
             targetLateralBtn.addEventListener("click", () => {
                 currentActivityTargetOverride = 75;
-                saveActiveStudentActivities();
+                saveActiveStudentActivities(currentActivityPoints, currentActivitySource);
                 renderActivityModal();
                 if (currentMetrics) renderStats(currentMetrics);
             });
         }
 
-        // Add Activity Form Submit
-        if (addActivityForm) {
-            addActivityForm.addEventListener("submit", (e) => {
-                e.preventDefault();
-                const title = (activityTitleInput?.value || "").trim();
-                const category = activityCategorySelect?.value;
+        // Save Activity Points Button (Direct Score Input & Override)
+        if (saveActivityBtn) {
+            saveActivityBtn.addEventListener("click", () => {
                 const pts = parseFloat(activityPointsInput?.value);
-                const semester = activitySemesterSelect?.value || "All";
-
-                if (!title) {
-                    alert("Please enter an activity title.");
+                if (isNaN(pts) || pts < 0) {
+                    alert("Please enter a valid non-negative activity points value.");
                     return;
                 }
-                if (!category) {
-                    alert("Please select an activity category.");
-                    return;
-                }
-                if (isNaN(pts) || pts <= 0) {
-                    alert("Please enter valid activity points (1–100).");
-                    return;
-                }
-
-                const newEntry = {
-                    id: "act_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
-                    title,
-                    category,
-                    points: pts,
-                    semester,
-                    createdAt: new Date().toISOString()
-                };
-
-                currentActivities.unshift(newEntry);
-                saveActiveStudentActivities();
-
-                if (activityTitleInput) activityTitleInput.value = "";
-                if (activityPointsInput) activityPointsInput.value = "";
+                saveActiveStudentActivities(pts, "manual");
                 renderActivityModal();
                 if (currentMetrics) renderStats(currentMetrics);
-            });
-        }
-
-        // Clear All Activities
-        if (clearAllActivitiesBtn) {
-            clearAllActivitiesBtn.addEventListener("click", () => {
-                if (currentActivities.length === 0) return;
-                const conf = confirm("Clear all logged activity points for this student?");
-                if (!conf) return;
-                currentActivities = [];
-                saveActiveStudentActivities();
-                renderActivityModal();
-                if (currentMetrics) renderStats(currentMetrics);
+                alert(`✅ Activity Points updated to ${pts} Pts!`);
             });
         }
 
@@ -1757,10 +1707,9 @@
                         activeProfileId = reg;
                         saveProfilesToStorage();
                         saveActiveStudentData(sData, sInfo, parsed.lastScraped || new Date().toISOString());
-                        if (Array.isArray(parsed.activityPoints) || Array.isArray(parsed.activities)) {
-                            const actList = parsed.activityPoints || parsed.activities;
-                            localStorage.setItem(STORAGE_KEY_ACTIVITY_PREFIX + reg, JSON.stringify(actList));
-                            currentActivities = actList;
+                        if (parsed.activityPoints !== undefined && parsed.activityPoints !== null) {
+                            const actPts = parseFloat(parsed.activityPoints) || 0;
+                            saveActiveStudentActivities(actPts, "manual");
                         }
                         closeModal(importModal);
                         renderApp();

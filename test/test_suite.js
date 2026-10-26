@@ -153,8 +153,8 @@ async function testCrypto() {
 // -----------------------------------------------------------------
 console.log("\n[Test 5] Testing PWA Web Manifest & Dynamic Versioning...");
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.webmanifest"), "utf8"));
-assert(manifest.version === "1.2.9" || manifest.version === "1.2.8" || manifest.version === "1.2.7" || manifest.version === "1.2.6" || manifest.version === "1.2.5" || manifest.version === "1.2.4" || manifest.version === "1.2.3" || manifest.version === "1.2.2" || manifest.version === "1.2.1" || manifest.version === "1.2" || manifest.version === "1.1" || manifest.version === "1.0.0", "Manifest version mismatch");
-assert(manifest.version_code === 12 || manifest.version_code === 11 || manifest.version_code === 10 || manifest.version_code === 9 || manifest.version_code === 8 || manifest.version_code === 7 || manifest.version_code === 6 || manifest.version_code === 5 || manifest.version_code === 4 || manifest.version_code === 3 || manifest.version_code === 2 || manifest.version_code === 1, "Manifest version code mismatch");
+assert(manifest.version === "1.2.10" || manifest.version === "1.2.9" || manifest.version === "1.2.8" || manifest.version === "1.2.7" || manifest.version === "1.2.6" || manifest.version === "1.2.5" || manifest.version === "1.2.4" || manifest.version === "1.2.3" || manifest.version === "1.2.2" || manifest.version === "1.2.1" || manifest.version === "1.2" || manifest.version === "1.1" || manifest.version === "1.0.0", "Manifest version mismatch");
+assert(manifest.version_code === 13 || manifest.version_code === 12 || manifest.version_code === 11 || manifest.version_code === 10 || manifest.version_code === 9 || manifest.version_code === 8 || manifest.version_code === 7 || manifest.version_code === 6 || manifest.version_code === 5 || manifest.version_code === 4 || manifest.version_code === 3 || manifest.version_code === 2 || manifest.version_code === 1, "Manifest version code mismatch");
 assert.strictEqual(manifest.display, "standalone");
 
 const indexHtml = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
@@ -374,9 +374,9 @@ assert(appJsCode.includes("openHonorsModal"), "app.js must define openHonorsModa
 console.log("  ✅ KTU Honors (CGPA >= 8.50, 0 backlogs) & Minors (CGPA >= 7.00) validated.");
 
 // -----------------------------------------------------------------
-// Test 12: Mandatory 100 Activity Points Tracker & University Capping
+// Test 12: Mandatory Activity Points Tracker (Direct Portal Auto-Sync & Cheat Sheet)
 // -----------------------------------------------------------------
-console.log("\n[Test 12] Testing KTU Activity Points Tracker & Category Capping...");
+console.log("\n[Test 12] Testing KTU Activity Points Tracker & Direct Scoring...");
 const { calculateActivityPointsSummary, KTU_ACTIVITY_CATEGORIES } = constantsScope;
 assert(typeof calculateActivityPointsSummary === "function", "calculateActivityPointsSummary must be a function");
 assert(KTU_ACTIVITY_CATEGORIES && typeof KTU_ACTIVITY_CATEGORIES === "object", "KTU_ACTIVITY_CATEGORIES must exist");
@@ -384,37 +384,61 @@ assert.strictEqual(Object.keys(KTU_ACTIVITY_CATEGORIES).length, 5, "Must define 
 assert.strictEqual(KTU_ACTIVITY_CATEGORIES.national_initiatives.maxCap, 60, "National initiatives cap must be 60 pts");
 assert.strictEqual(KTU_ACTIVITY_CATEGORIES.sports_cultural.maxCap, 40, "Sports & Culturals cap must be 40 pts");
 
-// Scenario 1: Category capping test (Regular 100 pts)
-// Student logs 80 pts in NSS (capped to 60) + 30 pts in sports (capped to 30) = 90 claimable pts
-const actLog1 = [
-    { category: "national_initiatives", points: 50 },
-    { category: "national_initiatives", points: 30 },
-    { category: "sports_cultural", points: 30 }
-];
-const actRes1 = calculateActivityPointsSummary(actLog1, false);
+// Scenario 1: Regular B.Tech (target 100 pts) with 85 points
+const actRes1 = calculateActivityPointsSummary(85, false);
 assert.strictEqual(actRes1.targetPoints, 100, "Regular B.Tech target must be 100 pts");
-assert.strictEqual(actRes1.totalRawPoints, 110, "Total raw points should be 110");
-assert.strictEqual(actRes1.totalClaimablePoints, 90, "Claimable points must be capped at 60 (NSS) + 30 (Sports) = 90");
-assert.strictEqual(actRes1.effectivePoints, 90);
-assert.strictEqual(actRes1.remainingPoints, 10, "100 - 90 = 10 pts remaining");
-assert.strictEqual(actRes1.progressPercent, 90);
+assert.strictEqual(actRes1.totalPoints, 85, "Total points should be 85");
+assert.strictEqual(actRes1.effectivePoints, 85);
+assert.strictEqual(actRes1.remainingPoints, 15, "100 - 85 = 15 pts remaining");
+assert.strictEqual(actRes1.progressPercent, 85);
 assert.strictEqual(actRes1.isCompleted, false);
 
-// Scenario 2: Lateral Entry 75 pts target test
-// Same 90 claimable points easily exceeds 75 pts target
-const actRes2 = calculateActivityPointsSummary(actLog1, true);
+// Scenario 2: Lateral Entry (target 75 pts) with 85 points
+const actRes2 = calculateActivityPointsSummary(85, true);
 assert.strictEqual(actRes2.targetPoints, 75, "Lateral Entry target must be 75 pts");
+assert.strictEqual(actRes2.totalPoints, 85);
 assert.strictEqual(actRes2.effectivePoints, 75, "Effective points capped at degree target (75)");
 assert.strictEqual(actRes2.remainingPoints, 0, "Requirement completed, 0 remaining");
 assert.strictEqual(actRes2.progressPercent, 100);
 assert.strictEqual(actRes2.isCompleted, true);
 
+// Scenario 3: String and exceeding points
+const actRes3 = calculateActivityPointsSummary("110", false);
+assert.strictEqual(actRes3.totalPoints, 110);
+assert.strictEqual(actRes3.effectivePoints, 100);
+assert.strictEqual(actRes3.remainingPoints, 0);
+assert.strictEqual(actRes3.isCompleted, true);
+
+// Scenario 4: Portal scraping of Activity Points in parseStudentInfo
+const mockDocForActivity = {
+    querySelector(s) {
+        if (s === ".profile-title" || s === "h3" || s === ".page-header") return null;
+        return null;
+    },
+    querySelectorAll(s) {
+        if (s === ".list-group-item") {
+            return [
+                {
+                    textContent: "Activity Points : 82",
+                    querySelector: () => null
+                }
+            ];
+        }
+        return [];
+    }
+};
+const parsedStudent = KTUSyncEngine.parseStudentInfo(mockDocForActivity);
+assert.strictEqual(parsedStudent.activityPoints, 82, "Must parse activityPoints 82 from portal list-group-item");
+
 // Verify UI & DOM wiring
 assert(indexHtml.includes('id="openActivityModalBtn"'), "index.html must include openActivityModalBtn (🏅)");
 assert(indexHtml.includes('id="activityModal"'), "index.html must include activityModal");
+assert(indexHtml.includes('id="activityPointsInput"'), "index.html must include activityPointsInput");
+assert(indexHtml.includes('id="saveActivityBtn"'), "index.html must include saveActivityBtn");
 assert(appJsCode.includes("openActivityModal"), "app.js must define openActivityModal");
 assert(appJsCode.includes("STORAGE_KEY_ACTIVITY_PREFIX"), "app.js must track activity storage key");
-console.log("  ✅ Activity points capping (60/40/40/50/50) and degree targets (100 / 75 pts) validated.");
+assert(appJsCode.includes("loadActiveStudentActivities"), "app.js must define loadActiveStudentActivities");
+console.log("  ✅ Direct activity scoring (100 / 75 pts), portal auto-sync scraping, and DOM wiring validated.");
 
 // Conclude
 testCrypto().then(() => {

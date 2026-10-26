@@ -7,8 +7,8 @@
                     "start":  "node server.js"
                 },
     "description":  "Progressive Web Application \u0026 1-Click Fast Sync Engine for KTU CGPA/SGPA calculation, comeback projections, and offline grade forecasting.",
-    "version_code":  12,
-    "version":  "1.2.9",
+    "version_code":  13,
+    "version":  "1.2.10",
     "author":  "GSR (theinfinox)",
     "name":  "ktu-cgpa-standalone-pwa",
     "main":  "server.js",

@@ -1111,63 +1111,36 @@ window.KTU_ACTIVITY_CATEGORIES = {
     }
 };
 
-window.calculateActivityPointsSummary = function(entries, isLateralEntry) {
+window.calculateActivityPointsSummary = function(input, isLateralEntry) {
     const targetPoints = isLateralEntry ? 75 : 100;
     const categories = window.KTU_ACTIVITY_CATEGORIES || {};
-    const breakdown = {};
+    let totalPoints = 0;
 
-    Object.keys(categories).forEach(catKey => {
-        breakdown[catKey] = {
-            id: catKey,
-            name: categories[catKey].name,
-            shortName: categories[catKey].shortName,
-            icon: categories[catKey].icon,
-            maxCap: categories[catKey].maxCap,
-            description: categories[catKey].description,
-            rawPoints: 0,
-            claimablePoints: 0,
-            excessPoints: 0,
-            entriesCount: 0
-        };
-    });
-
-    if (Array.isArray(entries)) {
-        entries.forEach(entry => {
-            if (!entry) return;
-            const catKey = entry.category;
-            const pts = parseFloat(entry.points) || 0;
-            if (catKey && breakdown[catKey] && pts > 0) {
-                breakdown[catKey].rawPoints += pts;
-                breakdown[catKey].entriesCount += 1;
-            }
-        });
+    if (typeof input === "number") {
+        totalPoints = isNaN(input) ? 0 : input;
+    } else if (typeof input === "string") {
+        totalPoints = parseFloat(input) || 0;
+    } else if (Array.isArray(input)) {
+        totalPoints = input.reduce((acc, cur) => acc + (parseFloat(cur && cur.points) || 0), 0);
+    } else if (input && typeof input === "object") {
+        totalPoints = parseFloat(input.totalPoints || input.activityPoints || input.points) || 0;
     }
 
-    let totalRawPoints = 0;
-    let totalClaimablePoints = 0;
-
-    Object.keys(breakdown).forEach(catKey => {
-        const item = breakdown[catKey];
-        item.claimablePoints = Math.min(item.rawPoints, item.maxCap);
-        item.excessPoints = Math.max(0, item.rawPoints - item.maxCap);
-        totalRawPoints += item.rawPoints;
-        totalClaimablePoints += item.claimablePoints;
-    });
-
-    const effectivePoints = Math.min(totalClaimablePoints, targetPoints);
+    const effectivePoints = Math.min(totalPoints, targetPoints);
     const remainingPoints = Math.max(0, targetPoints - effectivePoints);
     const progressPercent = targetPoints > 0 ? Math.min(100, Math.round((effectivePoints / targetPoints) * 100)) : 100;
 
     return {
         targetPoints,
         isLateralEntry: !!isLateralEntry,
-        totalRawPoints,
-        totalClaimablePoints,
+        totalPoints,
+        totalRawPoints: totalPoints,
+        totalClaimablePoints: totalPoints,
         effectivePoints,
         remainingPoints,
         progressPercent,
-        isCompleted: effectivePoints >= targetPoints,
-        breakdown
+        isCompleted: totalPoints >= targetPoints,
+        categories
     };
 };
 

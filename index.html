@@ -33,8 +33,8 @@
         <div class="brand-wrapper">
             <img src="icons/48.png" alt="KTU CGPA Logo" class="brand-icon">
             <div>
-                <div class="brand-title">KTU CGPA <span class="version-badge pwa-version-text" id="headerVersionBadge">v1.2.9</span></div>
-                <div class="brand-badge">⚡ 1-Click Fast Sync <span class="pwa-version-code" id="headerBuildBadge" style="opacity: 0.8; font-size: 9.5px; margin-left: 3px;">(Build 12)</span></div>
+                <div class="brand-title">KTU CGPA <span class="version-badge pwa-version-text" id="headerVersionBadge">v1.2.10</span></div>
+                <div class="brand-badge">⚡ 1-Click Fast Sync <span class="pwa-version-code" id="headerBuildBadge" style="opacity: 0.8; font-size: 9.5px; margin-left: 3px;">(Build 13)</span></div>
             </div>
         </div>
         <div class="header-actions">
@@ -159,7 +159,7 @@
         <div class="footer-content">
             <span>KTU CGPA Standalone PWA</span>
             <span class="footer-dot">•</span>
-            <span class="pwa-full-version">v1.0.0 (Build 1)</span>
+            <span class="pwa-full-version">v1.2.10 (Build 13)</span>
             <span class="footer-dot">•</span>
             <a href="#" id="footerDisclaimerLink" style="color: inherit; text-decoration: underline; cursor: pointer;">Disclaimer & Privacy</a>
             <span class="footer-dot">•</span>
@@ -444,7 +444,7 @@
     <!-- MODAL 8: Mandatory 100 Activity Points Tracker             -->
     <!-- ========================================================== -->
     <div id="activityModal" class="modal-overlay" style="display: none;">
-        <div class="modal-sheet" style="max-width: 580px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-sheet" style="max-width: 540px; max-height: 85vh; overflow-y: auto;">
             <div class="sheet-header">
                 <div class="sheet-title"><span>🏅</span> KTU Activity Points Tracker</div>
                 <button class="sheet-close-btn" data-close="activityModal">&times;</button>
@@ -464,60 +464,32 @@
                 <!-- Dynamically rendered -->
             </div>
 
-            <!-- Category Breakdown Meters (5 Official Categories) -->
-            <div class="activity-section-heading">
-                <span>📊 Category Breakdown & University Caps</span>
-            </div>
-            <div id="activityCategoryMeters" class="activity-categories-grid">
-                <!-- Dynamically rendered -->
+            <!-- Single Direct Points Setter / Portal Sync -->
+            <div class="activity-entry-box">
+                <div class="activity-entry-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="activity-entry-label" style="font-size: 12px; font-weight: 700; color: var(--text-main);">🎯 Update / Set Earned Activity Points</span>
+                    <span id="activitySyncSourceBadge" class="pill-badge" style="font-size: 10px; background: #DBEAFE; color: #1D4ED8;">Manual Mode</span>
+                </div>
+                <div class="activity-input-row" style="display: flex; gap: 8px; margin-top: 8px;">
+                    <input type="number" id="activityPointsInput" class="form-control" placeholder="Enter Total Activity Points (e.g. 75)" min="0" max="300" style="font-size: 16px; font-weight: 700; flex: 1;">
+                    <button type="button" id="saveActivityBtn" class="btn-action primary" style="min-width: 100px; padding: 8px 14px;">
+                        💾 Save
+                    </button>
+                </div>
+                <div id="activitySyncHint" class="activity-hint-text" style="font-size: 11px; color: var(--text-muted); margin-top: 6px; line-height: 1.4;">
+                    ⚡ <strong>Portal Sync:</strong> Running <em>1-Click Fast Sync</em> auto-populates your verified total points from <code>app.ktu.edu.in</code>.
+                </div>
             </div>
 
-            <!-- Add Activity Form -->
+            <!-- KTU Regulation Reference Guide & Category Caps -->
             <div class="activity-section-heading" style="margin-top: 18px;">
-                <span>➕ Log New Activity</span>
+                <span>📜 Official KTU Category Caps (Reference Guide)</span>
             </div>
-            <form id="addActivityForm" class="activity-form-container" onsubmit="return false;">
-                <div class="form-group">
-                    <input type="text" id="activityTitleInput" class="form-control" placeholder="Activity / Certificate Title (e.g. NSS Special Camp, IEEE Paper)" required>
-                </div>
-                <div class="form-row-2">
-                    <div class="form-group" style="flex: 1.4;">
-                        <select id="activityCategorySelect" class="form-control" required>
-                            <option value="">-- Select Category --</option>
-                            <option value="national_initiatives">🇮🇳 National Initiatives (Max 60)</option>
-                            <option value="sports_cultural">🎭 Sports & Culturals (Max 40)</option>
-                            <option value="professional_leadership">👔 Leadership & Bodies (Max 40)</option>
-                            <option value="innovation_hackathons">💡 Innovation & Hackathons (Max 50)</option>
-                            <option value="internships_moocs">💼 Internships & MOOCs (Max 50)</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="flex: 0.8; display: flex; gap: 6px;">
-                        <input type="number" id="activityPointsInput" class="form-control" placeholder="Pts" min="1" max="100" required>
-                        <select id="activitySemesterSelect" class="form-control">
-                            <option value="General">All</option>
-                            <option value="S1">S1</option>
-                            <option value="S2">S2</option>
-                            <option value="S3">S3</option>
-                            <option value="S4">S4</option>
-                            <option value="S5">S5</option>
-                            <option value="S6">S6</option>
-                            <option value="S7">S7</option>
-                            <option value="S8">S8</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="submit" id="saveActivityBtn" class="btn-action primary" style="width: 100%; margin-top: 4px;">
-                    ➕ Add Activity Entry
-                </button>
-            </form>
-
-            <!-- Activity Entries List -->
-            <div class="activity-section-heading" style="margin-top: 18px; display: flex; justify-content: space-between; align-items: center;">
-                <span>📋 Activity Log (<span id="activityLogCount">0</span>)</span>
-                <button id="clearAllActivitiesBtn" class="btn-clear-link" title="Remove all logged activities for this student">Clear All</button>
-            </div>
-            <div id="activityLogList" class="activity-log-container">
-                <!-- Dynamically rendered -->
+            <p style="font-size: 11.5px; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.45;">
+                KTU mandates that activity points be accumulated across these 5 categories. When submitting certificates to your Faculty Advisor, keep these university maximum caps in mind:
+            </p>
+            <div id="activityCategoryMeters" class="activity-categories-grid">
+                <!-- 5 category reference cards rendered dynamically by app.js -->
             </div>
         </div>
     </div>
