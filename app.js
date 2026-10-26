@@ -92,6 +92,15 @@
 
     // --- 1. Initialization ---
     async function init() {
+        // Auto-heal legacy or decommissioned relay URLs stored on mobile devices
+        try {
+            const savedRelay = localStorage.getItem(STORAGE_KEY_CUSTOM_RELAY);
+            if (savedRelay && (savedRelay.includes("theinfinox.workers.dev") || savedRelay.includes("ktu.govindsr.me"))) {
+                localStorage.removeItem(STORAGE_KEY_CUSTOM_RELAY);
+                console.log("[PWA] 🔄 Auto-healed legacy custom relay setting to default canonical endpoint.");
+            }
+        } catch (_) {}
+
         loadProfilesFromStorage();
         await migrateLegacyProfiles();
         loadActiveStudentData();
