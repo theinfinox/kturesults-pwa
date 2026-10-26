@@ -899,6 +899,16 @@
         const totalTarget = gf ? gf.totalDegreeCredits : (metrics.totalCredits || 160);
         const progressPct = Math.min(100, Math.max(0, Math.round((metrics.earnedCredits / (totalTarget || 160)) * 100)));
 
+        // Precompute Honors/Minors and Activity Points summaries BEFORE rendering HTML
+        const evalHM = window.validateHonorsMinorsEligibility ? window.validateHonorsMinorsEligibility(metrics, currentStudentInfo) : null;
+        const isLateral = getIsLateralEntry();
+        const actSum = window.calculateActivityPointsSummary ? window.calculateActivityPointsSummary(currentActivityPoints, isLateral) : null;
+
+        const hmHonorsEligible = evalHM && evalHM.honors && evalHM.honors.eligible;
+        const hmMinorsEligible = evalHM && evalHM.minors && evalHM.minors.eligible;
+        const actCompleted = Boolean(actSum && actSum.isCompleted);
+        const showHonors = Boolean(hmHonorsEligible);
+
         let html = `
             <div class="bento-stats-grid">
                 <!-- Bento Hero: CGPA Card -->
@@ -942,11 +952,7 @@
         `;
 
         // Honors & Minors VIP Achievement Banner (Shown when student is eligible)
-        const evalHM = window.validateHonorsMinorsEligibility ? window.validateHonorsMinorsEligibility(metrics, currentStudentInfo) : null;
-        const hmHonorsEligible = evalHM && evalHM.honors && evalHM.honors.eligible;
-        const hmMinorsEligible = evalHM && evalHM.minors && evalHM.minors.eligible;
-
-        if (hmHonorsEligible) {
+        if (showHonors) {
             html += `
                 <div class="honors-banner-card" id="honorsCardBtn" style="cursor: pointer;" title="View detailed Honors & Minors eligibility breakdown">
                     <div class="honors-banner-content">
