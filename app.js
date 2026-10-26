@@ -910,66 +910,66 @@
         const showHonors = Boolean(hmHonorsEligible);
 
         let html = `
-            <div class="bento-stats-grid">
-                <!-- Bento Hero: CGPA Card -->
-                <div class="stat-card bento-hero featured" id="cgpaCard" title="Tap to copy CGPA">
+            <div class="metrics-horizon-grid bento-stats-grid">
+                <!-- 1. CGPA Metric -->
+                <div class="metric-horizon-card stat-card featured bento-hero" id="cgpaCard" title="Tap to copy CGPA">
                     <div class="copy-toast" id="copyToast">✓ Copied!</div>
-                    <div class="bento-badge">Degree Standing</div>
+                    <div class="horizon-card-top">
+                        <span class="horizon-badge">CGPA</span>
+                        <span class="horizon-sub-badge">${eqPct}%</span>
+                    </div>
                     <div class="value">${metrics.currentCGPA}</div>
-                    <div class="label">Cumulative CGPA (${eqPct}%)</div>
+                    <div class="label">Cumulative Grade</div>
                 </div>
 
-                <!-- Bento Metric: Active Backlogs -->
-                <div class="stat-card ${metrics.hasBacklogs ? 'accent-danger' : 'accent-success'}">
+                <!-- 2. Backlogs Metric -->
+                <div class="metric-horizon-card stat-card ${metrics.hasBacklogs ? 'accent-danger' : 'accent-success'}">
+                    <div class="horizon-card-top">
+                        <span class="horizon-badge">${metrics.hasBacklogs ? 'Backlogs' : 'Status'}</span>
+                    </div>
                     <div class="value">${metrics.totalBacklogs}</div>
-                    <div class="label">${metrics.hasBacklogs ? '💀 Active Backlogs' : '✨ Backlogs (All Clear)'}</div>
+                    <div class="label">${metrics.hasBacklogs ? '💀 Active Backlogs' : '✨ All Clear (0)'}</div>
                 </div>
 
-                <!-- Bento Metric: Earned Credits -->
-                <div class="stat-card accent-success">
+                <!-- 3. Earned Credits Metric -->
+                <div class="metric-horizon-card stat-card accent-success">
+                    <div class="horizon-card-top">
+                        <span class="horizon-badge">Credits</span>
+                        <span class="horizon-sub-badge">${progressPct}%</span>
+                    </div>
                     <div class="value">${metrics.earnedCredits} <span class="unit">cr</span></div>
-                    <div class="label">Earned Credits</div>
-                </div>
-
-                <!-- Bento Metric: Degree Progress -->
-                <div class="stat-card">
-                    <div class="value">${metrics.earnedCredits} / ${totalTarget}</div>
-                    <div class="label">${gf ? `Progress (${progressPct}% • ${gf.totalFutureCredits}cr rem.)` : `Degree Progress (${progressPct}%)`}</div>
+                    <div class="label">${totalTarget} cr Target</div>
                     <div class="stat-progress-bar" title="${progressPct}% completed">
                         <div class="stat-progress-fill" style="width: ${progressPct}%;"></div>
                     </div>
                 </div>
 
-                <!-- Bento Metric: Activity Points (Symmetrically balanced with Degree Progress!) -->
-                <div class="stat-card ${actCompleted ? 'accent-success' : ''}" id="activityCardBtn" style="cursor: pointer;" title="View and track KTU Activity Points">
-                    <div class="value">${actSum ? actSum.effectivePoints : 0} / ${actSum ? actSum.targetPoints : 100}</div>
-                    <div class="label">🎯 Activity Pts (${actSum ? actSum.progressPercent : 0}% • ${actCompleted ? 'Completed' : (actSum ? actSum.remainingPoints + ' rem.' : '')})</div>
+                <!-- 4. Activity Points Metric -->
+                <div class="metric-horizon-card stat-card ${actCompleted ? 'accent-success' : ''}" id="activityCardBtn" style="cursor: pointer;" title="View and track KTU Activity Points">
+                    <div class="horizon-card-top">
+                        <span class="horizon-badge">Activities</span>
+                        <span class="horizon-sub-badge">${actSum ? actSum.progressPercent : 0}%</span>
+                    </div>
+                    <div class="value">${actSum ? actSum.effectivePoints : 0} <span class="unit">/ ${actSum ? actSum.targetPoints : 100}</span></div>
+                    <div class="label">🎯 ${actCompleted ? 'Completed (100%)' : (actSum ? actSum.remainingPoints + ' pts rem.' : 'Points')}</div>
                     <div class="stat-progress-bar" title="${actSum ? actSum.progressPercent : 0}% completed">
                         <div class="stat-progress-fill" style="width: ${actSum ? actSum.progressPercent : 0}%; background: ${actCompleted ? '#10B981' : '#3B82F6'};"></div>
                     </div>
                 </div>
+
+                <!-- 5. Honors & Minors Metric -->
+                <div class="metric-horizon-card stat-card ${showHonors ? 'accent-success' : ''}" id="honorsCardBtn" style="cursor: pointer;" title="View detailed Honors & Minors eligibility breakdown">
+                    <div class="horizon-card-top">
+                        <span class="horizon-badge">Honors</span>
+                        <span class="horizon-sub-badge" style="${showHonors ? 'background:#DCFCE7; color:#166534;' : 'background:#F1F5F9; color:#475569;'}">${showHonors ? 'Eligible' : (hmMinorsEligible ? 'Minors' : 'Standard')}</span>
+                    </div>
+                    <div class="value" style="font-size: 16px; margin: 6px 0 2px; font-weight: 700;">
+                        ${showHonors ? '🎓 Honors Ready' : (hmMinorsEligible ? '📘 Minors Ready' : 'Standard')}
+                    </div>
+                    <div class="label">${showHonors ? '≥ 8.50 & 0 Backlogs' : (hmMinorsEligible ? '≥ 7.00 Track' : 'Degree Track')}</div>
+                </div>
             </div>
         `;
-
-        // Honors & Minors VIP Achievement Banner (Shown when student is eligible)
-        if (showHonors) {
-            html += `
-                <div class="honors-banner-card" id="honorsCardBtn" style="cursor: pointer;" title="View detailed Honors & Minors eligibility breakdown">
-                    <div class="honors-banner-content">
-                        <div class="honors-banner-left">
-                            <span class="honors-badge-icon">🎓</span>
-                            <div>
-                                <div class="honors-title">Honors Degree Qualified (CGPA ≥ 8.50)</div>
-                                <div class="honors-subtitle">Zero backlogs • First-attempt excellence • Minors: ${hmMinorsEligible ? 'Eligible' : 'Ineligible'}</div>
-                            </div>
-                        </div>
-                        <span class="pill-badge" style="background:#DCFCE7; color:#166534; font-weight:700; font-size:11px;">
-                            Tap for Details ➔
-                        </span>
-                    </div>
-                </div>
-            `;
-        }
 
         // Level 2 Forecast Projections
         if (metrics.level === 2 && gf) {

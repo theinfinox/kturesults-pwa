@@ -33,8 +33,8 @@
         <div class="brand-wrapper">
             <img src="icons/48.png" alt="KTU CGPA Logo" class="brand-icon">
             <div>
-                <div class="brand-title">KTU CGPA <span class="version-badge pwa-version-text" id="headerVersionBadge">v1.2.16</span></div>
-                <div class="brand-badge" style="display: none;"><span class="pwa-version-code" id="headerBuildBadge">(Build 19)</span></div>
+                <div class="brand-title">KTU CGPA <span class="version-badge pwa-version-text" id="headerVersionBadge">v1.2.17</span></div>
+                <div class="brand-badge" style="display: none;"><span class="pwa-version-code" id="headerBuildBadge">(Build 20)</span></div>
             </div>
         </div>
         <div class="header-actions">
@@ -43,70 +43,44 @@
         </div>
     </header>
 
-    <!-- Dashboard Hero Section (Responsive: Stack on Mobile, Side-by-Side Companion Grid on Desktop) -->
-    <div class="dashboard-hero-section">
-        <!-- Top Dashboard: Unified Apple Wallet Student Pass -->
-        <div class="wallet-wrapper">
-            <div id="profileCard" class="wallet-card" style="display: none;">
-                <!-- Card Pass Top Edge / Issuer & Freshness -->
-                <div class="wallet-header">
-                    <div class="wallet-issuer" id="profileInstitution">
-                        <span class="issuer-icon">🏛️</span>
-                        <span id="institutionText" class="issuer-name">APJ Abdul Kalam Technological University</span>
-                    </div>
-                    <div class="wallet-freshness" id="heroFreshnessBadge">
-                        <span class="freshness-dot"></span> Offline Ready
-                    </div>
-                </div>
-
-                <!-- Card Pass Student Hero -->
-                <div class="wallet-hero">
-                    <div class="wallet-student-name" id="profileName">Student Name</div>
+    <!-- Executive Student Identity & Sync Command Bar -->
+    <div id="profileCard" class="executive-command-bar" style="display: none;">
+        <div class="command-bar-left">
+            <div class="student-avatar-badge">🎓</div>
+            <div class="student-meta-group">
+                <div class="student-primary-row">
+                    <span id="profileName" class="student-name">Student Name</span>
+                    <span id="profileRegNo" class="student-regno">N/A</span>
                     <span id="heroProfileName" style="display: none;">No Profile Configured</span>
-                    <div class="wallet-reg-row">
-                        <span id="profileRegNo" class="wallet-regno">N/A</span>
-                        <span id="heroActiveProfileLabel" style="display: none;"></span>
-                    </div>
+                    <span id="heroActiveProfileLabel" style="display: none;"></span>
                 </div>
-
-                <!-- Card Pass Fields Strip (Apple Wallet Metadata Grid) -->
-                <div class="wallet-fields-grid profile-badges">
-                    <div class="wallet-field">
-                        <span class="field-label">Branch</span>
-                        <span id="badgeDept" class="field-val">💻 Engineering</span>
-                    </div>
-                    <div class="wallet-field">
-                        <span class="field-label">Batch</span>
-                        <span id="badgeBatch" class="field-val">📅 Batch</span>
-                    </div>
-                    <div class="wallet-field">
-                        <span class="field-label">Scheme</span>
-                        <span id="badgeScheme" class="field-val active-scheme">📜 Scheme</span>
-                    </div>
-                    <div class="wallet-field">
-                        <span class="field-label">Standing</span>
-                        <span id="badgeLevel" class="field-val">🎓 Level</span>
-                    </div>
-                </div>
-
-                <!-- Card Pass Integrated Action Strip -->
-                <div class="wallet-actions">
-                    <div class="wallet-btn-row">
-                        <button id="heroFastSyncBtn" class="btn-wallet-sync" title="Full KTU portal synchronization">
-                            <span>⚡ 1-Click Fast Sync</span>
-                        </button>
-                        <button id="heroRefreshBtn" class="btn-wallet-refresh" title="Fetch latest data using cached session (0 logins sent to KTU)">
-                            <span>🔄 Zero-Login Refresh</span>
-                        </button>
-                    </div>
-                    <div class="wallet-subtext">Cached session refresh bypasses login • 0 lockout risk</div>
-                    <div id="syncStatusPill" class="status-pill"></div>
+                <div class="student-secondary-row profile-badges">
+                    <span id="profileInstitution" class="meta-item"><span class="meta-icon">🏛️</span> <span id="institutionText">APJ Abdul Kalam Technological University</span></span>
+                    <span class="meta-divider">•</span>
+                    <span id="badgeDept" class="pill-badge">💻 Engineering</span>
+                    <span id="badgeScheme" class="pill-badge active-scheme">📜 Scheme</span>
+                    <span id="badgeBatch" class="pill-badge">📅 Batch</span>
+                    <span id="badgeLevel" class="pill-badge">🎓 Standing</span>
                 </div>
             </div>
         </div>
 
-        <!-- Main Stats Grid (Desktop Right Companion Panel) -->
-        <div id="statsContainer" class="stats-wrapper"></div>
+        <div class="command-bar-right">
+            <div class="command-sync-group">
+                <button id="heroFastSyncBtn" class="btn-command-sync" title="Full KTU portal synchronization">
+                    <span>⚡ 1-Click Fast Sync</span>
+                </button>
+                <button id="heroRefreshBtn" class="btn-command-refresh" title="Fetch latest data using cached session (0 logins sent to KTU)">
+                    <span>🔄 Zero-Login Refresh</span>
+                </button>
+            </div>
+            <div class="command-freshness-group">
+                <div class="wallet-freshness" id="heroFreshnessBadge">
+                    <span class="freshness-dot"></span> Offline Ready
+                </div>
+                <div id="syncStatusPill" class="status-pill"></div>
+            </div>
+        </div>
     </div>
 
     <!-- Empty State (Shown when no data exists) -->
@@ -125,6 +99,9 @@
             </button>
         </div>
     </div>
+
+    <!-- Main Stats Grid (Unified Metric Horizon) -->
+    <div id="statsContainer"></div>
 
     <!-- Degree Forecast Banner (Active State) -->
     <div id="activeForecastBanner" class="forecast-banner" style="display: none;">
@@ -161,7 +138,7 @@
         <div class="footer-content">
             <span>KTU CGPA Standalone PWA</span>
             <span class="footer-dot">•</span>
-            <span class="pwa-full-version">v1.2.16 (Build 19)</span>
+            <span class="pwa-full-version">v1.2.17 (Build 20)</span>
             <span class="footer-dot">•</span>
             <a href="#" id="footerDisclaimerLink" style="color: inherit; text-decoration: underline; cursor: pointer;">Disclaimer & Privacy</a>
             <span class="footer-dot">•</span>
@@ -601,7 +578,7 @@
 
             <div class="menu-footer" style="margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted);">
                 <span>KTU Standalone PWA</span>
-                <span class="pwa-version-text">v1.2.16 (Build 19)</span>
+                <span class="pwa-version-text">v1.2.17 (Build 20)</span>
             </div>
         </div>
     </div>
