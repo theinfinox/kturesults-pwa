@@ -903,30 +903,34 @@
         const actSum = window.calculateActivityPointsSummary ? window.calculateActivityPointsSummary(currentActivityPoints, isLateral) : null;
 
         const hmHonorsEligible = evalHM && evalHM.honors && evalHM.honors.eligible;
-        const hmHonorsAtRisk = evalHM && evalHM.honors && evalHM.honors.status === "at_risk";
         const hmMinorsEligible = evalHM && evalHM.minors && evalHM.minors.eligible;
         const actCompleted = actSum && actSum.isCompleted;
 
+        // Show Honors card only if student is actually eligible; otherwise hide it from main dashboard
+        const showHonors = Boolean(hmHonorsEligible);
+
         html += `
-            <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); margin-top: 10px; margin-bottom: 12px;">
-                <div class="stat-card ${hmHonorsEligible ? 'accent-success' : (hmHonorsAtRisk ? 'accent-warning' : '')}" id="honorsCardBtn" style="cursor: pointer; text-align: left; padding: 14px;" title="View detailed Honors & Minors eligibility breakdown">
+            <div class="stats-grid" style="grid-template-columns: ${showHonors ? 'repeat(2, 1fr)' : '1fr'}; margin-top: 10px; margin-bottom: 12px;">
+                ${showHonors ? `
+                <div class="stat-card accent-success" id="honorsCardBtn" style="cursor: pointer; text-align: left; padding: 14px;" title="View detailed Honors & Minors eligibility breakdown">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary);">🎖️ Honors & Minors</span>
-                        <span class="pill-badge" style="font-size: 10px; ${hmHonorsEligible ? 'background:#DCFCE7; color:#166534;' : (hmHonorsAtRisk ? 'background:#FEF3C7; color:#92400E;' : 'background:#FEE2E2; color:#991B1B;')}">
-                            ${hmHonorsEligible ? 'Honors Eligible' : (hmHonorsAtRisk ? 'At Risk' : 'Honors Ineligible')}
+                        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary);">🎓 Honors Degree</span>
+                        <span class="pill-badge" style="font-size: 10px; background:#DCFCE7; color:#166534;">
+                            Honors Eligible
                         </span>
                     </div>
                     <div class="value" style="font-size: 16px; font-weight: 700; margin-bottom: 2px;">
-                        ${hmHonorsEligible ? '✅ Eligible (≥ 8.50)' : (hmHonorsAtRisk ? '⚠️ At Risk (' + metrics.currentCGPA + ')' : '❌ Ineligible')}
+                        ✅ Eligible (≥ 8.50)
                     </div>
                     <div class="label" style="font-size: 11px;">
                         Minors: ${hmMinorsEligible ? 'Eligible (≥ 7.0)' : 'Ineligible'} • Tap for breakdown
                     </div>
                 </div>
+                ` : ''}
 
                 <div class="stat-card ${actCompleted ? 'accent-success' : ''}" id="activityCardBtn" style="cursor: pointer; text-align: left; padding: 14px;" title="View and track KTU Activity Points">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary);">🏅 Activity Points</span>
+                        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary);">🎯 Activity Points</span>
                         <span class="pill-badge" style="font-size: 10px; ${actCompleted ? 'background:#DCFCE7; color:#166534;' : 'background:#EFF6FF; color:#1D4ED8;'}">
                             ${actCompleted ? 'Completed' : (actSum ? actSum.remainingPoints + ' pts needed' : '0 Pts')}
                         </span>
@@ -1107,7 +1111,7 @@
         if (!evaluation || !currentMetrics) {
             honorsContentContainer.innerHTML = `
                 <div class="empty-state" style="padding: 24px 12px;">
-                    <div class="empty-icon">🎖️</div>
+                    <div class="empty-icon">🎓</div>
                     <div class="empty-title">No Academic Records</div>
                     <div class="empty-desc">Sync or import your KTU grades to evaluate Honors & Minors eligibility.</div>
                 </div>
