@@ -1,4 +1,4 @@
-const CACHE_NAME = "ktu-cgpa-pwa-v24";
+const CACHE_NAME = "ktu-cgpa-pwa-v25";
 const ASSETS_TO_CACHE = [
     "./",
     "./index.html",
