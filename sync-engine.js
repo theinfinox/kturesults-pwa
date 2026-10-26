@@ -18,6 +18,130 @@
 
     const GRADE_REGEX = /^(O|S|A\+|A|B\+|B|C\+|C|D|P|LP|F|FE|I|AB|ABSENT|PASS|FAIL|COMPLETED|AUDIT|SATISFACTORY)$/i;
 
+    // --- Activity Points Parser from Official KTU #collapseSix Accordion Table ---
+    function parseActivityPoints(doc) {
+        if (!doc) return null;
+        const activityData = {
+            totalPoints: 0,
+            eligiblePoints: 0,
+            obtainedPoints: 0,
+            minimumPoints: 100,
+            yearlyBreakdown: {
+                firstYear: 0,
+                secondYear: 0,
+                thirdYear: 0,
+                fourthYear: 0
+            },
+            groups: []
+        };
+
+        // 1. Locate collapseSix panel or any container/anchor pointing to collapseSix
+        let panel = (typeof doc.querySelector === "function") ? doc.querySelector("#collapseSix, [id*='collapseSix'], [id*='CollapseSix']") : null;
+        let table = panel && typeof panel.querySelector === "function" ? panel.querySelector("table") : null;
+
+        if (!table && typeof doc.querySelector === "function") {
+            const anchor = doc.querySelector('a[href*="collapseSix"], [data-target*="collapseSix"]');
+            if (anchor && anchor.parentElement) {
+                const parentBlock = (typeof anchor.closest === "function" ? anchor.closest(".panel, .card, .accordion-group") : null) || anchor.parentElement.parentElement;
+                if (parentBlock && typeof parentBlock.querySelector === "function") table = parentBlock.querySelector("table");
+            }
+        }
+
+        if (!table && typeof doc.querySelectorAll === "function") {
+            // Fallback: search all tables in document for activity points headers
+            const allTables = doc.querySelectorAll("table") || [];
+            for (let i = 0; i < allTables.length; i++) {
+                const tbl = allTables[i];
+                const text = (tbl.textContent || "").toLowerCase();
+                if ((text.includes("obtained") || text.includes("eligible")) && (text.includes("activity") || text.includes("minimum") || text.includes("first year"))) {
+                    table = tbl;
+                    break;
+                }
+            }
+        }
+
+        if (table && typeof table.querySelectorAll === "function") {
+            let groupCol = -1;
+            let y1Col = -1;
+            let y2Col = -1;
+            let y3Col = -1;
+            let y4Col = -1;
+            let obtainedCol = -1;
+            let eligibleCol = -1;
+            let minCol = -1;
+
+            const ths = table.querySelectorAll("thead th, tr th, tr:first-child td") || [];
+            ths.forEach((th, idx) => {
+                const txt = (th.textContent || "").trim().toLowerCase();
+                if (txt.includes("group")) groupCol = idx;
+                else if (txt.includes("first")) y1Col = idx;
+                else if (txt.includes("second")) y2Col = idx;
+                else if (txt.includes("third")) y3Col = idx;
+                else if (txt.includes("fourth")) y4Col = idx;
+                else if (txt.includes("obtained")) obtainedCol = idx;
+                else if (txt.includes("eligible")) eligibleCol = idx;
+                else if (txt.includes("minimum") || txt.includes("target")) minCol = idx;
+            });
+
+            const rows = table.querySelectorAll("tbody tr, tr") || [];
+            let totalEligible = 0;
+            let totalObtained = 0;
+            let targetMin = 100;
+            let foundDataRow = false;
+
+            rows.forEach(tr => {
+                if (typeof tr.querySelectorAll !== "function") return;
+                const tds = tr.querySelectorAll("td") || [];
+                if (tds.length < 3) return; // ignore headers or spacer rows
+
+                const groupName = groupCol >= 0 && tds[groupCol] ? tds[groupCol].textContent.trim() : "";
+                const y1 = y1Col >= 0 && tds[y1Col] ? (parseFloat(tds[y1Col].textContent.trim()) || 0) : 0;
+                const y2 = y2Col >= 0 && tds[y2Col] ? (parseFloat(tds[y2Col].textContent.trim()) || 0) : 0;
+                const y3 = y3Col >= 0 && tds[y3Col] ? (parseFloat(tds[y3Col].textContent.trim()) || 0) : 0;
+                const y4 = y4Col >= 0 && tds[y4Col] ? (parseFloat(tds[y4Col].textContent.trim()) || 0) : 0;
+
+                const obt = obtainedCol >= 0 && tds[obtainedCol] ? parseFloat(tds[obtainedCol].textContent.trim()) : NaN;
+                const elig = eligibleCol >= 0 && tds[eligibleCol] ? parseFloat(tds[eligibleCol].textContent.trim()) : NaN;
+                const minPts = minCol >= 0 && tds[minCol] ? parseFloat(tds[minCol].textContent.trim()) : NaN;
+
+                if (!isNaN(elig) || !isNaN(obt)) {
+                    foundDataRow = true;
+                    const rowElig = !isNaN(elig) ? elig : obt;
+                    const rowObt = !isNaN(obt) ? obt : elig;
+                    totalEligible += rowElig;
+                    totalObtained += rowObt;
+                    if (!isNaN(minPts) && minPts > 0) targetMin = minPts;
+
+                    activityData.yearlyBreakdown.firstYear += y1;
+                    activityData.yearlyBreakdown.secondYear += y2;
+                    activityData.yearlyBreakdown.thirdYear += y3;
+                    activityData.yearlyBreakdown.fourthYear += y4;
+
+                    activityData.groups.push({
+                        group: groupName,
+                        firstYear: y1,
+                        secondYear: y2,
+                        thirdYear: y3,
+                        fourthYear: y4,
+                        obtained: rowObt,
+                        eligible: rowElig,
+                        minimum: minPts
+                    });
+                }
+            });
+
+            if (foundDataRow) {
+                activityData.totalPoints = totalEligible > 0 ? totalEligible : totalObtained;
+                activityData.eligiblePoints = totalEligible;
+                activityData.obtainedPoints = totalObtained;
+                activityData.minimumPoints = targetMin;
+                return activityData;
+            }
+        }
+
+        return null;
+    }
+
     // --- In-Memory HTML Parsers (Direct Boilerplate from Tested Extension Logic) ---
     function parseStudentInfo(doc) {
         const studentInfo = {
@@ -86,7 +210,17 @@
             }
         });
 
-        // Resilient Scrape: Scan document for Activity Points if not found in list-group-items
+        // 1. Primary Source: KTU official #collapseSix activity table
+        const actData = parseActivityPoints(doc);
+        if (actData && (actData.totalPoints !== undefined && actData.totalPoints !== null)) {
+            studentInfo.activityPoints = actData.totalPoints;
+            studentInfo.activityDetails = actData;
+            if (actData.minimumPoints) {
+                studentInfo.activityTarget = actData.minimumPoints;
+            }
+        }
+
+        // 2. Secondary Scrape: Scan document for Activity Points if not found in table or list-group-items
         if (studentInfo.activityPoints === undefined || studentInfo.activityPoints === null) {
             const allElements = doc.querySelectorAll("td, th, span, div, p, li") || [];
             for (const el of allElements) {
@@ -373,6 +507,7 @@
         executeSessionRefresh,
         parseRawHtml,
         parseStudentInfo,
+        parseActivityPoints,
         parseSemesterData
     };
 })();

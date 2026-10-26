@@ -153,8 +153,8 @@ async function testCrypto() {
 // -----------------------------------------------------------------
 console.log("\n[Test 5] Testing PWA Web Manifest & Dynamic Versioning...");
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.webmanifest"), "utf8"));
-assert(manifest.version === "1.2.10" || manifest.version === "1.2.9" || manifest.version === "1.2.8" || manifest.version === "1.2.7" || manifest.version === "1.2.6" || manifest.version === "1.2.5" || manifest.version === "1.2.4" || manifest.version === "1.2.3" || manifest.version === "1.2.2" || manifest.version === "1.2.1" || manifest.version === "1.2" || manifest.version === "1.1" || manifest.version === "1.0.0", "Manifest version mismatch");
-assert(manifest.version_code === 13 || manifest.version_code === 12 || manifest.version_code === 11 || manifest.version_code === 10 || manifest.version_code === 9 || manifest.version_code === 8 || manifest.version_code === 7 || manifest.version_code === 6 || manifest.version_code === 5 || manifest.version_code === 4 || manifest.version_code === 3 || manifest.version_code === 2 || manifest.version_code === 1, "Manifest version code mismatch");
+assert(manifest.version === "1.2.11" || manifest.version === "1.2.10" || manifest.version === "1.2.9" || manifest.version === "1.2.8" || manifest.version === "1.2.7" || manifest.version === "1.2.6" || manifest.version === "1.2.5" || manifest.version === "1.2.4" || manifest.version === "1.2.3" || manifest.version === "1.2.2" || manifest.version === "1.2.1" || manifest.version === "1.2" || manifest.version === "1.1" || manifest.version === "1.0.0", "Manifest version mismatch");
+assert(manifest.version_code === 14 || manifest.version_code === 13 || manifest.version_code === 12 || manifest.version_code === 11 || manifest.version_code === 10 || manifest.version_code === 9 || manifest.version_code === 8 || manifest.version_code === 7 || manifest.version_code === 6 || manifest.version_code === 5 || manifest.version_code === 4 || manifest.version_code === 3 || manifest.version_code === 2 || manifest.version_code === 1, "Manifest version code mismatch");
 assert.strictEqual(manifest.display, "standalone");
 
 const indexHtml = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
@@ -409,7 +409,7 @@ assert.strictEqual(actRes3.effectivePoints, 100);
 assert.strictEqual(actRes3.remainingPoints, 0);
 assert.strictEqual(actRes3.isCompleted, true);
 
-// Scenario 4: Portal scraping of Activity Points in parseStudentInfo
+// Scenario 4: Portal scraping of Activity Points in parseStudentInfo (Fallback list-group-item)
 const mockDocForActivity = {
     querySelector(s) {
         if (s === ".profile-title" || s === "h3" || s === ".page-header") return null;
@@ -429,6 +429,71 @@ const mockDocForActivity = {
 };
 const parsedStudent = KTUSyncEngine.parseStudentInfo(mockDocForActivity);
 assert.strictEqual(parsedStudent.activityPoints, 82, "Must parse activityPoints 82 from portal list-group-item");
+
+// Scenario 5: Official KTU #collapseSix Table Parsing (Govind's Exact Structure)
+const mockCollapseSixDoc = {
+    querySelector(s) {
+        if (s.includes("collapseSix")) {
+            return {
+                id: "collapseSix",
+                querySelector(subSel) {
+                    if (subSel === "table") {
+                        return {
+                            querySelectorAll(target) {
+                                if (target.includes("thead") || target.includes("th")) {
+                                    return [
+                                        { textContent: "Group" },
+                                        { textContent: "First Year" },
+                                        { textContent: "Second Year" },
+                                        { textContent: "Third Year" },
+                                        { textContent: "Fourth Year" },
+                                        { textContent: "Obtained Points" },
+                                        { textContent: "Eligible Points" },
+                                        { textContent: "Minimum Points" }
+                                    ];
+                                }
+                                if (target.includes("tbody") || target.includes("tr")) {
+                                    return [
+                                        {
+                                            querySelectorAll(colSel) {
+                                                return [
+                                                    { textContent: "Default Group-B.Tech Full Time 2019 Scheme" },
+                                                    { textContent: "132" },
+                                                    { textContent: "5" },
+                                                    { textContent: "0" },
+                                                    { textContent: "0" },
+                                                    { textContent: "137" },
+                                                    { textContent: "137" },
+                                                    { textContent: "100" }
+                                                ];
+                                            }
+                                        }
+                                    ];
+                                }
+                                return [];
+                            }
+                        };
+                    }
+                    return null;
+                }
+            };
+        }
+        return null;
+    },
+    querySelectorAll(s) {
+        return [];
+    }
+};
+
+const parsedGovind = KTUSyncEngine.parseStudentInfo(mockCollapseSixDoc);
+assert.strictEqual(parsedGovind.activityPoints, 137, "Must extract 137 activity points from #collapseSix");
+assert(parsedGovind.activityDetails, "Must include activityDetails object");
+assert.strictEqual(parsedGovind.activityDetails.eligiblePoints, 137);
+assert.strictEqual(parsedGovind.activityDetails.minimumPoints, 100);
+assert.strictEqual(parsedGovind.activityDetails.yearlyBreakdown.firstYear, 132);
+assert.strictEqual(parsedGovind.activityDetails.yearlyBreakdown.secondYear, 5);
+assert.strictEqual(parsedGovind.activityDetails.yearlyBreakdown.thirdYear, 0);
+assert.strictEqual(parsedGovind.activityDetails.yearlyBreakdown.fourthYear, 0);
 
 // Verify UI & DOM wiring
 assert(indexHtml.includes('id="openActivityModalBtn"'), "index.html must include openActivityModalBtn (🏅)");

@@ -50,6 +50,14 @@ $$\text{Clean RegNo: } \texttt{^(?:L)?(?:[A-Z]\{3,4\})?(\textbackslash d\{2\})([
 - `CE` &rarr; Civil Engineering
 - `IT` &rarr; Information Technology
 
+### 2.4 Official Activity Points Accordion Parsing (`#collapseSix`)
+Activity points data is located inside the `#collapseSix` accordion panel (following the semester cards `collapseFiveS1...S8`).
+The engine targets `#collapseSix` (or parent/fallback table) and extracts:
+- **Eligible / Obtained Points**: Dynamically detects column headers (`Obtained Points`, `Eligible Points`).
+- **Degree Minimum Target**: Extracts `Minimum Points` (e.g. `100` or `75`).
+- **Year-Wise Breakdown**: Parses `First Year`, `Second Year`, `Third Year`, and `Fourth Year` points.
+- **Group Info**: Preserves the batch regulation scheme (e.g. `Default Group-B.Tech Full Time 2019 Scheme`).
+
 ---
 
 ## 3. Extraction Heuristics: `parseSemesterData(doc)`
