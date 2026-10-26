@@ -822,11 +822,11 @@
                     const bLevel = document.getElementById("badgeLevel");
                     if (pName) pName.textContent = activeProf.label;
                     if (pReg) pReg.textContent = activeProf.username;
-                    if (instEl) instEl.textContent = "APJ Abdul Kalam Technological University";
-                    if (bDept) bDept.textContent = "💻 Engineering";
-                    if (bBatch) bBatch.textContent = "📅 Profile Saved";
-                    if (bScheme) bScheme.textContent = "📜 KTU Portal";
-                    if (bLevel) bLevel.textContent = "⚡ Ready to Sync";
+                    if (instEl) instEl.textContent = "KTU";
+                    if (bDept) bDept.textContent = "Engineering";
+                    if (bBatch) bBatch.textContent = "Profile Saved";
+                    if (bScheme) bScheme.textContent = "KTU Portal";
+                    if (bLevel) bLevel.textContent = "Ready to Sync";
                 } else {
                     profileCard.style.display = "none";
                 }
@@ -908,19 +908,48 @@
         const badgeLevelEl = document.getElementById("badgeLevel");
 
         const cleanStr = (s) => (s ? String(s).replace(/\s+/g, " ").trim() : "");
+        const toTitleCase = (s) => {
+            if (!s) return "";
+            return s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+        };
+
+        const rawInst = cleanStr(normProfile?.institution || studentInfo?.institution);
+        const formatInst = (raw) => {
+            if (!raw) return "KTU";
+            if (/apj\s*abdul\s*kalam/i.test(raw) || /technological\s*university/i.test(raw) || /^ktu$/i.test(raw)) {
+                return "KTU";
+            }
+            return toTitleCase(raw);
+        };
+
         if (profileNameEl) profileNameEl.textContent = cleanStr(normProfile?.name || studentInfo?.name) || "Student Profile";
         if (profileRegNoEl) profileRegNoEl.textContent = cleanStr(normProfile?.ktuId || studentInfo?.registerNo) || "N/A";
-        if (institutionTextEl) institutionTextEl.textContent = cleanStr(normProfile?.institution || studentInfo?.institution) || "APJ Abdul Kalam Technological University";
+        if (institutionTextEl) institutionTextEl.textContent = formatInst(rawInst);
         
         let deptLabel = cleanStr(normProfile?.dept) || "Engineering";
         if (normProfile?.minorDept && !normProfile.minorDept.toLowerCase().includes("none") && !normProfile.minorDept.toLowerCase().includes("minor")) {
-            deptLabel += ` (Minor: ${normProfile.minorDept})`;
+            deptLabel += ` (Minor: ${toTitleCase(normProfile.minorDept)})`;
         }
-        if (badgeDeptEl) badgeDeptEl.textContent = `💻 ${deptLabel}`;
-        if (badgeBatchEl) badgeBatchEl.textContent = `📅 ${cleanStr(normProfile?.year) || "KTU Batch"}`;
-        if (badgeSchemeEl) badgeSchemeEl.textContent = `📜 ${cleanStr(normProfile?.scheme) || "KTU Scheme"}`;
+        deptLabel = toTitleCase(deptLabel);
+
+        let schemeLabel = cleanStr(normProfile?.scheme) || "KTU Scheme";
+        const schemeYearMatch = schemeLabel.match(/(\d{4})/);
+        if (schemeYearMatch) {
+            schemeLabel = `${schemeYearMatch[1]} Scheme`;
+        }
+
+        let batchLabel = cleanStr(normProfile?.year) || "";
+        if (batchLabel && !batchLabel.toLowerCase().includes("batch")) {
+            batchLabel = `${batchLabel} Batch`;
+        } else if (!batchLabel) {
+            batchLabel = "KTU Batch";
+        }
+
+        if (badgeDeptEl) badgeDeptEl.textContent = deptLabel;
+        if (badgeBatchEl) badgeBatchEl.textContent = batchLabel;
+        if (badgeSchemeEl) badgeSchemeEl.textContent = schemeLabel;
         if (badgeLevelEl) {
-            badgeLevelEl.textContent = metrics.level === 1 ? "🎓 Full Degree" : (metrics.level === 2 ? "🔮 Forecast" : "📚 Completed Actuals");
+            badgeLevelEl.textContent = metrics.level === 1 ? "Full Degree" : (metrics.level === 2 ? "Forecast" : "Actuals");
         }
 
         // Render Active Forecast Banner
@@ -1613,6 +1642,7 @@
         if (heroFastSyncBtn) heroFastSyncBtn.addEventListener("click", handleFastSync);
         if (heroRefreshBtn) heroRefreshBtn.addEventListener("click", handleSessionRefresh);
         if (headerRefreshBtn) headerRefreshBtn.addEventListener("click", handleSessionRefresh);
+        if (heroFreshnessBadge) heroFreshnessBadge.addEventListener("click", handleSessionRefresh);
 
         // Modal Open/Close Handlers
         const openForecastModal = () => {

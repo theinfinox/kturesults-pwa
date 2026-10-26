@@ -31,55 +31,43 @@
     <!-- Header Navigation -->
     <header class="app-header">
         <div class="brand-wrapper">
-            <img src="icons/48.png" alt="KTU CGPA Logo" class="brand-icon">
-            <div>
-                <div class="brand-title">KTU CGPA <span class="version-badge pwa-version-text" id="headerVersionBadge">v1.2.19</span></div>
-                <div class="brand-badge" style="display: none;"><span class="pwa-version-code" id="headerBuildBadge">(Build 22)</span></div>
-            </div>
+            <div class="brand-title">KTU CGPA <span class="version-badge pwa-version-text" id="headerVersionBadge">v1.2.20</span></div>
+            <div class="brand-badge" style="display: none;"><span class="pwa-version-code" id="headerBuildBadge">(Build 23)</span></div>
         </div>
         <div class="header-actions">
+            <button id="heroFastSyncBtn" class="btn-header-sync" title="1-Click Fast Sync with KTU Portal">
+                <span>⚡ Fast Sync</span>
+            </button>
             <button id="headerRefreshBtn" class="icon-btn" title="Zero-Login Refresh (Cached Session • 0 Lockout Risk)">🔄</button>
             <button id="hamburgerMenuBtn" class="icon-btn" title="Menu & Academic Tools" aria-label="Open Navigation Menu">☰</button>
         </div>
     </header>
 
-    <!-- Executive Student Identity & Sync Command Bar -->
+    <!-- Executive Student Identity & Freshness Card -->
     <div id="profileCard" class="executive-command-bar" style="display: none;">
         <div class="command-bar-left">
-            <div class="student-avatar-badge">🎓</div>
             <div class="student-meta-group">
                 <div class="student-primary-row">
-                    <span id="profileName" class="student-name">Student Name</span>
-                    <span id="profileRegNo" class="student-regno">N/A</span>
-                    <span id="heroProfileName" style="display: none;">No Profile Configured</span>
-                    <span id="heroActiveProfileLabel" style="display: none;"></span>
+                    <div class="student-identity-pair">
+                        <span id="profileName" class="student-name">Student Name</span>
+                        <span id="profileRegNo" class="student-regno">N/A</span>
+                        <span id="heroProfileName" style="display: none;">No Profile Configured</span>
+                        <span id="heroActiveProfileLabel" style="display: none;"></span>
+                    </div>
+                    <div class="wallet-freshness" id="heroFreshnessBadge" title="Click to refresh session">
+                        <span class="freshness-dot"></span> Offline Ready
+                    </div>
                 </div>
                 <div class="student-secondary-row profile-badges">
-                    <span id="profileInstitution" class="meta-item"><span class="meta-icon">🏛️</span> <span id="institutionText">APJ Abdul Kalam Technological University</span></span>
-                    <span class="meta-divider">•</span>
-                    <span id="badgeDept" class="pill-badge">💻 Engineering</span>
-                    <span id="badgeScheme" class="pill-badge active-scheme">📜 Scheme</span>
-                    <span id="badgeBatch" class="pill-badge">📅 Batch</span>
-                    <span id="badgeLevel" class="pill-badge">🎓 Standing</span>
+                    <span id="profileInstitution" class="meta-chip"><span id="institutionText">KTU</span></span>
+                    <span id="badgeDept" class="meta-chip">Engineering</span>
+                    <span id="badgeScheme" class="meta-chip active-scheme">Scheme</span>
+                    <span id="badgeBatch" class="meta-chip">Batch</span>
+                    <span id="badgeLevel" class="meta-chip">Full Degree</span>
                 </div>
             </div>
         </div>
-
-        <div class="command-bar-right">
-            <div class="command-sync-group">
-                <button id="heroFastSyncBtn" class="btn-command-sync" title="Full KTU portal synchronization">
-                    <span>⚡ 1-Click Fast Sync</span>
-                </button>
-                <button id="heroRefreshBtn" class="btn-command-refresh" title="Fetch latest data using cached session (0 logins sent to KTU)">
-                    <span>🔄 Zero-Login Refresh</span>
-                </button>
-            </div>
-            <div class="command-freshness-group">
-                <div class="wallet-freshness" id="heroFreshnessBadge">
-                    <span class="freshness-dot"></span> Offline Ready
-                </div>
-            </div>
-        </div>
+        <button id="heroRefreshBtn" style="display: none;" aria-hidden="true"></button>
     </div>
 
     <!-- Empty State (Shown when no data exists) -->
@@ -137,7 +125,7 @@
         <div class="footer-content">
             <span>KTU CGPA Standalone PWA</span>
             <span class="footer-dot">•</span>
-            <span class="pwa-full-version">v1.2.19 (Build 22)</span>
+            <span class="pwa-full-version">v1.2.20 (Build 23)</span>
             <span class="footer-dot">•</span>
             <a href="#" id="footerDisclaimerLink" style="color: inherit; text-decoration: underline; cursor: pointer;">Disclaimer & Privacy</a>
             <span class="footer-dot">•</span>
@@ -577,7 +565,7 @@
 
             <div class="menu-footer" style="margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted);">
                 <span>KTU Standalone PWA</span>
-                <span class="pwa-version-text">v1.2.19 (Build 22)</span>
+                <span class="pwa-version-text">v1.2.20 (Build 23)</span>
             </div>
         </div>
     </div>

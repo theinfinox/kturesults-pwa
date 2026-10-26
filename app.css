@@ -234,9 +234,45 @@ body {
 }
 
 /* ========================================================================== */
-/* EXECUTIVE STUDENT IDENTITY COMMAND BAR                                     */
+/* EXECUTIVE STUDENT IDENTITY CARD & HEADER CONTROLS (OPTION B)               */
 /* ========================================================================== */
 
+/* Header Fast Sync Button */
+.btn-header-sync {
+    background: #10B981;
+    color: #FFFFFF;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 0 12px;
+    height: 34px;
+    font-size: var(--font-caption);
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.28);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+}
+
+.btn-header-sync:hover {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.38);
+}
+
+.btn-header-sync:active {
+    transform: scale(0.98);
+}
+
+.btn-header-sync:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Executive Student Identity Card */
 .executive-command-bar {
     background: #FFFFFF;
     border: 1px solid var(--border-light);
@@ -244,46 +280,37 @@ body {
     padding: 12px 18px;
     box-shadow: var(--shadow-sm);
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
+    flex-direction: column;
+    gap: 6px;
     margin-bottom: 16px;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .command-bar-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 0;
-}
-
-.student-avatar-badge {
-    width: 38px;
-    height: 38px;
-    border-radius: var(--radius-md);
-    background: #ECFDF5;
-    border: 1px solid #A7F3D0;
-    color: #065F46;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    flex-shrink: 0;
+    width: 100%;
 }
 
 .student-meta-group {
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    min-width: 0;
+    gap: 6px;
+    width: 100%;
 }
 
 .student-primary-row {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+}
+
+.student-identity-pair {
+    display: flex;
+    align-items: center;
     gap: 8px;
     flex-wrap: wrap;
+    min-width: 0;
 }
 
 .student-name {
@@ -306,106 +333,10 @@ body {
     letter-spacing: 0.04em;
 }
 
-.student-secondary-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    font-size: var(--font-caption);
-    color: var(--text-secondary);
-}
-
-.meta-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-weight: 500;
-}
-
-.meta-divider {
-    opacity: 0.4;
-    font-size: 10px;
-}
-
-.command-bar-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-shrink: 0;
-}
-
-.command-sync-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.btn-command-sync {
-    background: #10B981;
-    color: #FFFFFF;
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 8px 14px;
-    font-size: var(--font-caption);
-    font-weight: 700;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    white-space: nowrap;
-    height: 36px;
-}
-
-.btn-command-sync:hover {
-    background: #059669;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-}
-
-.btn-command-sync:active {
-    transform: scale(0.98);
-}
-
-.btn-command-refresh {
-    background: #F8FAFC;
-    color: var(--text-main);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
-    padding: 8px 12px;
-    font-size: var(--font-caption);
-    font-weight: 600;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    white-space: nowrap;
-    height: 36px;
-}
-
-.btn-command-refresh:hover {
-    background: #F1F5F9;
-    border-color: var(--border-hover);
-    transform: translateY(-1px);
-}
-
-.btn-command-refresh:active {
-    transform: scale(0.98);
-}
-
-.command-freshness-group {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 2px;
-}
-
 .wallet-freshness {
     font-size: var(--font-badge);
     font-weight: 600;
-    background: #F1F5F9;
+    background: #F8FAFC;
     border: 1px solid var(--border-light);
     padding: 3px 9px;
     border-radius: 999px;
@@ -415,6 +346,13 @@ body {
     gap: 5px;
     white-space: nowrap;
     flex-shrink: 0;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.wallet-freshness:hover {
+    background: #F1F5F9;
+    border-color: var(--border-hover);
 }
 
 .freshness-dot {
@@ -426,70 +364,33 @@ body {
     display: inline-block;
 }
 
-@media (max-width: 900px) {
-    .executive-command-bar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-        padding: 14px 16px;
-    }
+.student-secondary-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
 
-    .command-bar-left {
-        width: 100%;
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-    }
+.meta-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    background: #F8FAFC;
+    border: 1px solid var(--border-light);
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    white-space: nowrap;
+}
 
-    .student-meta-group {
-        width: 100%;
-        min-width: 0;
-    }
-
-    .student-primary-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-
-    .student-secondary-row {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        flex-wrap: wrap;
-    }
-
-    .command-bar-right {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        width: 100%;
-        border-top: 1px solid var(--border-light);
-        padding-top: 12px;
-    }
-
-    .command-sync-group {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        width: 100%;
-    }
-
-    .btn-command-sync,
-    .btn-command-refresh {
-        width: 100%;
-        justify-content: center;
-        padding: 8px 6px;
-        font-size: var(--font-caption);
-    }
-
-    .command-freshness-group {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-    }
+.meta-chip.active-scheme,
+.meta-chip.highlight {
+    background: #ECFDF5;
+    border-color: #A7F3D0;
+    color: #065F46;
+    font-weight: 600;
 }
 
 /* ========================================================================== */
@@ -1891,63 +1792,58 @@ body {
 /* ========================================================================== */
 @media (max-width: 480px) {
     .app-header {
-        padding: 10px 14px;
+        padding: 8px 12px;
         flex-wrap: nowrap !important;
-        gap: 10px;
+        gap: 8px;
         align-items: center;
         justify-content: space-between;
-        min-height: 52px;
-    }
-
-    .brand-icon {
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        flex-shrink: 0;
-    }
-
-    .brand-wrapper {
-        gap: 8px;
-        flex: 0 1 auto;
-        min-width: 0;
-        display: flex;
-        align-items: center;
+        min-height: 50px;
     }
 
     .brand-title {
         font-size: 15px;
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
     }
 
-    /* Keep version badge compact */
     .version-badge {
-        display: inline-block;
-        font-size: 10.5px;
-        padding: 1px 6px;
+        font-size: 10px;
+        padding: 1px 5px;
     }
 
     .header-actions {
-        gap: 8px;
+        gap: 6px;
         flex: 0 0 auto;
         justify-content: flex-end;
         display: flex;
         align-items: center;
     }
 
+    .btn-header-sync {
+        height: 32px;
+        padding: 0 9px;
+        font-size: 11.5px;
+        gap: 4px;
+    }
+
     .icon-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 15px;
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
         border-radius: 8px;
         flex-shrink: 0;
     }
 
-    .header-profile-select {
-        max-width: 90px;
-        font-size: 10.5px;
-        padding: 4px 5px;
+    .executive-command-bar {
+        padding: 10px 14px;
+    }
+
+    .student-name {
+        font-size: 14.5px;
+    }
+
+    .meta-chip {
+        font-size: 11px;
+        padding: 1px 6px;
     }
 }
 
