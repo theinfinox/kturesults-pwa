@@ -1461,10 +1461,15 @@
                 ? `<span style="font-size: 11px; font-weight: 700; color: #1D4ED8; background: #DBEAFE; padding: 2px 8px; border-radius: 999px;">🔮 FORECAST</span>`
                 : `<span class="semester-sgpa-badge">SGPA: ${sem.sgpa}</span>`;
 
+            const semLabel = sem.semester || "";
+            const semBadgeMatch = semLabel.match(/(?:Semester\s*|S)(\d+)/i);
+            const semShortBadge = semBadgeMatch ? `S${semBadgeMatch[1]}` : (semLabel.startsWith("S") ? semLabel : semLabel.substring(0, 2).toUpperCase());
+
             card.innerHTML = `
                 <div class="semester-header">
                     <div class="semester-title">
-                        <span>${sem.semester}</span>
+                        <span class="semester-col-badge">${semShortBadge}</span>
+                        <span class="semester-title-text">${sem.semester}</span>
                         <span class="accordion-chevron">▾</span>
                     </div>
                     ${badgeHtml}
