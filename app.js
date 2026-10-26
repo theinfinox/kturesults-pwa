@@ -411,15 +411,77 @@
         }
     }
 
+    let toastDismissTimer = null;
+
     function showStatus(msg, type = "loading") {
         if (!syncStatusPill) return;
-        syncStatusPill.className = `status-pill ${type}`;
-        syncStatusPill.innerHTML = msg;
-        syncStatusPill.style.display = "block";
+        if (toastDismissTimer) {
+            clearTimeout(toastDismissTimer);
+            toastDismissTimer = null;
+        }
+
+        // Remove exit class if active
+        syncStatusPill.classList.remove("toast-leave");
+
+        // Format message with spinner if loading and no spinner present
+        let displayMsg = msg;
+        if (type === "loading") {
+            if (displayMsg.startsWith("🌐 ") || displayMsg.startsWith("🔄 ")) {
+                displayMsg = `<span class="toast-spinner"></span> <span>${displayMsg.substring(2).trim()}</span>`;
+            } else if (!displayMsg.includes("toast-spinner")) {
+                displayMsg = `<span class="toast-spinner"></span> <span>${displayMsg}</span>`;
+            }
+        }
+
+        const toastContent = document.getElementById("toastContent");
+        if (toastContent) {
+            toastContent.innerHTML = displayMsg;
+        } else {
+            syncStatusPill.innerHTML = `
+                <div class="toast-content" id="toastContent">${displayMsg}</div>
+                <button class="toast-close-btn" id="toastCloseBtn" title="Dismiss" aria-label="Dismiss">✕</button>
+            `;
+            const closeBtn = document.getElementById("toastCloseBtn");
+            if (closeBtn) closeBtn.onclick = hideStatus;
+        }
+
+        syncStatusPill.className = `toast-bubble status-pill ${type}`;
+
+        const isAlreadyVisible = syncStatusPill.style.display === "flex";
+        if (isAlreadyVisible) {
+            syncStatusPill.classList.remove("toast-pop");
+            void syncStatusPill.offsetWidth; // Force reflow to retrigger animation
+            syncStatusPill.classList.add("toast-pop");
+        } else {
+            syncStatusPill.style.display = "flex";
+        }
+
+        const closeBtn = document.getElementById("toastCloseBtn");
+        if (closeBtn) closeBtn.onclick = hideStatus;
+
+        // Auto-dismiss: loading stays until completion; success 4.5s; error/warning 6s
+        if (type === "success") {
+            toastDismissTimer = setTimeout(hideStatus, 4500);
+        } else if (type === "warning" || type === "error") {
+            toastDismissTimer = setTimeout(hideStatus, 6000);
+        }
     }
 
     function hideStatus() {
-        if (syncStatusPill) syncStatusPill.style.display = "none";
+        if (!syncStatusPill) return;
+        if (toastDismissTimer) {
+            clearTimeout(toastDismissTimer);
+            toastDismissTimer = null;
+        }
+        if (syncStatusPill.style.display === "none") return;
+
+        syncStatusPill.classList.add("toast-leave");
+        setTimeout(() => {
+            if (syncStatusPill.classList.contains("toast-leave")) {
+                syncStatusPill.style.display = "none";
+                syncStatusPill.classList.remove("toast-leave");
+            }
+        }, 220);
     }
 
     function openModal(el) {

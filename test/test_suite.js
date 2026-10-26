@@ -153,8 +153,8 @@ async function testCrypto() {
 // -----------------------------------------------------------------
 console.log("\n[Test 5] Testing PWA Web Manifest & Dynamic Versioning...");
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.webmanifest"), "utf8"));
-assert(manifest.version === "1.2.17" || manifest.version === "1.2.16" || manifest.version === "1.2.15" || manifest.version === "1.2.14" || manifest.version === "1.2.13" || manifest.version === "1.2.12" || manifest.version === "1.2.11" || manifest.version === "1.2.10" || manifest.version === "1.2.9" || manifest.version === "1.2.8" || manifest.version === "1.2.7" || manifest.version === "1.2.6" || manifest.version === "1.2.5" || manifest.version === "1.2.4" || manifest.version === "1.2.3" || manifest.version === "1.2.2" || manifest.version === "1.2.1" || manifest.version === "1.2" || manifest.version === "1.1" || manifest.version === "1.0.0", "Manifest version mismatch");
-assert(manifest.version_code === 20 || manifest.version_code === 19 || manifest.version_code === 18 || manifest.version_code === 17 || manifest.version_code === 16 || manifest.version_code === 15 || manifest.version_code === 14 || manifest.version_code === 13 || manifest.version_code === 12 || manifest.version_code === 11 || manifest.version_code === 10 || manifest.version_code === 9 || manifest.version_code === 8 || manifest.version_code === 7 || manifest.version_code === 6 || manifest.version_code === 5 || manifest.version_code === 4 || manifest.version_code === 3 || manifest.version_code === 2 || manifest.version_code === 1, "Manifest version code mismatch");
+assert(manifest.version === "1.2.18" || manifest.version === "1.2.17" || manifest.version === "1.2.16" || manifest.version === "1.2.15" || manifest.version === "1.2.14" || manifest.version === "1.2.13" || manifest.version === "1.2.12" || manifest.version === "1.2.11" || manifest.version === "1.2.10" || manifest.version === "1.2.9" || manifest.version === "1.2.8" || manifest.version === "1.2.7" || manifest.version === "1.2.6" || manifest.version === "1.2.5" || manifest.version === "1.2.4" || manifest.version === "1.2.3" || manifest.version === "1.2.2" || manifest.version === "1.2.1" || manifest.version === "1.2" || manifest.version === "1.1" || manifest.version === "1.0.0", "Manifest version mismatch");
+assert(manifest.version_code === 21 || manifest.version_code === 20 || manifest.version_code === 19 || manifest.version_code === 18 || manifest.version_code === 17 || manifest.version_code === 16 || manifest.version_code === 15 || manifest.version_code === 14 || manifest.version_code === 13 || manifest.version_code === 12 || manifest.version_code === 11 || manifest.version_code === 10 || manifest.version_code === 9 || manifest.version_code === 8 || manifest.version_code === 7 || manifest.version_code === 6 || manifest.version_code === 5 || manifest.version_code === 4 || manifest.version_code === 3 || manifest.version_code === 2 || manifest.version_code === 1, "Manifest version code mismatch");
 assert.strictEqual(manifest.display, "standalone");
 
 const indexHtml = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
@@ -162,6 +162,8 @@ assert(indexHtml.includes("pwa-version-text"), "index.html missing version place
 assert(indexHtml.includes("pwa-version-code"), "index.html missing version code placeholders");
 assert(indexHtml.includes('id="hamburgerMenuBtn"'), "index.html must include hamburgerMenuBtn");
 assert(indexHtml.includes('id="menuModal"'), "index.html must include menuModal");
+assert(indexHtml.includes('id="toastContainer"'), "index.html must include toastContainer for floating notifications");
+assert(indexHtml.includes('id="syncStatusPill"'), "index.html must preserve syncStatusPill ID");
 console.log("  ✅ PWA manifest configuration and DOM placeholders verified.");
 
 // -----------------------------------------------------------------
