@@ -19,6 +19,9 @@
         if (path.includes("studentdetailsview.htm") || path.includes("studentdetailsview")) {
             return "student_details";
         }
+        if (path.includes("dashboard.htm") || path.includes("dashboard")) {
+            return "dashboard";
+        }
         
         // Detect if user is logged into KTU portal on any internal page (e.g. /home.htm, /eu/core/home.htm)
         if (doc) {
@@ -34,43 +37,45 @@
 
     function checkPageIntegrity(doc) {
         if (!doc) return { isComplete: false, reason: "missing_document" };
-        const route = getRoute(doc);
 
-        if (route === "student_details") {
-            const hasAccordion = !!doc.querySelector("[id^='collapseFiveS'], [id*='collapseFiveS'], [id^='collapseFive'], a[href*='collapseFive']");
-            const hasProfile = !!doc.querySelector(".list-group-item, .panel-heading");
+        const hasAccordion = !!doc.querySelector("[id^='collapseFiveS'], [id*='collapseFiveS'], [id^='collapseFive'], a[href*='collapseFive']");
+        const hasProfile = !!doc.querySelector(".list-group-item, .panel-heading, .profile-title, .page-header");
+        const hasLoginForm = !!doc.querySelector("form[name='loginform'], #loginForm, input[name='username']");
+        const hasTurnstile = !!doc.querySelector(".cf-turnstile, [data-sitekey]");
+
+        if (hasAccordion) {
             return {
-                isComplete: hasAccordion || hasProfile,
-                hasAccordion,
-                hasProfile,
-                reason: hasAccordion ? "valid_curriculum" : (hasProfile ? "profile_only" : "missing_curriculum")
+                isComplete: true,
+                hasAccordion: true,
+                hasProfile: !!hasProfile,
+                reason: "valid_curriculum"
             };
         }
 
-        if (route === "login") {
-            const hasLoginForm = !!doc.querySelector("form[name='loginform'], #loginForm, input[name='username']");
-            const hasTurnstile = !!doc.querySelector(".cf-turnstile, [data-sitekey]");
+        if (hasLoginForm) {
             return {
-                isComplete: hasLoginForm,
-                hasLoginForm,
-                hasTurnstile,
-                reason: hasLoginForm ? "valid_login" : "missing_login_form"
+                isComplete: true,
+                hasLoginForm: true,
+                hasTurnstile: !!hasTurnstile,
+                reason: "valid_login"
             };
         }
 
-        if (route === "authenticated_home") {
+        if (hasProfile) {
             return {
                 isComplete: true,
                 hasAccordion: false,
                 hasProfile: true,
-                reason: "authenticated_home"
+                reason: "profile_only"
             };
         }
 
-        return { isComplete: true, reason: "general_page" };
-    }
-
-        return { isComplete: true, reason: "general_page" };
+        return {
+            isComplete: true,
+            hasAccordion: false,
+            hasProfile: false,
+            reason: "general_page"
+        };
     }
 
     return {

@@ -57,9 +57,9 @@
             return;
         }
 
-        // Post-login / Home page support: auto-fetch curriculum in background
-        if (route === "authenticated_home") {
-            console.log("[KTU Supercharger] Authenticated portal home detected. Fetching curriculum...");
+        // Post-login / Dashboard / Home page support: auto-fetch curriculum in background
+        if (route === "authenticated_home" || route === "dashboard") {
+            console.log("[KTU Supercharger] Authenticated portal dashboard/home detected. Fetching curriculum...");
             try {
                 const res = await fetch("/eu/stu/studentDetailsView.htm", { credentials: "same-origin" });
                 if (res.ok) {

@@ -2,7 +2,7 @@
 
 /* Full-Site Masking: When modern skin is active, entirely mask KTU's ancient portal layout */
 body.ktu-supercharger-active {
-    background: #f1f1f1 !important;
+    background: #f8fafc !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow-x: hidden !important;

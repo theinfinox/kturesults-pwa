@@ -18,15 +18,7 @@
             container = document.createElement("div");
             container.id = "ktu-supercharger-container";
             container.className = "ktu-supercharger-skin-root";
-
-            // Find KTU's main container or insert before the accordion
-            const nativeTarget = document.querySelector("#collapseFive")?.closest(".panel-group, .container") ||
-                                 document.querySelector(".container, #page-wrapper, body");
-            if (nativeTarget && nativeTarget.parentElement) {
-                nativeTarget.parentElement.insertBefore(container, nativeTarget);
-            } else {
-                document.body.appendChild(container);
-            }
+            document.body.appendChild(container);
         }
 
         const sInfo = payload.studentInfo || {};

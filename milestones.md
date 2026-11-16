@@ -51,3 +51,12 @@
 - **Resilient Offline Vault & Anti-Degradation Shield**: Caches complete scorecards into `chrome.storage.local`. Protects against empty/withheld server responses with `newCoursesCount >= cachedCoursesCount`.
 - **Unified 1-Click PWA Parity**: Clicking `[ 🚀 Open in PWA Forecaster ]` on KTU transfers data seamlessly via URL fragment (`#ext_sync=<base64>`) to `kturesults.govindsr.me`, maintaining 100% data parity between the extension and PWA.
 - **Dedicated Extension Test Suite**: Independent test suite in `/extension/test/run_tests.js` validating parser, calculator, storage shield, and URL bridge.
+
+---
+
+## ⚡ Milestone 6: Real-World 11-Column Table Alignment & Complete Portal Masking
+- **Post-Login Route Discovery (`/eu/alt/dashboard.htm`)**: KTU's post-login flow lands on `/eu/alt/dashboard.htm` without curriculum tables. Added `dashboard` route recognition and immediate background fetch of `/eu/stu/studentDetailsView.htm` using active session cookies.
+- **11-Column Dynamic Table Parser**: Real-world portal audit revealed that KTU curriculum tables have 11 columns (`Slot`, `Course [CODE - NAME]`, `Course Credit`, `Valuation Type`, `Completed Status`, `Is Eligible`, `Re-Registration`, `Grade`, `Earned Credit`, `Exam Details`, `SGPA`). Resolved column indexing bug that previously read `"Valuation by university"` as the grade, fixing the `0.00 CGPA` and `0 Backlogs` discrepancy.
+- **Direct Body-Level Container Mounting**: Fixed skin masking by appending `#ktu-supercharger-container` directly to `document.body` rather than inside `#page-wrapper`. This ensures `body.ktu-supercharger-active > *:not(...)` cleanly hides 100% of native KTU portal elements (blue navigation bar, sidebar, and footers).
+- **DOM-Native Page Integrity Preflight**: Refactored `checkPageIntegrity()` in `preflight.js` to inspect the passed document tree directly rather than `window.location.pathname`, enabling flawless curriculum extraction from background-fetched DOMs on `dashboard.htm`.
+- **Verified Official Fixtures & Expanded Test Suite**: Added Test 3B in `extension/test/test_parser.js` testing official KTU 11-column table layouts and real title banners (`GOVIND S R(CEA20CS026) (COLLEGE OF ENGINEERING ATTINGAL)`). Verified that all 10 extension tests and all 13 root PWA tests pass with 100% fidelity.
