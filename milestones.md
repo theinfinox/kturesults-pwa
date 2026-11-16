@@ -44,7 +44,10 @@
 - **Context & Motivation**: KTU introduced Cloudflare Turnstile anti-bot verification and a security modal warning on `app.ktu.edu.in/login.htm`, blocking headless server-side credential scraping.
 - **Architectural Shift**: Decoupled grade capture from credential collection by shifting to an **In-Portal Browser Extension (`/extension`)**.
 - **Instant Scorecard Capture**: Content script extracts `#collapseFive*` and `#collapseSix` on `DOMContentLoaded` (< 50ms), immunizing students against KTU server crashes on result day.
-- **Executive In-Portal Bento Grid**: Automatically overhauls KTU’s 2012 Bootstrap 3 curriculum page into a modern executive dashboard directly on the university domain, with a 1-click toggle back to Classic View.
+- **Full-Site Masking & Exact PWA Parity**: When Modern View is active (`body.ktu-supercharger-active`), entirely masks KTU's ancient portal layout (hiding blue navbar, sidebar, footers, and unstyled tables). Replaces the screen with the exact Bento Grid layout of our main PWA.
+- **Post-Login Home Page Auto-Fetch**: Detects when students land on KTU's home page after logging in (`/eu/core/home.htm`) and automatically fetches the curriculum section in the background with active session cookies, preventing "page not found" errors.
+- **Instant 1-Click Toggle**: Allows students to switch back to the original KTU portal (`[ 🔄 Classic KTU Portal ]`) with all menus, sidebars, and tables 100% restored.
+- **Raw HTML Capture (`[ 💾 Save HTML ]`)**: Added toolbar action to export/download the exact raw official KTU HTML page for inspection and benchmarking.
 - **Resilient Offline Vault & Anti-Degradation Shield**: Caches complete scorecards into `chrome.storage.local`. Protects against empty/withheld server responses with `newCoursesCount >= cachedCoursesCount`.
 - **Unified 1-Click PWA Parity**: Clicking `[ 🚀 Open in PWA Forecaster ]` on KTU transfers data seamlessly via URL fragment (`#ext_sync=<base64>`) to `kturesults.govindsr.me`, maintaining 100% data parity between the extension and PWA.
 - **Dedicated Extension Test Suite**: Independent test suite in `/extension/test/run_tests.js` validating parser, calculator, storage shield, and URL bridge.

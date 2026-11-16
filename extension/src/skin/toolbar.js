@@ -42,6 +42,9 @@
                 <button id="ktuBtnOpenPwa" class="ktu-btn ktu-btn-primary" title="Open full degree forecasting & comebacks in KTU PWA">
                     <span>🚀 Open in PWA Forecaster</span>
                 </button>
+                <button id="ktuBtnSaveHtml" class="ktu-btn ktu-btn-secondary" title="Save & download the raw official KTU HTML page for inspection">
+                    <span>💾 Save HTML</span>
+                </button>
                 <button id="ktuBtnExportJson" class="ktu-btn ktu-btn-secondary" title="Export raw JSON scorecard backup">
                     <span>📥 Export JSON</span>
                 </button>
@@ -57,6 +60,11 @@
         const btnOpenPwa = document.getElementById("ktuBtnOpenPwa");
         if (btnOpenPwa && callbacks.onOpenPwa) {
             btnOpenPwa.addEventListener("click", callbacks.onOpenPwa);
+        }
+
+        const btnSaveHtml = document.getElementById("ktuBtnSaveHtml");
+        if (btnSaveHtml && callbacks.onSaveHtml) {
+            btnSaveHtml.addEventListener("click", callbacks.onSaveHtml);
         }
 
         const btnExportJson = document.getElementById("ktuBtnExportJson");
