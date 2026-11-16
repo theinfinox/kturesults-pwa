@@ -133,9 +133,61 @@
         await migrateLegacyProfiles();
         loadActiveStudentData();
         setupEventListeners();
+        checkExternalSyncPayload();
         renderApp();
         await loadManifestVersion();
         checkDisclaimerStatus();
+    }
+
+    // --- Extension & External URL Fragment Sync Bridge ---
+    function checkExternalSyncPayload() {
+        try {
+            if (!window.location.hash || !window.location.hash.includes("ext_sync=")) {
+                return;
+            }
+            const hashMatch = window.location.hash.match(/ext_sync=([^&]+)/);
+            if (!hashMatch) return;
+            const encoded = decodeURIComponent(hashMatch[1]);
+            let rawJson = "";
+            if (typeof atob === "function") {
+                rawJson = decodeURIComponent(escape(atob(encoded)));
+            } else {
+                rawJson = decodeURIComponent(encoded);
+            }
+            const parsed = JSON.parse(rawJson);
+            const sData = Array.isArray(parsed.semesterData) ? parsed.semesterData : [];
+            const sInfo = parsed.studentInfo || {};
+
+            if (sData.length === 0 && !sInfo.registerNo) return;
+
+            const reg = (sInfo.registerNo || "IMPORTED_STUDENT").toUpperCase().trim();
+            if (!savedProfiles[reg]) {
+                savedProfiles[reg] = {
+                    id: reg,
+                    label: sInfo.name || reg,
+                    username: reg,
+                    password: "",
+                    createdAt: new Date().toISOString()
+                };
+            }
+            activeProfileId = reg;
+            saveProfilesToStorage();
+            saveActiveStudentData(sData, sInfo, parsed.lastScraped || new Date().toISOString());
+
+            if (parsed.activityPoints !== undefined && parsed.activityPoints !== null) {
+                const actPts = parseFloat(parsed.activityPoints) || 0;
+                saveActiveStudentActivities(actPts, "manual");
+            }
+
+            if (window.history && window.history.replaceState) {
+                window.history.replaceState(null, document.title, window.location.pathname + window.location.search);
+            }
+
+            renderApp();
+            showStatus(`🎉 Synced ${sData.length} courses for ${sInfo.name || reg}!`, "success");
+        } catch (err) {
+            console.warn("[PWA] Extension sync payload import failed:", err);
+        }
     }
 
     // --- Dynamic Manifest Version Sync ---
@@ -2003,6 +2055,9 @@
         // CSV Export
         if (downloadCsvBtn) downloadCsvBtn.addEventListener("click", exportCsv);
         if (headerCsvBtn) headerCsvBtn.addEventListener("click", exportCsv);
+
+        // Extension URL Fragment listener
+        window.addEventListener("hashchange", checkExternalSyncPayload);
     }
 
     // --- 10. CSV Export ---

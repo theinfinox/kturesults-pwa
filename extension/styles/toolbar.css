@@ -1,0 +1,147 @@
+/* KTU Supercharger - Floating Executive Toolbar */
+.ktu-supercharger-toolbar-bar {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 999999;
+    background: rgba(15, 23, 42, 0.94);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #f8fafc;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.ktu-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.ktu-toolbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 800;
+    font-size: 15px;
+    color: #34d399;
+    letter-spacing: -0.3px;
+}
+
+.ktu-brand-icon {
+    font-size: 18px;
+}
+
+.ktu-toolbar-student {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #cbd5e1;
+}
+
+.ktu-student-name {
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.ktu-student-reg {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    color: #a7f3d0;
+}
+
+.ktu-capture-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #6ee7b7;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.ktu-status-dot {
+    width: 6px;
+    height: 6px;
+    background: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #10b981;
+}
+
+.ktu-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ktu-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ktu-btn-primary {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+}
+
+.ktu-btn-primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.ktu-btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f1f5f9;
+}
+
+.ktu-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.ktu-btn-toggle {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #fbbf24;
+}
+
+.ktu-btn-toggle:hover {
+    background: rgba(245, 158, 11, 0.25);
+}
+
+@media (max-width: 768px) {
+    .ktu-supercharger-toolbar-bar {
+        padding: 8px 12px;
+        gap: 8px;
+    }
+    .ktu-toolbar-student {
+        font-size: 12px;
+    }
+    .ktu-btn {
+        padding: 5px 10px;
+        font-size: 11.5px;
+    }
+}

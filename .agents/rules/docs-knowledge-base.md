@@ -17,6 +17,8 @@ The repository documentation is organized as follows:
 - **[`docs/SYNC_ENGINE.md`](file:///c:/Users/1sree/Documents/standalone-pwa/docs/SYNC_ENGINE.md)**: Headless portal parser (`sync-engine.js`), DOM traversal, regex pattern extractors, and cookie handling.
 - **[`docs/SECURITY_AND_VAULT.md`](file:///c:/Users/1sree/Documents/standalone-pwa/docs/SECURITY_AND_VAULT.md)**: Web Cryptography API (`crypto-vault.js`), AES-GCM-256 + PBKDF2 (100,000 iterations), device seed vs PIN modes, memory hygiene, and HTTPS enforcement.
 - **[`docs/VERSIONING_AND_RELEASES.md`](file:///c:/Users/1sree/Documents/standalone-pwa/docs/VERSIONING_AND_RELEASES.md)**: Mandatory 5-point atomic release protocol (`sw.js` cache bust, manifest bump, `package.json`, `index.html`, and `test_suite.js`).
+- **[`milestones.md`](file:///c:/Users/1sree/Documents/standalone-pwa/milestones.md)**: Master historical tracking of all architectural milestones and evolutionary steps.
+- **[`extension/`](file:///c:/Users/1sree/Documents/standalone-pwa/extension)**: The KTU Supercharger In-Portal Browser Extension (Manifest V3) for instant scorecard capture and executive in-portal skinning.
 
 ## Invariants to Preserve:
 1. Zero runtime npm dependencies in backend and frontend.
@@ -25,3 +27,5 @@ The repository documentation is organized as follows:
 4. Protect against KTU account lockout using the Anti-Lockout Shield and Zero-Login Session Refresh.
 5. Offline-first PWA operation with updated Service Worker caching.
 6. Mandatory atomic version and cache bump on ANY code change following `docs/VERSIONING_AND_RELEASES.md`.
+7. Keep extension code modular and isolated in `/extension` with 100% passing tests in `node extension/test/run_tests.js`.
+8. Track changes incrementally in `milestones.md` without clearing history.

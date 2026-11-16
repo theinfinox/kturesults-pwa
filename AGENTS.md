@@ -22,6 +22,8 @@ When initializing a new session or addressing user requests without context:
    - **Portal Scraping, Heuristics, & DOM Parsing (`sync-engine.js`)**: Consult **[`docs/SYNC_ENGINE.md`](file:///c:/Users/1sree/Documents/standalone-pwa/docs/SYNC_ENGINE.md)**.
    - **Security, Encryption, PBKDF2, AES-GCM (`crypto-vault.js`)**: Consult **[`docs/SECURITY_AND_VAULT.md`](file:///c:/Users/1sree/Documents/standalone-pwa/docs/SECURITY_AND_VAULT.md)**.
    - **PWA Releases, Version Bumping & Cache Invalidation**: Consult **[`docs/VERSIONING_AND_RELEASES.md`](file:///c:/Users/1sree/Documents/standalone-pwa/docs/VERSIONING_AND_RELEASES.md)**.
+   - **Historical Milestones & Evolutionary Record**: Consult **[`milestones.md`](file:///c:/Users/1sree/Documents/standalone-pwa/milestones.md)**.
+   - **Browser Extension Architecture & In-Portal Skin**: Consult **[`.agents/rules/extension-architecture.md`](file:///c:/Users/1sree/Documents/standalone-pwa/.agents/rules/extension-architecture.md)** and [`extension/`](file:///c:/Users/1sree/Documents/standalone-pwa/extension).
 
 ---
 

@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "KTU CGPA Supercharger & Scorecard Vault",
+  "short_name": "KTU Supercharger",
+  "version": "1.0.0",
+  "description": "Instant scorecard capture, crash-proof offline vault, and modern Executive Bento Grid reskin for the KTU student portal.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "*://app.ktu.edu.in/*"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "KTU CGPA Supercharger",
+    "default_icon": {
+      "16": "icons/16.png",
+      "32": "icons/32.png",
+      "48": "icons/48.png",
+      "128": "icons/128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/16.png",
+    "32": "icons/32.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://app.ktu.edu.in/*"
+      ],
+      "js": [
+        "src/core/constants.js",
+        "src/core/parser.js",
+        "src/core/calculator.js",
+        "src/core/storage.js",
+        "src/core/bridge.js",
+        "src/skin/preflight.js",
+        "src/skin/login-skin.js",
+        "src/skin/dashboard-skin.js",
+        "src/skin/toolbar.js",
+        "src/content.js"
+      ],
+      "css": [
+        "styles/modern-skin.css",
+        "styles/toolbar.css",
+        "styles/login-skin.css"
+      ],
+      "run_at": "document_end"
+    }
+  ]
+}

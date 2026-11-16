@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>KTU Supercharger</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="popup-container">
+        <div class="popup-header">
+            <span class="popup-icon">⚡</span>
+            <div class="popup-title-group">
+                <div class="popup-title">KTU Supercharger</div>
+                <div class="popup-sub">Scorecard Vault & In-Portal Skin</div>
+            </div>
+        </div>
+
+        <div id="vaultStatusCard" class="vault-card">
+            <div class="vault-label">OFFLINE VAULT STATUS</div>
+            <div id="vaultStudentName" class="vault-student-name">Loading vault...</div>
+            <div id="vaultStudentReg" class="vault-student-reg">-</div>
+            <div id="vaultMetrics" class="vault-metrics-row">
+                <div class="v-metric"><span id="vCgpa">-</span><label>CGPA</label></div>
+                <div class="v-metric"><span id="vCourses">-</span><label>Courses</label></div>
+                <div class="v-metric"><span id="vBacklogs">-</span><label>Backlogs</label></div>
+            </div>
+            <div id="vaultSyncTime" class="vault-sync-time">Checking storage...</div>
+        </div>
+
+        <div class="popup-actions">
+            <button id="btnPopupOpenPwa" class="popup-btn btn-pwa">
+                <span>🚀 Open PWA Forecaster</span>
+            </button>
+            <button id="btnPopupGoKtu" class="popup-btn btn-ktu">
+                <span>🌐 Open KTU Portal</span>
+            </button>
+        </div>
+    </div>
+    <script src="../src/core/constants.js"></script>
+    <script src="../src/core/calculator.js"></script>
+    <script src="../src/core/storage.js"></script>
+    <script src="../src/core/bridge.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>
