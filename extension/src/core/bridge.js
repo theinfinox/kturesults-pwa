@@ -33,10 +33,39 @@
 
     function encodePayload(payload) {
         if (!payload) return "";
+        const rawSemesterData = payload.semesterData || [];
+        const normalizedSemesterData = rawSemesterData.map(item => {
+            const credit = Number(item.credit !== undefined ? item.credit : (item.credits !== undefined ? item.credits : 0)) || 0;
+            const code = (item.code || "").toUpperCase();
+            const name = item.name || code;
+            let subject = item.subject || "";
+            if (!subject && (code || name)) {
+                subject = code && name && code !== name ? `${code} - ${name}` : (name || code);
+            }
+            return {
+                semester: item.semester || "S1",
+                subject,
+                credit,
+                credits: credit,
+                grade: item.grade || "-",
+                slot: item.slot || "",
+                code: code || (subject.split("-")[0]?.trim() || ""),
+                name: name || (subject.split("-").slice(1).join("-").trim() || subject),
+                isAudit: Boolean(item.isAudit),
+                isBacklog: Boolean(item.isBacklog),
+                isPending: Boolean(item.isPending)
+            };
+        });
+
+        const sInfo = { ...(payload.studentInfo || {}) };
+        if (!sInfo.name || /Technological\s*University/i.test(sInfo.name)) {
+            sInfo.name = sInfo.registerNo || "KTU Student";
+        }
+
         const jsonStr = JSON.stringify({
-            studentInfo: payload.studentInfo || {},
-            semesterData: payload.semesterData || [],
-            activityPoints: payload.studentInfo ? payload.studentInfo.activityPoints : null,
+            studentInfo: sInfo,
+            semesterData: normalizedSemesterData,
+            activityPoints: sInfo.activityPoints !== undefined ? sInfo.activityPoints : null,
             lastScraped: payload.timestamp || new Date().toISOString(),
             source: "ktu_supercharger_extension"
         });

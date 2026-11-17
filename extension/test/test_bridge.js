@@ -23,6 +23,9 @@ function runBridgeTests() {
     assert(decoded, "Decoded payload must not be null");
     assert.strictEqual(decoded.studentInfo.registerNo, "CEA20CS026");
     assert.strictEqual(decoded.semesterData.length, 1);
+    assert.strictEqual(decoded.semesterData[0].credit, 4, "Must normalize credit field for PWA");
+    assert.strictEqual(decoded.semesterData[0].credits, 4, "Must normalize credits field");
+    assert.strictEqual(decoded.semesterData[0].subject, "MAT101", "Must populate subject string for PWA");
     assert.strictEqual(decoded.source, "ktu_supercharger_extension");
 
     const syncUrl = bridge.getPwaSyncUrl(testPayload);

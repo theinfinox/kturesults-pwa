@@ -155,10 +155,36 @@
                 rawJson = decodeURIComponent(encoded);
             }
             const parsed = JSON.parse(rawJson);
-            const sData = Array.isArray(parsed.semesterData) ? parsed.semesterData : [];
+            const rawData = Array.isArray(parsed.semesterData) ? parsed.semesterData : [];
             const sInfo = parsed.studentInfo || {};
 
-            if (sData.length === 0 && !sInfo.registerNo) return;
+            if (rawData.length === 0 && !sInfo.registerNo) return;
+
+            // Universal Schema Normalizer: guarantees both PWA and extension field contracts
+            const sData = rawData.map(item => {
+                const credit = Number(item.credit !== undefined ? item.credit : (item.credits !== undefined ? item.credits : 0)) || 0;
+                const code = (item.code || "").toUpperCase();
+                const name = item.name || code;
+                let subject = item.subject || "";
+                if (!subject && (code || name)) {
+                    subject = code && name && code !== name ? `${code} - ${name}` : (name || code);
+                }
+                return {
+                    semester: item.semester || "S1",
+                    subject: subject || "Course",
+                    credit: credit,
+                    credits: credit,
+                    grade: item.grade || "-",
+                    slot: item.slot || "",
+                    code: code || (subject.split("-")[0]?.trim() || ""),
+                    name: name || (subject.split("-").slice(1).join("-").trim() || subject)
+                };
+            });
+
+            // Student name normalization: heal if it was set to university title
+            if (!sInfo.name || /Technological\s*University/i.test(sInfo.name)) {
+                sInfo.name = sInfo.registerNo || "KTU Student";
+            }
 
             const reg = (sInfo.registerNo || "IMPORTED_STUDENT").toUpperCase().trim();
             if (!savedProfiles[reg]) {

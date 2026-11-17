@@ -70,3 +70,12 @@
 - **Instant Tab Synchronization via Runtime Messaging**: Wired `chrome.runtime.sendMessage` from `popup.js` to `content.js` so toggling the master switch takes effect in active KTU tabs in real-time (0ms) without needing a page refresh.
 - **Student Name Extraction Guard**: Filtered out `APJ Abdul Kalam Technological University` navbar titles in `extension/src/core/parser.js`, ensuring the student's true name (`GOVIND S R`) is parsed from profile banners and welcome greetings.
 - **Expanded Storage Test Suite (11 Tests)**: Added Test 8B in `extension/test/test_storage.js` validating default power state (`true`), toggle persistence, and boolean preservation in `storage.getItem()`.
+
+---
+
+## 🔄 Milestone 8: PWA-Extension Data Normalization & Atomic Release v1.2.25 (Build 28)
+- **Root Cause of PWA Desynchronization**: Resolved schema contract mismatch where the standalone PWA expected `item.credit` (singular) and `item.subject` (`"CODE - NAME"`), whereas the extension emitted `credits` (plural) and separate `code`/`name`. This caused the PWA to read credits as 0, displaying `undefined cr`, missing subject titles, and calculating `0.00` CGPA.
+- **Dual-Layer Schema Harmonization**:
+  - *Extension Layer* ([`extension/src/core/parser.js`](file:///c:/Users/1sree/Documents/standalone-pwa/extension/src/core/parser.js) & [`extension/src/core/bridge.js`](file:///c:/Users/1sree/Documents/standalone-pwa/extension/src/core/bridge.js)): Output both `credit` and `credits`, fully populated `subject`, `code`, and `name`.
+  - *PWA Ingestion Layer* ([`app.js`](file:///c:/Users/1sree/Documents/standalone-pwa/app.js)): Added a universal schema normalizer inside `checkExternalSyncPayload()` that maps both field formats, heals placeholder student names, and ensures instant, lossless syncing.
+- **Atomic 5-Point Release (v1.2.25 Build 28)**: Bumper Service Worker cache to `ktu-cgpa-pwa-v34`, version to `1.2.25`, and build to `28` across `sw.js`, `manifest.webmanifest`, `package.json`, `index.html`, and `test/test_suite.js`. All 13 PWA tests and 11 extension tests passed 100%.

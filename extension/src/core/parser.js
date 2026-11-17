@@ -307,12 +307,15 @@
                 const isBacklog = BACKLOG_GRADES.has(grade);
                 const isPending = PENDING_GRADES.has(grade);
 
+                const subject = code && name && code !== name ? `${code} - ${name}` : (name || code);
                 semesterData.push({
                     semester: `S${semNum}`,
                     semesterNum: semNum,
+                    subject: subject,
                     code: code.toUpperCase(),
                     name: name || code,
-                    credits,
+                    credit: credits,
+                    credits: credits,
                     grade,
                     slot: slot || "",
                     isAudit,
