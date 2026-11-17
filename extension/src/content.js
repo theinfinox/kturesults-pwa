@@ -60,6 +60,24 @@
         // Post-login / Dashboard / Home page support: auto-fetch curriculum in background
         if (route === "authenticated_home" || route === "dashboard") {
             console.log("[KTU Supercharger] Authenticated portal dashboard/home detected. Fetching curriculum...");
+
+            // 1. Instant Masking via Cached Vault Snapshot (< 2ms):
+            // If a snapshot exists in storage, mask the site and render immediately!
+            try {
+                const cached = await storage.getLatestSnapshot();
+                if (cached && cached.studentInfo && Array.isArray(cached.semesterData) && cached.semesterData.length > 0) {
+                    activePayload = cached;
+                    activeMetrics = calculator.calculateAcademicMetrics(activePayload.semesterData, activePayload.studentInfo);
+                    renderSkin();
+                } else {
+                    // Show a temporary sleek loading state so ancient portal does not flash
+                    showLoadingMask();
+                }
+            } catch (e) {
+                // Ignore storage lookup error
+            }
+
+            // 2. Fresh Background Fetch with active session cookies
             try {
                 const res = await fetch("/eu/stu/studentDetailsView.htm", { credentials: "same-origin" });
                 if (res.ok) {
@@ -73,14 +91,44 @@
                         await storage.saveSnapshot(activePayload);
                         console.log(`[KTU Supercharger] Background fetch captured ${activePayload.semesterData.length} courses!`);
 
-                        // Render the modern skin directly over the home page!
+                        // Re-render skin with latest live data
                         renderSkin();
+                        return;
                     }
+                }
+                // If fetch did not return valid curriculum and no cached payload exists, restore view
+                if (!activePayload) {
+                    document.body.classList.remove("ktu-supercharger-active");
                 }
             } catch (err) {
                 console.warn("[KTU Supercharger] Background curriculum fetch note:", err.message);
+                if (!activePayload) {
+                    document.body.classList.remove("ktu-supercharger-active");
+                }
             }
         }
+    }
+
+    function showLoadingMask() {
+        document.body.classList.add("ktu-supercharger-active");
+        let container = document.getElementById("ktu-supercharger-container");
+        if (!container) {
+            container = document.createElement("div");
+            container.id = "ktu-supercharger-container";
+            container.className = "ktu-supercharger-skin-root";
+            document.body.appendChild(container);
+        }
+        container.innerHTML = `
+            <div class="ktu-dash-card ktu-identity-card" style="text-align: center; padding: 40px 20px;">
+                <div style="font-size: 28px; margin-bottom: 12px;">⚡</div>
+                <div style="font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">
+                    KTU Supercharger
+                </div>
+                <div style="font-size: 13.5px; color: #64748b;">
+                    Connecting to student curriculum vault & preparing executive dashboard...
+                </div>
+            </div>
+        `;
     }
 
     function renderSkin() {
