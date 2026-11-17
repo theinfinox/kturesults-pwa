@@ -51,6 +51,24 @@ async function runStorageTests() {
     await storage.setMasterEnabled(true);
     assert.strictEqual(await storage.isMasterEnabled(), true, "Master switch must be true after toggle back");
 
+    console.log("  [Test 8C] Testing Multi-User Account Isolation in Snapshot Vault...");
+    const studentBPayload = {
+        studentInfo: { registerNo: "CEA20CS099", name: "ALEX DOE" },
+        semesterData: [
+            { code: "MAT101", credits: 4, grade: "B" }
+        ]
+    };
+    await storage.saveSnapshot(studentBPayload);
+
+    const retrievedA = await storage.getLatestSnapshot("CEA20CS026");
+    assert.strictEqual(retrievedA.studentInfo.name, "GOVIND S R", "Must isolate Student A snapshot");
+
+    const retrievedB = await storage.getLatestSnapshot("CEA20CS099");
+    assert.strictEqual(retrievedB.studentInfo.name, "ALEX DOE", "Must isolate Student B snapshot");
+
+    const nonExistent = await storage.getLatestSnapshot("NONEXISTENT");
+    assert.strictEqual(nonExistent, null, "Unknown student must return null and not leak other snapshots");
+
     console.log("  ✅ Storage & Anti-Degradation tests passed 100%!");
 }
 

@@ -42,20 +42,25 @@
                         <span>${sInfo.isLateral ? "Lateral Entry Degree" : "Full Degree"}</span>
                         <span class="ktu-spec-dot">•</span>
                         <span>${sInfo.college || "KTU"}</span>
+                        ${metrics.honorsMinors?.honorsEligible ? '<span class="ktu-spec-dot">•</span><span class="ktu-track-badge badge-honors" title="CGPA >= 8.50 with zero backlog history">🎖️ KTU Honors Eligible</span>' : ''}
+                        ${!metrics.honorsMinors?.honorsEligible && metrics.honorsMinors?.minorsEligible ? '<span class="ktu-spec-dot">•</span><span class="ktu-track-badge badge-minors" title="CGPA >= 7.00 with zero active backlogs">📘 KTU Minor Eligible</span>' : ''}
                     </div>
                 </div>
             </div>
 
             <!-- 2. Bento Stats Grid -->
             <div class="ktu-bento-grid">
-                <!-- CGPA Card -->
-                <div class="ktu-dash-card ktu-bento-stat stat-cgpa">
+                <!-- CGPA Card (Click to Copy) -->
+                <div class="ktu-dash-card ktu-bento-stat stat-cgpa" title="Click to copy CGPA">
                     <div class="ktu-stat-header">
                         <span class="ktu-stat-label">CGPA</span>
                         <span class="ktu-stat-tag">${(metrics.cgpa * 10).toFixed(1)}%</span>
                     </div>
                     <div class="ktu-stat-big-value">${metrics.cgpa.toFixed(2)}</div>
-                    <div class="ktu-stat-sub">Cumulative Grade Point Average</div>
+                    <div class="ktu-stat-sub">
+                        <span>Cumulative Grade Point Average</span>
+                        <span class="ktu-click-copy-hint">📋 Click to copy</span>
+                    </div>
                 </div>
 
                 <!-- Backlogs Card -->
@@ -110,6 +115,15 @@
                 <div class="ktu-card-title">
                     <span>🚀</span> Academic Comeback Projections (Upon Clearing Backlogs)
                 </div>
+                ${metrics.activeBacklogs === 0 ? `
+                    <div class="ktu-comeback-clear-banner">
+                        <span class="ktu-clear-icon">🎉</span>
+                        <div class="ktu-clear-body">
+                            <div class="ktu-clear-title">Zero Active Backlogs — Excellent Academic Standing!</div>
+                            <div class="ktu-clear-desc">All registered courses successfully passed. Projections reflect your current locked CGPA of <strong>${metrics.cgpa.toFixed(2)}</strong>.</div>
+                        </div>
+                    </div>
+                ` : ""}
                 <div class="ktu-comeback-grid">
                     ${renderComebackTiles(metrics.comebackProjections)}
                 </div>
@@ -117,16 +131,97 @@
 
             <!-- 4. Interactive Semester Records -->
             <div class="ktu-dash-card ktu-semesters-card">
-                <div class="ktu-card-title">
-                    <span>📚</span> Semester Course Records (${sData.length} Total Courses)
+                <div class="ktu-card-header-row">
+                    <div class="ktu-card-title" style="margin-bottom: 0;">
+                        <span>📚</span> Semester Course Records (${sData.length} Total Courses)
+                    </div>
+                    <button id="ktuToggleAllSems" class="ktu-sem-toggle-all-btn" type="button" title="Expand or collapse all semester cards">
+                        ↕ Collapse All
+                    </button>
                 </div>
-                <div class="ktu-sem-accordion-list">
+                <div class="ktu-sem-accordion-list" id="ktuSemAccordionList">
                     ${renderSemesterCards(sData, metrics.semesters)}
                 </div>
             </div>
         `;
 
+        // Wire Up Interactive Handlers
+        attachInteractiveListeners(container, metrics);
+
         return container;
+    }
+
+    function attachInteractiveListeners(container, metrics) {
+        // 1. 1-Click Copy CGPA
+        const cgpaCard = container.querySelector(".stat-cgpa");
+        if (cgpaCard) {
+            cgpaCard.addEventListener("click", () => {
+                const textToCopy = `${metrics.cgpa.toFixed(2)} CGPA`;
+                if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        showToast(`📋 Copied ${textToCopy} to clipboard!`);
+                    }).catch(() => {
+                        showToast(`📋 ${textToCopy}`);
+                    });
+                } else {
+                    showToast(`📋 ${textToCopy}`);
+                }
+            });
+        }
+
+        // 2. Click on Semester Header to Toggle Expand/Collapse
+        const headers = container.querySelectorAll(".ktu-sem-header");
+        headers.forEach(hdr => {
+            hdr.addEventListener("click", () => {
+                const block = hdr.closest(".ktu-sem-block");
+                if (block) {
+                    block.classList.toggle("is-collapsed");
+                    const chev = block.querySelector(".ktu-sem-chevron");
+                    if (chev) {
+                        chev.textContent = block.classList.contains("is-collapsed") ? "▶" : "▼";
+                    }
+                }
+            });
+        });
+
+        // 3. Expand / Collapse All Toggle Button
+        const toggleAllBtn = container.querySelector("#ktuToggleAllSems");
+        if (toggleAllBtn) {
+            let allCollapsed = false;
+            toggleAllBtn.addEventListener("click", () => {
+                allCollapsed = !allCollapsed;
+                const blocks = container.querySelectorAll(".ktu-sem-block");
+                blocks.forEach(block => {
+                    if (allCollapsed) {
+                        block.classList.add("is-collapsed");
+                        const chev = block.querySelector(".ktu-sem-chevron");
+                        if (chev) chev.textContent = "▶";
+                    } else {
+                        block.classList.remove("is-collapsed");
+                        const chev = block.querySelector(".ktu-sem-chevron");
+                        if (chev) chev.textContent = "▼";
+                    }
+                });
+                toggleAllBtn.textContent = allCollapsed ? "↕ Expand All" : "↕ Collapse All";
+            });
+        }
+    }
+
+    function showToast(message) {
+        if (typeof document === "undefined") return;
+        let toast = document.getElementById("ktu-supercharger-toast");
+        if (!toast) {
+            toast = document.createElement("div");
+            toast.id = "ktu-supercharger-toast";
+            toast.className = "ktu-supercharger-toast";
+            document.body.appendChild(toast);
+        }
+        toast.textContent = message;
+        toast.classList.add("show");
+        if (toast._timer) clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => {
+            toast.classList.remove("show");
+        }, 2200);
     }
 
     function renderComebackTiles(comebacks) {
@@ -169,9 +264,10 @@
             const list = groups[sem];
             const m = semMetrics[sem] || { sgpa: 0, earnedCredits: 0, backlogs: 0 };
             return `
-                <div class="ktu-sem-block">
-                    <div class="ktu-sem-header">
+                <div class="ktu-sem-block" data-semester="${sem}">
+                    <div class="ktu-sem-header" role="button" tabindex="0" title="Click to expand/collapse ${sem}">
                         <div class="ktu-sem-title-box">
+                            <span class="ktu-sem-chevron">▼</span>
                             <span class="ktu-sem-name">${sem}</span>
                             <span class="ktu-sem-courses-count">${list.length} Courses</span>
                         </div>
@@ -222,6 +318,7 @@
     }
 
     return {
-        renderModernDashboard
+        renderModernDashboard,
+        showToast
     };
 });

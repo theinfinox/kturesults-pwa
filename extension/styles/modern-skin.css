@@ -355,6 +355,174 @@ body.ktu-supercharger-active > *:not(#ktu-supercharger-container):not(#ktu-super
 .badge-fail { background: #fee2e2; color: #b91c1c; }
 .badge-neutral { background: #f1f5f9; color: #475569; }
 
+/* Card Header Row & Expand/Collapse All */
+.ktu-card-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.ktu-sem-toggle-all-btn {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ktu-sem-toggle-all-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+/* Accordion Fold Behavior */
+.ktu-sem-header {
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s ease;
+}
+
+.ktu-sem-header:hover {
+    background: #f1f5f9;
+}
+
+.ktu-sem-chevron {
+    font-size: 10px;
+    color: #64748b;
+    display: inline-block;
+    width: 14px;
+    transition: transform 0.2s ease;
+}
+
+.ktu-sem-block.is-collapsed .ktu-sem-table-wrap {
+    display: none;
+}
+
+.ktu-sem-block.is-collapsed .ktu-sem-header {
+    border-bottom: none;
+}
+
+/* CGPA Card Copy Interactivity */
+.stat-cgpa {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-cgpa:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(5, 150, 105, 0.12);
+}
+
+.stat-cgpa .ktu-stat-sub {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ktu-click-copy-hint {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #059669;
+    opacity: 0.8;
+}
+
+/* Degree Track Badges (Honors / Minors) */
+.ktu-track-badge {
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badge-honors {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+.badge-minors {
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+}
+
+/* Zero Backlog Celebration Banner */
+.ktu-comeback-clear-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+    border: 1px solid #a7f3d0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+}
+
+.ktu-clear-icon {
+    font-size: 24px;
+}
+
+.ktu-clear-title {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #065f46;
+    margin-bottom: 2px;
+}
+
+.ktu-clear-desc {
+    font-size: 12px;
+    color: #047857;
+}
+
+/* Floating Toast Notification */
+.ktu-supercharger-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999999;
+    background: #0f172a;
+    color: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    transform: translateY(12px);
+    pointer-events: none;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ktu-supercharger-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* Loading Animations */
+@keyframes ktu-loading-slide {
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(0%); }
+    100% { transform: translateX(100%); }
+}
+
+@keyframes ktu-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 @media (max-width: 1024px) {
     .ktu-bento-grid {
         grid-template-columns: repeat(2, 1fr);

@@ -71,25 +71,46 @@
         if (route === "authenticated_home" || route === "dashboard") {
             console.log("[KTU Supercharger] Authenticated portal dashboard/home detected. Fetching curriculum...");
 
+            // Multi-User Isolation: Detect current student's register number from the DOM if present
+            let targetReg = null;
+            const bodyText = (document.body ? document.body.innerText || document.body.textContent || "" : "");
+            const regMatch = bodyText.match(/\b([A-Z]{3,4}\d{2}[A-Z]{2,3}\d{3})\b/i);
+            if (regMatch) {
+                targetReg = regMatch[1].toUpperCase();
+            }
+
             // 1. Instant Masking via Cached Vault Snapshot (< 2ms):
-            // If a snapshot exists in storage, mask the site and render immediately!
+            // If a valid snapshot exists for the current student, render immediately!
             try {
-                const cached = await storage.getLatestSnapshot();
+                const cached = await storage.getLatestSnapshot(targetReg);
                 if (cached && cached.studentInfo && Array.isArray(cached.semesterData) && cached.semesterData.length > 0) {
-                    activePayload = cached;
-                    activeMetrics = calculator.calculateAcademicMetrics(activePayload.semesterData, activePayload.studentInfo);
-                    renderSkin();
+                    const cachedReg = (cached.studentInfo.registerNo || "").toUpperCase();
+                    if (!targetReg || cachedReg === targetReg) {
+                        activePayload = cached;
+                        activeMetrics = calculator.calculateAcademicMetrics(activePayload.semesterData, activePayload.studentInfo);
+                        renderSkin();
+                    } else {
+                        showLoadingMask();
+                    }
                 } else {
                     // Show a temporary sleek loading state so ancient portal does not flash
                     showLoadingMask();
                 }
             } catch (e) {
-                // Ignore storage lookup error
+                showLoadingMask();
             }
 
-            // 2. Fresh Background Fetch with active session cookies
+            // 2. Fresh Background Fetch with active session cookies and 8-second resilience timeout
             try {
-                const res = await fetch("/eu/stu/studentDetailsView.htm", { credentials: "same-origin" });
+                const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+                const timeoutId = controller ? setTimeout(() => controller.abort(), 8000) : null;
+
+                const res = await fetch("/eu/stu/studentDetailsView.htm", {
+                    credentials: "same-origin",
+                    signal: controller ? controller.signal : undefined
+                });
+                if (timeoutId) clearTimeout(timeoutId);
+
                 if (res.ok) {
                     const html = await res.text();
                     rawHtmlCapture = html;
@@ -129,13 +150,16 @@
             document.body.appendChild(container);
         }
         container.innerHTML = `
-            <div class="ktu-dash-card ktu-identity-card" style="text-align: center; padding: 40px 20px;">
-                <div style="font-size: 28px; margin-bottom: 12px;">⚡</div>
-                <div style="font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">
+            <div class="ktu-dash-card ktu-identity-card" style="text-align: center; padding: 48px 24px; max-width: 600px; margin: 40px auto;">
+                <div class="ktu-loading-spinner" style="font-size: 36px; margin-bottom: 16px;">⚡</div>
+                <div style="font-size: 19px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">
                     KTU Supercharger
                 </div>
-                <div style="font-size: 13.5px; color: #64748b;">
+                <div style="font-size: 13.5px; color: #64748b; line-height: 1.5; margin-bottom: 20px;">
                     Connecting to student curriculum vault & preparing executive dashboard...
+                </div>
+                <div class="ktu-loading-progress-bar" style="width: 220px; height: 4px; background: #e2e8f0; border-radius: 2px; margin: 0 auto; overflow: hidden;">
+                    <div style="width: 100%; height: 100%; background: linear-gradient(90deg, #10b981, #059669); animation: ktu-loading-slide 1.5s infinite linear;"></div>
                 </div>
             </div>
         `;

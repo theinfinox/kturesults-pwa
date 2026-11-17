@@ -1,6 +1,9 @@
 /* Automatic Dismissal of KTU's Annoying Security Disclaimer Modal */
+html.ktu-bypass-login-modal #welcomeModal,
 body.ktu-bypass-login-modal #welcomeModal,
+html.ktu-bypass-login-modal #portalInfoModal,
 body.ktu-bypass-login-modal #portalInfoModal,
+html.ktu-bypass-login-modal .modal-backdrop,
 body.ktu-bypass-login-modal .modal-backdrop {
     display: none !important;
     opacity: 0 !important;
@@ -8,6 +11,7 @@ body.ktu-bypass-login-modal .modal-backdrop {
     visibility: hidden !important;
 }
 
+html.ktu-bypass-login-modal,
 body.ktu-bypass-login-modal {
     overflow: auto !important;
     padding-right: 0 !important;

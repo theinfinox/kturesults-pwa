@@ -106,6 +106,14 @@
             info.isLateral = true;
         }
 
+        // Admission Year auto-derivation: decode 2-digit batch year from register number if missing (e.g. CEA20CS026 -> 2020)
+        if (!info.admissionYear && info.registerNo) {
+            const yearMatch = info.registerNo.match(/^(?:L)?[A-Z]{3,4}(\d{2})/i);
+            if (yearMatch) {
+                info.admissionYear = "20" + yearMatch[1];
+            }
+        }
+
         // Department auto-healing: if "Minor Branch" or missing, decode from register number
         if (!info.branch || /^minor\s*branch$/i.test(info.branch)) {
             info.branch = decodeBranchFromRegisterNo(info.registerNo) || info.branch;

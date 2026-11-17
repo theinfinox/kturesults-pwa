@@ -90,3 +90,16 @@
   - *CSS Shielding*: Applies `.ktu-bypass-login-modal` to ensure zero modal flicker and restores body overflow scrolling.
 - **Safe & Compliant**: Does not touch Cloudflare Turnstile (`.cf-turnstile`) or credential inputs, allowing clean, unimpeded student sign-ins.
 - **Expanded Test Suite (12 Tests)**: Added Test 10 in `extension/test/test_login_skin.js` validating auto-bypass behavior, sessionStorage pre-seeding, and DOM cleanup.
+
+---
+
+## ⚡ Milestone 10: Performance, Multi-User Isolation & UX Refinements
+- **Zero-Flash Security Modal Shield (`fast-start.js` at `document_start`)**: Injected `src/skin/fast-start.js` and `styles/login-skin.css` at `document_start` in `manifest.json`. Pre-seeds `sessionStorage.setItem('welcomeModalShown', 'true')` before KTU's HTML parser even reaches inline `<script>` tags, guaranteeing 0ms modal prevention with zero visual flicker.
+- **Multi-User Account Isolation in Vault**: Prevented cross-account snapshot hydration on shared computers. `content.js` now scans the page DOM for the active student's register number and verifies it before hydrating cached snapshots via `storage.getLatestSnapshot(targetReg)`. If an unknown or new student logs in, the extension displays a sleek loading state until fresh live data is fetched.
+- **Network Resilience & Background Fetch Timeout**: Wrapped background curriculum requests to `studentDetailsView.htm` in an 8-second `AbortController` timeout, ensuring that heavy portal latency, 504 gateway errors, or server hangs do not freeze the browser tab.
+- **Admission Year & Batch Auto-Derivation**: Refined `extension/src/core/parser.js` to derive `admissionYear` from the register number (`CEA20CS026` -> `2020 Batch`) if the profile row is missing, eliminating generic placeholders.
+- **Interactive Collapsible Semester Cards**: Added smooth accordion folding on `.ktu-sem-header` with chevron state indicators (`▼` / `▶`) and a master `[ ↕ Collapse All / ↕ Expand All ]` control button in the header, allowing students with 60+ courses to glance at their entire degree in compact rows.
+- **1-Click Quick Copy with Floating Toast**: Made the CGPA stat card interactive. Clicking copies `${cgpa} CGPA` directly to the system clipboard and displays a sleek floating toast notification.
+- **Zero-Backlog Academic Celebration**: When active backlogs reach 0, the Comeback card displays a congratulatory emerald banner highlighting the student's locked standing and degree health.
+- **Degree Track Badges**: Evaluated `metrics.honorsMinors` to surface official KTU B.Tech Honors (CGPA >= 8.50 with 0 backlog history) and B.Tech Minor (CGPA >= 7.00 with 0 active backlogs) eligibility pills in the student identity banner.
+- **Expanded Test Suite (13 Tests)**: Added Test 8C (multi-user isolation) in `test_storage.js` and Test 11 (dashboard skin, accordions, and toast notifications) in `test_dashboard_skin.js`. All 13 extension tests and all 13 root PWA tests pass with 100% fidelity.

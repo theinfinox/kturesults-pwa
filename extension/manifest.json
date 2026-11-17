@@ -32,6 +32,18 @@
         "*://app.ktu.edu.in/*"
       ],
       "js": [
+        "src/skin/fast-start.js"
+      ],
+      "css": [
+        "styles/login-skin.css"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "*://app.ktu.edu.in/*"
+      ],
+      "js": [
         "src/core/constants.js",
         "src/core/parser.js",
         "src/core/calculator.js",
@@ -45,8 +57,7 @@
       ],
       "css": [
         "styles/modern-skin.css",
-        "styles/toolbar.css",
-        "styles/login-skin.css"
+        "styles/toolbar.css"
       ],
       "run_at": "document_end"
     }

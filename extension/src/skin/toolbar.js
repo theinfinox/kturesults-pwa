@@ -59,7 +59,14 @@
         // Bind Events
         const btnOpenPwa = document.getElementById("ktuBtnOpenPwa");
         if (btnOpenPwa && callbacks.onOpenPwa) {
-            btnOpenPwa.addEventListener("click", callbacks.onOpenPwa);
+            btnOpenPwa.addEventListener("click", (e) => {
+                const originalHtml = btnOpenPwa.innerHTML;
+                btnOpenPwa.innerHTML = `<span>🚀 Launching PWA...</span>`;
+                setTimeout(() => {
+                    btnOpenPwa.innerHTML = originalHtml;
+                }, 2200);
+                callbacks.onOpenPwa(e);
+            });
         }
 
         const btnSaveHtml = document.getElementById("ktuBtnSaveHtml");

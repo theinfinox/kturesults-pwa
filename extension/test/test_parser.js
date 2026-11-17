@@ -255,6 +255,7 @@ function runParserTests() {
     assert.strictEqual(sOfficial.registerNo, "CEA20CS026");
     assert.strictEqual(sOfficial.college, "COLLEGE OF ENGINEERING ATTINGAL");
     assert.strictEqual(sOfficial.branch, "COMPUTER SCIENCE & ENGINEERING");
+    assert.strictEqual(sOfficial.admissionYear, "2020", "Admission year must be derived from registerNo if missing");
 
     const semOfficial = parser.parseSemesterData(mockOfficialKtuDoc);
     assert.strictEqual(semOfficial.length, 3);
