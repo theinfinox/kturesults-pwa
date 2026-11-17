@@ -35,7 +35,10 @@
         const route = preflight.getRoute(document);
 
         if (route === "login") {
-            if (loginSkin) loginSkin.enhanceLoginPage();
+            if (loginSkin) {
+                loginSkin.enhanceLoginPage();
+                loginSkin.dismissSecurityWarningModal();
+            }
             return;
         }
 
@@ -226,6 +229,7 @@
                 } else {
                     console.log("[KTU Supercharger] Master switch turned OFF. Completely unmasking portal...");
                     document.body.classList.remove("ktu-supercharger-active");
+                    document.body.classList.remove("ktu-bypass-login-modal");
                     const container = document.getElementById("ktu-supercharger-container");
                     if (container) container.style.display = "none";
                     const bar = document.getElementById("ktu-supercharger-toolbar");

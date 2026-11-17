@@ -1,4 +1,17 @@
-/* KTU Supercharger - Login Page Enhancements (Option A: Safe) */
+/* Automatic Dismissal of KTU's Annoying Security Disclaimer Modal */
+body.ktu-bypass-login-modal #welcomeModal,
+body.ktu-bypass-login-modal #portalInfoModal,
+body.ktu-bypass-login-modal .modal-backdrop {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
+
+body.ktu-bypass-login-modal {
+    overflow: auto !important;
+    padding-right: 0 !important;
+}
 
 .ktu-supercharger-login-pill {
     display: flex;

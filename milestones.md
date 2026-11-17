@@ -79,3 +79,14 @@
   - *Extension Layer* ([`extension/src/core/parser.js`](file:///c:/Users/1sree/Documents/standalone-pwa/extension/src/core/parser.js) & [`extension/src/core/bridge.js`](file:///c:/Users/1sree/Documents/standalone-pwa/extension/src/core/bridge.js)): Output both `credit` and `credits`, fully populated `subject`, `code`, and `name`.
   - *PWA Ingestion Layer* ([`app.js`](file:///c:/Users/1sree/Documents/standalone-pwa/app.js)): Added a universal schema normalizer inside `checkExternalSyncPayload()` that maps both field formats, heals placeholder student names, and ensures instant, lossless syncing.
 - **Atomic 5-Point Release (v1.2.25 Build 28)**: Bumper Service Worker cache to `ktu-cgpa-pwa-v34`, version to `1.2.25`, and build to `28` across `sw.js`, `manifest.webmanifest`, `package.json`, `index.html`, and `test/test_suite.js`. All 13 PWA tests and 11 extension tests passed 100%.
+
+---
+
+## 🛡️ Milestone 9: Login Security Modal Auto-Bypass
+- **Root Cause & Modal Mechanics**: Analyzed `app.ktu.edu.in/login.htm` and identified that KTU launches `#welcomeModal` on `$(document).ready()` whenever `sessionStorage.getItem('welcomeModalShown')` is unset, obstructing the login form on every new tab or browser session.
+- **Tri-Layer Seamless Dismissal**:
+  - *Storage Pre-Seeding*: Automatically sets `sessionStorage.setItem('welcomeModalShown', 'true')`, preventing KTU's inline script from ever executing `$('#welcomeModal').modal('show')`.
+  - *Programmatic Dismissal*: Dispatches change on `#understandCheckbox`, clicks `#modalOkBtn`, and purges any lingering `.modal-backdrop` elements.
+  - *CSS Shielding*: Applies `.ktu-bypass-login-modal` to ensure zero modal flicker and restores body overflow scrolling.
+- **Safe & Compliant**: Does not touch Cloudflare Turnstile (`.cf-turnstile`) or credential inputs, allowing clean, unimpeded student sign-ins.
+- **Expanded Test Suite (12 Tests)**: Added Test 10 in `extension/test/test_login_skin.js` validating auto-bypass behavior, sessionStorage pre-seeding, and DOM cleanup.

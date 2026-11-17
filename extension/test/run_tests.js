@@ -8,6 +8,7 @@ const runParserTests = require("./test_parser");
 const runCalculatorTests = require("./test_calculator");
 const runStorageTests = require("./test_storage");
 const runBridgeTests = require("./test_bridge");
+const runLoginSkinTests = require("./test_login_skin");
 
 async function runAll() {
     console.log("=================================================");
@@ -19,6 +20,7 @@ async function runAll() {
         runCalculatorTests();
         await runStorageTests();
         runBridgeTests();
+        runLoginSkinTests();
 
         console.log("\n=================================================");
         console.log("🎉 ALL EXTENSION MODULE TESTS PASSED 100%!");
