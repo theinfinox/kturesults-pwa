@@ -25,6 +25,13 @@
     let rawHtmlCapture = "";
 
     async function init() {
+        // Master Power Switch Check
+        const isMasterEnabled = await storage.isMasterEnabled();
+        if (!isMasterEnabled) {
+            console.log("[KTU Supercharger] Master switch is OFF. Native KTU portal preserved.");
+            return;
+        }
+
         const route = preflight.getRoute(document);
 
         if (route === "login") {
@@ -207,6 +214,28 @@
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+    }
+
+    // Master Switch Message Listener (Real-Time Control from Extension Popup)
+    if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage) {
+        chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+            if (msg && msg.type === "KTU_TOGGLE_MASTER_POWER") {
+                if (msg.enabled) {
+                    console.log("[KTU Supercharger] Master switch turned ON. Initializing supercharger...");
+                    init();
+                } else {
+                    console.log("[KTU Supercharger] Master switch turned OFF. Completely unmasking portal...");
+                    document.body.classList.remove("ktu-supercharger-active");
+                    const container = document.getElementById("ktu-supercharger-container");
+                    if (container) container.style.display = "none";
+                    const bar = document.getElementById("ktu-supercharger-toolbar");
+                    if (bar) bar.style.display = "none";
+                    const loginPill = document.getElementById("ktu-supercharger-login-badge");
+                    if (loginPill) loginPill.style.display = "none";
+                }
+                sendResponse({ success: true, enabled: msg.enabled });
+            }
+        });
     }
 
     // Run on document load

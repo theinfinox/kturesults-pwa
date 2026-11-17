@@ -61,3 +61,12 @@
 - **DOM-Native Page Integrity Preflight**: Refactored `checkPageIntegrity()` in `preflight.js` to inspect the passed document tree directly rather than `window.location.pathname`, enabling flawless curriculum extraction from background-fetched DOMs on `dashboard.htm`.
 - **Zero-Flash Instant Vault Masking**: Leveraged edge relay and vault persistence patterns to render cached snapshot data in < 2ms on `/eu/alt/dashboard.htm` while executing a seamless background refresh, completely eliminating portal UI flash.
 - **Verified Official Fixtures & Expanded Test Suite**: Added Test 3B in `extension/test/test_parser.js` testing official KTU 11-column table layouts and real title banners (`GOVIND S R(CEA20CS026) (COLLEGE OF ENGINEERING ATTINGAL)`). Verified that all 10 extension tests and all 13 root PWA tests pass with 100% fidelity.
+
+---
+
+## 🔌 Milestone 7: Master ON/OFF Switch & Student Identity Refinement
+- **Master Power Switch in Popup Header**: Introduced a master switch in the extension popup header allowing students to completely turn ON or OFF the Supercharger skin and auto-capture engine.
+- **Total In-Portal Disengagement**: When toggled OFF, the content script removes `body.ktu-supercharger-active`, hides the modern Bento Grid and toolbar, halts background fetches to `studentDetailsView.htm`, and leaves the native KTU portal 100% untouched.
+- **Instant Tab Synchronization via Runtime Messaging**: Wired `chrome.runtime.sendMessage` from `popup.js` to `content.js` so toggling the master switch takes effect in active KTU tabs in real-time (0ms) without needing a page refresh.
+- **Student Name Extraction Guard**: Filtered out `APJ Abdul Kalam Technological University` navbar titles in `extension/src/core/parser.js`, ensuring the student's true name (`GOVIND S R`) is parsed from profile banners and welcome greetings.
+- **Expanded Storage Test Suite (11 Tests)**: Added Test 8B in `extension/test/test_storage.js` validating default power state (`true`), toggle persistence, and boolean preservation in `storage.getItem()`.

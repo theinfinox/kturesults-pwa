@@ -41,6 +41,16 @@ async function runStorageTests() {
     const verifyRetained = await storage.getLatestSnapshot("CEA20CS026");
     assert.strictEqual(verifyRetained.semesterData.length, 2, "Valid 2-course snapshot must be retained");
 
+    console.log("  [Test 8B] Testing Master Power Switch Default & Persistence...");
+    const defaultEnabled = await storage.isMasterEnabled();
+    assert.strictEqual(defaultEnabled, true, "Master switch must default to true");
+
+    await storage.setMasterEnabled(false);
+    assert.strictEqual(await storage.isMasterEnabled(), false, "Master switch must be false after toggle");
+
+    await storage.setMasterEnabled(true);
+    assert.strictEqual(await storage.isMasterEnabled(), true, "Master switch must be true after toggle back");
+
     console.log("  ✅ Storage & Anti-Degradation tests passed 100%!");
 }
 

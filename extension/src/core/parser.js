@@ -29,25 +29,33 @@
         };
 
         // 1. Check prominent page title / header banner (e.g. "GOVIND S R(CEA20CS026) (COLLEGE OF ENGINEERING ATTINGAL)")
-        const titleDiv = doc.querySelector(".profile-title, h3, .page-header, .panel-title, h4, .navbar-brand");
+        const titleDiv = doc.querySelector(".page-header, .profile-title, h3, .panel-title, h4");
         if (titleDiv) {
             const rawTitle = (titleDiv.textContent || "").trim();
-            const regMatch = rawTitle.match(/\(([A-Z0-9]+)\)/i);
-            if (regMatch) info.registerNo = regMatch[1].toUpperCase();
+            // Disregard university portal header banners
+            if (!/Technological\s*University|APJ\s*Abdul\s*Kalam/i.test(rawTitle)) {
+                const regMatch = rawTitle.match(/\(([A-Z0-9]+)\)/i);
+                if (regMatch) info.registerNo = regMatch[1].toUpperCase();
 
-            const instMatch = rawTitle.match(/\((COLLEGE[^)]+|INSTITUTE[^)]+|[A-Z\s]+ENGINEERING[A-Z\s]*)\)/i);
-            if (instMatch) info.college = instMatch[1].trim();
+                const instMatch = rawTitle.match(/\((COLLEGE[^)]+|INSTITUTE[^)]+|[A-Z\s]+ENGINEERING[A-Z\s]*)\)/i);
+                if (instMatch) info.college = instMatch[1].trim();
 
-            const nameMatch = rawTitle.split("(")[0];
-            if (nameMatch && nameMatch.trim()) info.name = nameMatch.trim();
+                const nameMatch = rawTitle.split("(")[0];
+                if (nameMatch && nameMatch.trim() && !/Technological\s*University|APJ\s*Abdul/i.test(nameMatch)) {
+                    info.name = nameMatch.trim();
+                }
+            }
         }
 
         // 2. Scan all list items, table labels, and form groups
         const listItems = doc.querySelectorAll(".list-group-item, li, .form-group, tr");
         listItems.forEach(item => {
             const text = (item.textContent || "").trim();
-            if (/Name\s*:/i.test(text) && !info.name) {
-                info.name = text.split(/Name\s*:/i)[1]?.trim().split("\n")[0]?.trim() || info.name;
+            if ((/Student\s*Name\s*:/i.test(text) || /Name\s*:/i.test(text)) && (!info.name || /Technological\s*University/i.test(info.name))) {
+                const cand = text.split(/Student\s*Name\s*:|Name\s*:/i)[1]?.trim().split("\n")[0]?.trim();
+                if (cand && !/Technological\s*University/i.test(cand)) {
+                    info.name = cand;
+                }
             }
             if ((/Register\s*No(\.|\s*:)/i.test(text) || /Roll\s*No(\.|\s*:)/i.test(text)) && !info.registerNo) {
                 const match = text.match(/([A-Z0-9]{9,12})/i);
@@ -75,6 +83,16 @@
                 }
             }
         });
+
+        // 3. Fallback: Check KTU's "Welcome <STUDENT NAME>" header greeting (e.g. on dashboard.htm)
+        if (!info.name || /Technological\s*University/i.test(info.name)) {
+            const welcomeEl = doc.querySelector ? doc.querySelector(".dropdown-user, .user-profile, .navbar-top-links, #user-profile, .welcome") : null;
+            const welcomeText = (welcomeEl ? welcomeEl.textContent : "") || (doc.body ? doc.body.textContent : "");
+            const wMatch = welcomeText.match(/Welcome\s+([A-Z\s\.]+?)(?:\s*\(|\s*Change|\s*Logout|\s*\||\n|\r|$)/i);
+            if (wMatch && wMatch[1] && wMatch[1].trim().length > 2 && !/Technological/i.test(wMatch[1])) {
+                info.name = wMatch[1].trim();
+            }
+        }
 
         // Register number fallback
         if (!info.registerNo) {

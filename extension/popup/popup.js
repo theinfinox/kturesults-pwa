@@ -11,9 +11,65 @@
 
     let cachedSnapshot = null;
 
+    function updateMasterSwitchUI(isEnabled) {
+        const masterLabel = document.getElementById("masterPowerLabel");
+        const vaultCard = document.getElementById("vaultStatusCard");
+
+        if (masterLabel) {
+            masterLabel.textContent = isEnabled ? "ON" : "OFF";
+            if (isEnabled) {
+                masterLabel.classList.remove("power-off");
+            } else {
+                masterLabel.classList.add("power-off");
+            }
+        }
+        if (vaultCard) {
+            if (isEnabled) {
+                vaultCard.classList.remove("is-disabled");
+                const disPill = vaultCard.querySelector(".disabled-pill");
+                if (disPill) disPill.remove();
+            } else {
+                vaultCard.classList.add("is-disabled");
+                const vLabel = vaultCard.querySelector(".vault-label");
+                if (vLabel && !vLabel.querySelector(".disabled-pill")) {
+                    const pill = document.createElement("span");
+                    pill.className = "disabled-pill";
+                    pill.textContent = "PAUSED";
+                    vLabel.appendChild(pill);
+                }
+            }
+        }
+    }
+
     async function initPopup() {
         if (!storage) return;
 
+        // 1. Initialize Master Power Switch
+        const masterSwitch = document.getElementById("masterPowerSwitch");
+        const isMasterEnabled = await storage.isMasterEnabled();
+        if (masterSwitch) {
+            masterSwitch.checked = isMasterEnabled;
+            masterSwitch.addEventListener("change", async (e) => {
+                const checked = e.target.checked;
+                await storage.setMasterEnabled(checked);
+                updateMasterSwitchUI(checked);
+
+                // Broadcast to active KTU tab in current window
+                if (typeof chrome !== "undefined" && chrome.tabs && chrome.tabs.query) {
+                    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                        if (tabs && tabs[0] && tabs[0].id) {
+                            chrome.tabs.sendMessage(tabs[0].id, {
+                                type: "KTU_TOGGLE_MASTER_POWER",
+                                enabled: checked
+                            }, () => {});
+                        }
+                    });
+                }
+            });
+        }
+        updateMasterSwitchUI(isMasterEnabled);
+
+        // 2. Load Snapshot Data
         cachedSnapshot = await storage.getLatestSnapshot();
 
         const elName = document.getElementById("vaultStudentName");

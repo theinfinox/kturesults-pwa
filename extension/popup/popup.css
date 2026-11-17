@@ -15,10 +15,109 @@ body {
 .popup-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 10px;
     margin-bottom: 14px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 12px;
+}
+
+.popup-header-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.popup-master-toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 4px 8px 4px 6px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    user-select: none;
+}
+
+.master-switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.master-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.master-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #475569;
+    transition: 0.25s ease;
+    border-radius: 20px;
+}
+
+.master-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #ffffff;
+    transition: 0.25s ease;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.master-switch input:checked + .master-slider {
+    background-color: #10b981;
+}
+
+.master-switch input:focus + .master-slider {
+    box-shadow: 0 0 1px #10b981;
+}
+
+.master-switch input:checked + .master-slider:before {
+    transform: translateX(16px);
+}
+
+.master-power-text {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #10b981;
+    min-width: 24px;
+}
+
+.master-power-text.power-off {
+    color: #94a3b8;
+}
+
+/* Disabled state for vault card when Supercharger is turned OFF */
+.vault-card.is-disabled {
+    opacity: 0.55;
+    filter: grayscale(0.6);
+}
+
+.disabled-pill {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.15);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
 }
 
 .popup-icon {

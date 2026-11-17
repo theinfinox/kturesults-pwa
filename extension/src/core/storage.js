@@ -12,6 +12,7 @@
 })(typeof self !== "undefined" ? self : this, function () {
     const STORAGE_KEY_PREFIX = "ktu_supercharger_snap_";
     const ACTIVE_STUDENT_KEY = "ktu_supercharger_active";
+    const MASTER_POWER_KEY = "ktu_supercharger_master_power";
 
     // In-memory fallback if neither chrome.storage nor localStorage is available (e.g. testing)
     let memoryStore = {};
@@ -45,17 +46,20 @@
     async function getItem(key) {
         if (isChromeStorageAvailable()) {
             return new Promise((resolve) => {
-                chrome.storage.local.get([key], (result) => resolve(result[key] || null));
+                chrome.storage.local.get([key], (result) => {
+                    resolve(result && result[key] !== undefined ? result[key] : null);
+                });
             });
         } else if (isLocalStorageAvailable()) {
             const raw = localStorage.getItem(key);
+            if (raw === null || raw === undefined) return Promise.resolve(null);
             try {
-                return Promise.resolve(raw ? JSON.parse(raw) : null);
+                return Promise.resolve(JSON.parse(raw));
             } catch (e) {
                 return Promise.resolve(null);
             }
         } else {
-            return Promise.resolve(memoryStore[key] || null);
+            return Promise.resolve(memoryStore[key] !== undefined ? memoryStore[key] : null);
         }
     }
 
@@ -111,6 +115,16 @@
         return await getItem(key);
     }
 
+    async function isMasterEnabled() {
+        const val = await getItem(MASTER_POWER_KEY);
+        return val === null || val === undefined ? true : Boolean(val);
+    }
+
+    async function setMasterEnabled(enabled) {
+        await setItem(MASTER_POWER_KEY, Boolean(enabled));
+        return Boolean(enabled);
+    }
+
     function _resetMemoryStore() {
         memoryStore = {};
     }
@@ -118,6 +132,8 @@
     return {
         saveSnapshot,
         getLatestSnapshot,
+        isMasterEnabled,
+        setMasterEnabled,
         setItem,
         getItem,
         _resetMemoryStore
